@@ -84,9 +84,9 @@
 
 <script>
   // Projects data from server
-  const projectsData = <%- JSON.stringify(projects || []) %>;
-  const categoriesData = <%- JSON.stringify(categories || []) %>;
-  const allUserProjects = <%- JSON.stringify(typeof allUserProjects !== 'undefined' ? allUserProjects : []) %>;
+  const projectsData = <%- safeJson(projects || []) %>;
+  const categoriesData = <%- safeJson(categories || []) %>;
+  const allUserProjects = <%- safeJson(typeof allUserProjects !== 'undefined' ? allUserProjects : []) %>;
 
   console.log('=== PROJECTS DASHBOARD ===');
   console.log('Projects Data:', projectsData);
@@ -106,13 +106,14 @@
     container.innerHTML = projectsData.map(proj => {
       const category = categoriesData.find(c => c.id === proj.categoryId);
       const volunteerCount = allUserProjects.filter(up => up.projectId === proj.id).length;
-      const statusClass = `status-${proj.status || 'active'}`;
-      const statusText = (proj.status || 'active').toUpperCase();
+      const safeStatus = escapeHtml(proj.status || 'active');
+      const statusClass = `status-${safeStatus}`;
+      const statusText = safeStatus.toUpperCase();
 
       return `
-        <div class="project-item ${proj.status || 'active'}">
-          <div class="project-item-name">${proj.name}</div>
-          ${category ? `<span class="project-item-category">${category.name}</span>` : ''}
+        <div class="project-item ${safeStatus}">
+          <div class="project-item-name">${escapeHtml(proj.name)}</div>
+          ${category ? `<span class="project-item-category">${escapeHtml(category.name)}</span>` : ''}
           <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
             <span class="project-item-status ${statusClass}">${statusText}</span>
             <span style="font-size: 12px; color: #718096;">
@@ -526,7 +527,7 @@
       .on('mouseover', function(event, d) {
         d3.select(this).transition().duration(200).attr('r', d => Math.max(d.radius * 3.5, 25));
         tooltip.transition().duration(200).style('opacity', 1);
-        tooltip.html(`<strong>${d.name}</strong><br/>Occupancy: ${d.occupancy.toFixed(1)}%<br/>${d.volunteers}/${d.capacity} volunteers`)
+        tooltip.html(`<strong>${escapeHtml(d.name)}</strong><br/>Occupancy: ${d.occupancy.toFixed(1)}%<br/>${d.volunteers}/${d.capacity} volunteers`)
           .style('left', (event.pageX + 10) + 'px')
           .style('top', (event.pageY - 28) + 'px');
       })
