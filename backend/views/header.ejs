@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= shopName %> - Dashboard</title>
+    <link rel="icon" type="image/png" href="/images/awtc-logo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar expanded" id="sidebar">
+      <div class="sidebar-header">
+        <a href="<%= frontendUrl || '/' %>" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;text-decoration:none;color:inherit;">
+          <div class="sidebar-logo">
+            <img src="/images/awtc-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-hands-helping\\' style=\\'color:#F0BB00;font-size:24px\\'></i>'">
+          </div>
+          <span class="sidebar-title">A Will To Change</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='overview') ? 'active' : '' %>">
+          <i class="fas fa-chart-line"></i>
+          <span class="sidebar-nav-text">Overview</span>
+        </a>
+        <a href="/projects" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='projects') ? 'active' : '' %>">
+          <i class="fas fa-project-diagram"></i>
+          <span class="sidebar-nav-text">Projects</span>
+        </a>
+        <a href="/categories" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='categories') ? 'active' : '' %>">
+          <i class="fas fa-tags"></i>
+          <span class="sidebar-nav-text">Categories</span>
+        </a>
+        <a href="/users" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='users') ? 'active' : '' %>">
+          <i class="fas fa-users"></i>
+          <span class="sidebar-nav-text">Users</span>
+        </a>
+        <a href="/reviews" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='reviews') ? 'active' : '' %>">
+          <i class="fas fa-star"></i>
+          <span class="sidebar-nav-text">Reviews</span>
+        </a>
+        <a href="/contacts" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='contacts') ? 'active' : '' %>">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span class="sidebar-nav-text">Incidents</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <div class="user-menu">
+          <div class="user-avatar" id="userAvatar">
+            <% if (currentUser.profileImage) { %>
+              <% 
+                let imgSrc = currentUser.profileImage;
+                if (!imgSrc.startsWith('/') && !imgSrc.startsWith('http')) {
+                  imgSrc = '/images/' + imgSrc;
+                }
+              %>
+              <img src="<%= imgSrc %>" alt="<%= currentUser.name || currentUser.email %>" onerror="this.style.display='none'; this.parentElement.textContent='<%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %>';">
+            <% } else { %>
+              <%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %>
+            <% } %>
+          </div>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="user-dropdown-header">
+              <div class="user-dropdown-email"><%= currentUser.email %></div>
+              <% if (currentUser.name) { %>
+                <div class="user-dropdown-name"><%= currentUser.name %></div>
+              <% } %>
+            </div>
+            <a href="/logout" class="user-dropdown-item logout">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Log Out</span>
+            </a>
+          </div>
+        </div>
+      <% } else { %>
+        <a href="/login" style="color:#F0BB00;text-decoration:none;font-weight:500">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+      <% } %>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container">
+
+    <script>
+      // Sidebar toggle
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      
+      // En móvil siempre contraído
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('expanded');
+      }
+      
+      sidebarToggle.addEventListener('click', () => {
+        // No expandir en móvil
+        if (window.innerWidth <= 768) return;
+        sidebar.classList.toggle('expanded');
+      });
+
+      // Colapsar sidebar en móvil al redimensionar
+      window.addEventListener('resize', () => {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('expanded');
+        }
+      });
+
+      // User dropdown
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+          userDropdown.classList.remove('show');
+        });
+
+        userDropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+      }
+    </script>

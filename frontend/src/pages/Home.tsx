@@ -1,0 +1,750 @@
+import React, { useState, useEffect } from "react";
+import AuthModal from "../components/AuthModal";
+import HeroImage from "../components/HeroImage";
+import AlertModal from "../components/AlertModal";
+import logo4 from "../../../frontend/public/home/aboutUs-image.png";
+import { NavLink, useNavigate } from "react-router-dom";
+import { io, Socket } from "socket.io-client";
+import { useTranslation } from "react-i18next";
+import { handleAuthFetch } from "../utils/auth";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const IMAGE_URL = import.meta.env.VITE_IMAGE_URL || "http://localhost:8080/images";
+
+// --- CAROUSEL ---
+function Carousel() {
+  const { t } = useTranslation();
+  const [current, setCurrent] = useState<number>(0);
+  const [projects, setProjects] = useState<any[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/projects`)
+      .then((res) => res.json())
+      .then((data: any[]) => {
+        // Take exactly 3 projects with images
+        const projectsWithImages = data.filter((p) => p.filename).slice(0, 3);
+
+        // Only show carousel if we have at least 3 projects
+        if (projectsWithImages.length >= 3) {
+          setProjects(projectsWithImages);
+        } else {
+          setProjects([]);
+        }
+      })
+      .catch((err) =>
+        console.error("Error fetching projects for carousel:", err)
+      );
+  }, []);
+
+  const prev = () => setCurrent((c) => (c === 0 ? projects.length - 1 : c - 1));
+  const next = () => setCurrent((c) => (c === projects.length - 1 ? 0 : c + 1));
+
+  const handleImageClick = (projectId: number) => {
+    navigate(`/volunteering?project=${projectId}`);
+  };
+
+  if (projects.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-400">
+        {t('home.carousel.notEnough')}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center items-center my-4 md:my-8 space-x-2 md:space-x-4 px-2">
+      <button
+        onClick={prev}
+        className="text-2xl md:text-3xl px-2 md:px-3 text-gray-600 shrink-0"
+      >
+        &lt;
+      </button>
+      <div className="flex space-x-3 md:space-x-6 items-center justify-center overflow-hidden">
+        <img
+          src={`${
+            IMAGE_URL
+          }/${projects[(current - 1 + projects.length) % projects.length].filename}`}
+          className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
+          alt={
+            projects[(current - 1 + projects.length) % projects.length].name
+          }
+          onClick={() =>
+            handleImageClick(
+              projects[(current - 1 + projects.length) % projects.length].id
+            )
+          }
+        />
+        <img
+          src={`${IMAGE_URL}/${projects[current].filename}`}
+          className="w-56 md:w-96 h-40 md:h-72 object-cover rounded shadow-lg shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
+          alt={projects[current].name}
+          onClick={() => handleImageClick(projects[current].id)}
+        />
+        <img
+          src={`${
+            IMAGE_URL
+          }/${projects[(current + 1) % projects.length].filename}`}
+          className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
+          alt={
+            projects[(current + 1) % projects.length].name
+          }
+          onClick={() =>
+            handleImageClick(
+              projects[(current + 1) % projects.length].id
+            )
+          }
+        />
+      </div>
+      <button
+        onClick={next}
+        className="text-2xl md:text-3xl px-2 md:px-3 text-gray-600 shrink-0"
+      >
+        &gt;
+      </button>
+    </div>
+  );
+}
+
+// --- ABOUT SECTION ---
+function AboutSection() {
+  const { t } = useTranslation();
+  return (
+    <section className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 my-8 md:my-12 bg-white px-4 md:px-0">
+      <img
+        src={logo4}
+        alt="Volunteers"
+        className="w-full md:w-auto md:max-w-sm h-auto rounded"
+      />
+      <div >
+        <p className="mb-6 md:mb-4 text-gray-700">
+          {t('home.aboutSection.description')}
+        </p>
+        <NavLink to="/aboutus">
+          <button className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto text-center transition-colors duration-300">
+            {t('home.aboutSection.readMore')}
+          </button>
+        </NavLink>
+      </div>
+    </section>
+  );
+}
+
+// --- REVIEWS SECTION ---
+interface ReviewsSectionProps {
+  onOpenSignup: () => void;
+  refreshTrigger: number;
+}
+
+interface Review {
+  id: number;
+  content: string;
+  date: string;
+  image?: string | null;
+  userId: number;
+  user?: { email?: string; name?: string; profileImage?: string | null };
+}
+
+function ReviewsSection({
+  onOpenSignup,
+  refreshTrigger,
+}: ReviewsSectionProps) {
+  const { t } = useTranslation();
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
+  const [editRemoveImage, setEditRemoveImage] = useState(false);
+
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem("jwtToken")
+  );
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const isLoggedIn = !!token;
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "jwtToken") {
+        setToken(e.newValue);
+      }
+    };
+
+    const onAuthChanged = () => {
+      setToken(localStorage.getItem("jwtToken"));
+    };
+
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("authChanged", onAuthChanged);
+
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("authChanged", onAuthChanged);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      setCurrentUserId(null);
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setCurrentUserId(payload.id ?? null);
+    } catch (e) {
+      console.error("Error decoding token", e);
+      setCurrentUserId(null);
+    }
+  }, [token]);
+
+  // Fetch reviews
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/api/reviews`)
+      .then((res) => {
+        if (!res.ok) throw new Error("Error fetching reviews");
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const validReviews = data.filter(
+            (review) => review.user && (review.user.name || review.user.email)
+          );
+          setReviews(validReviews);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, [refreshTrigger]);
+
+  // Reviews WebSocket: listen on public namespace '/reviews'
+  useEffect(() => {
+    let reviewsSocket: Socket | null = null;
+    try {
+      reviewsSocket = io(`${API_BASE_URL}/reviews`, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      });
+
+      reviewsSocket.on('connected', () => {
+        console.log('Connected to reviews socket namespace');
+      });
+
+      reviewsSocket.on('review_created', (data: { id: number; content: string; date: string; image?: string | null; userId: number; user?: { email?: string; name?: string }; }) => {
+        console.log('review_created:', data);
+        setReviews(prev => {
+          // Avoid duplicates
+          if (prev.some(r => r.id === data.id)) return prev;
+          return [data as Review, ...prev];
+        });
+      });
+
+      reviewsSocket.on('review_updated', (data: { id: number; content: string; date: string; image?: string | null; }) => {
+        console.log('review_updated:', data);
+        setReviews(prev => prev.map(r => r.id === data.id ? { ...r, content: data.content, image: data.image ?? null, date: data.date } : r));
+      });
+
+      reviewsSocket.on('review_deleted', (data: { reviewId: number; userId?: number }) => {
+        console.log('review_deleted:', data);
+        setReviews(prev => prev.filter(r => r.id !== data.reviewId));
+      });
+
+      reviewsSocket.on('connect_error', (error) => {
+        console.error('Reviews socket connection error:', error);
+      });
+    } catch (error) {
+      console.error('Error setting up reviews socket:', error);
+    }
+
+    return () => {
+      if (reviewsSocket) {
+        reviewsSocket.disconnect();
+        console.log('Reviews socket disconnected');
+      }
+    };
+  }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("content", newComment);
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      const res = await handleAuthFetch(`${API_BASE_URL}/api/reviews`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (res.ok) {
+        const savedReview = await res.json();
+        setReviews([savedReview, ...reviews]);
+        setNewComment("");
+        setSelectedFile(null);
+        setShowReviewModal(false);
+      } else {
+        setAlertMessage("Error creating review");
+        setAlertOpen(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm(t('reviews.confirmDelete'))) return;
+    try {
+      const res = await handleAuthFetch(`${API_BASE_URL}/api/reviews/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setReviews(reviews.filter((r) => r.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const saveEdit = async (id: number) => {
+    try {
+      let res;
+      if (editSelectedFile || editRemoveImage) {
+        const formData = new FormData();
+        formData.append("content", editContent);
+        if (editSelectedFile) formData.append("image", editSelectedFile);
+        if (editRemoveImage) formData.append("removeImage", "true");
+
+        res = await handleAuthFetch(`${API_BASE_URL}/api/reviews/${id}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+      } else {
+        res = await handleAuthFetch(`${API_BASE_URL}/api/reviews/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content: editContent }),
+        });
+      }
+
+      if (res.ok) {
+        const updatedReview = await res.json();
+        setReviews(
+          reviews.map((r) =>
+            r.id === id
+              ? { ...r, content: updatedReview.content, image: updatedReview.image ?? null }
+              : r
+          )
+        );
+        setEditingId(null);
+        setEditSelectedFile(null);
+        setEditRemoveImage(false);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const getUserDisplayName = (user?: { email?: string; name?: string }) => {
+    if (user?.name) return user.name;
+    if (user?.email) return user.email.split("@")[0];
+    return "User";
+  };
+
+  return (
+    <>
+      <section className="my-12 px-4 md:px-0">
+      <div className="flex flex-col gap-4 items-start w-full">
+        <div className="flex justify-between items-baseline mb-6 border-b pb-2 w-full">
+          <h5 className="text-xl font-bold text-gray-800">{t('reviews.title')}</h5>
+          <span className="text-sm text-gray-500">
+            {t('reviews.comments', { count: reviews.length })}
+          </span>
+        </div>
+
+        {isLoggedIn && (
+          <button
+            onClick={() => setShowReviewModal(true)}
+            className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto transition-colors duration-300 mb-4"
+          >
+            {t('reviews.writeReview')}
+          </button>
+        )}
+
+        <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar w-full">
+          {reviews.length === 0 ? (
+            <div className="text-center py-10 text-gray-400">
+              {t('reviews.noReviews')}
+            </div>
+          ) : (
+            reviews.map((review) => (
+              <div
+                key={review.id}
+                className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex items-center gap-3">
+                    {/* Profile Image */}
+                    {review.user?.profileImage ? (
+                      <img
+                        src={`${API_BASE_URL}/images/${review.user.profileImage}`}
+                        alt={getUserDisplayName(review.user)}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className={`w-10 h-10 rounded-full bg-[#F0BB00] flex items-center justify-center text-white font-bold text-lg ${review.user?.profileImage ? 'hidden' : ''}`}
+                    >
+                      {getUserDisplayName(review.user).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-gray-900 text-base capitalize">
+                        {getUserDisplayName(review.user)}
+                      </span>
+                      <span className="text-xs text-gray-400 mt-0.5">
+                        {new Date(review.date).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+
+                  {currentUserId === review.userId && !editingId && (
+                    <div className="flex gap-3 text-sm font-medium">
+                      <button
+                        onClick={() => {
+                          setEditingId(review.id);
+                          setEditContent(review.content);
+                        }}
+                        className="text-green-600 hover:text-green-800 transition-colors"
+                      >
+                        {t('common.edit')}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(review.id)}
+                        className="text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        {t('common.delete')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {review.image && (
+                  <div className="mb-4">
+                    <img
+                      src={`${API_BASE_URL}${review.image}`}
+                      alt="Attached"
+                      className="h-32 w-auto object-cover rounded-xl cursor-zoom-in hover:opacity-95"
+                      onClick={() =>
+                        window.open(
+                          `${API_BASE_URL}${review.image}`,
+                          "_blank"
+                        )
+                      }
+                    />
+                  </div>
+                )}
+
+                {editingId === review.id ? (
+                  <div className="mt-2 animate-fade-in">
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 outline-none resize-none bg-gray-50"
+                    />
+
+                    {review.image && !editRemoveImage && !editSelectedFile && (
+                      <div className="mt-3 mb-2">
+                        <img
+                          src={`${API_BASE_URL}${review.image}`}
+                          alt="Current"
+                          className="h-24 w-auto object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    {editSelectedFile && (
+                      <div className="mt-3 mb-2">
+                        <img
+                          src={URL.createObjectURL(editSelectedFile)}
+                          alt="New preview"
+                          className="h-24 w-auto object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between gap-4 mt-3">
+                      <div>
+                        <input
+                          id={`editFileInput-${review.id}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const f = e.target.files && e.target.files[0];
+                            setEditSelectedFile(f ?? null);
+                            if (f) setEditRemoveImage(false);
+                          }}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor={`editFileInput-${review.id}`}
+                          className="cursor-pointer flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="w-5 h-5"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M4.5 12.75l6 6 9-13.5"
+                            />
+                          </svg>
+                          {editSelectedFile
+                            ? editSelectedFile.name
+                            : t('reviews.addReplaceImage')}
+                        </label>
+                      </div>
+
+                      {review.image && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditRemoveImage((prev) => {
+                              const next = !prev;
+                              if (next) setEditSelectedFile(null);
+                              return next;
+                            });
+                          }}
+                          className={`text-sm px-3 py-1 rounded-full border ${
+                            editRemoveImage
+                              ? "bg-red-50 text-red-600 border-red-200"
+                              : "bg-gray-100 text-gray-700 border-gray-200"
+                          }`}
+                        >
+                          {editRemoveImage
+                            ? t('reviews.imageWillBeRemoved')
+                            : t('reviews.removeImage')}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex gap-2 mt-3 justify-end">
+                      <button
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditSelectedFile(null);
+                          setEditRemoveImage(false);
+                        }}
+                        className="px-4 py-1.5 rounded-full text-xs font-medium bg-gray-100 hover:bg-gray-200"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                      <button
+                        onClick={() => saveEdit(review.id)}
+                        className="px-4 py-1.5 rounded-full text-xs font-medium bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white"
+                      >
+                        {t('common.save')}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 leading-relaxed text-sm">
+                    {review.content}
+                  </p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {!isLoggedIn && (
+          <div className="w-full bg-yellow-50 p-6 md:p-8 rounded-3xl text-center border border-yellow-100">
+            <h3 className="font-bold text-lg mb-2 text-gray-800">
+              {t('reviews.joinConversation')}
+            </h3>
+            <p className="text-xs text-gray-500 mb-6">
+              {t('reviews.shareExperience')}
+            </p>
+
+            <button
+              onClick={onOpenSignup}
+              className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full transition-colors duration-300"
+            >
+              {t('reviews.addReview')}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 relative">
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-4 right-5 text-gray-400 hover:text-black text-xl font-light"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-2xl font-bold mb-1 text-gray-900">
+              {t('reviews.newReview')}
+            </h3>
+            <p className="text-sm text-gray-500 mb-6">
+              {t('reviews.howWasExperience')}
+            </p>
+
+            <form onSubmit={handleCreate}>
+              <textarea
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 h-40 resize-none mb-4 focus:ring-2 focus:ring-[#F0BB00] focus:bg-white outline-none transition-all placeholder-gray-400"
+                placeholder={t('reviews.placeholder')}
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                autoFocus
+              />
+
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <input
+                    id="fileInputModal"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      e.target.files && setSelectedFile(e.target.files[0])
+                    }
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="fileInputModal"
+                    className="cursor-pointer flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                      />
+                    </svg>
+                    {selectedFile ? (
+                      <span className="text-green-600">
+                        {selectedFile.name}
+                      </span>
+                    ) : (
+                      t('reviews.addPhoto')
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowReviewModal(false)}
+                  className="flex-1 py-3 rounded-full font-semibold text-gray-500 hover:bg-gray-100 transition-colors"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white font-bold py-3 rounded-full transition-all shadow-lg hover:shadow-xl"
+                >
+                  {t('reviews.postReview')}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      </section>
+      <AlertModal open={alertOpen} message={alertMessage} onAccept={() => setAlertOpen(false)} />
+    </>
+  );
+}
+
+// --- HOME PAGE ---
+function Home() {
+  const { t } = useTranslation();
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleOpenSignup = () => {
+    setAuthMode("signup");
+    setAuthOpen(true);
+  };
+
+  const handleCloseAuth = () => {
+    setAuthOpen(false);
+    setRefreshKey((prev) => prev + 1);
+  };
+
+  return (
+    <>
+      <HeroImage
+        title={
+          <div className="text-center px-4">
+            <h1 className="Display">{t('common.appName')}</h1>
+            <h4 className="text-base md:text-2xl">
+              {t('home.hero.subtitle')}
+            </h4>
+          </div>
+        }
+        imgSrc="/hero-img.jpg"
+        heightClass="h-48 md:h-96"
+        titleClass="Display text-white"
+      />
+
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+        <h2 className="text-3xl font-bold">{t('home.newestProjects')}</h2>
+        <p className="text-lg text-gray-600">{t('home.discoverProjects')}</p>
+        <Carousel />
+
+        <h2 className="text-3xl font-bold">{t('home.aboutUs')}</h2>
+        <p className="text-lg text-gray-600">{t('home.aboutUsDescription')}</p>
+        <AboutSection />
+        <ReviewsSection
+          onOpenSignup={handleOpenSignup}
+          refreshTrigger={refreshKey}
+        />
+      </main>
+
+      <AuthModal open={authOpen} mode={authMode} onClose={handleCloseAuth} />
+    </>
+  );
+}
+
+export default Home;
