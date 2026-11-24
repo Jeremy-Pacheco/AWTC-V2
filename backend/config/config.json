@@ -1,0 +1,30 @@
+{
+  "development": {
+    "username": "root",
+    "password": "1234",
+    "database": "db_awtc_development",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "doadmin",
+    "password": "PASSWORD_PLACEHOLDER",
+    "database": "defaultdb",
+    "host": "db-mysql-lon1-73311-do-user-29593823-0.f.db.ondigitalocean.com",
+    "port": 25060,
+    "dialect": "mysql",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}
