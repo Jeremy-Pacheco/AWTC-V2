@@ -48,19 +48,24 @@ var fileFilter = (req, file, cb) => {
   }
 };
 
+// 5MB normally; smaller in DEMO_MODE (DEMO_MAX_UPLOAD_MB, default 1MB)
+var maxUploadMb = require('../services/demo.service').getMaxUploadMb();
+
 var upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: Math.floor(maxUploadMb * 1024 * 1024)
   }
 });
+
+upload.maxUploadMb = maxUploadMb;
 
 // Turns multer / fileFilter errors into a 400 JSON response instead of a 500
 upload.handleUploadError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+      return res.status(400).json({ message: 'File too large. Maximum size is ' + maxUploadMb + 'MB.' });
     }
     return res.status(400).json({ message: 'Upload error' });
   }

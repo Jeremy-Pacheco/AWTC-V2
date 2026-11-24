@@ -1,4 +1,17 @@
 {
+  "demo": {
+    "badge": "Test site",
+    "bannerText": "This is a public demo with fake data that is reset every night. Do not enter real personal data.",
+    "closeBanner": "Close test site notice",
+    "enterAs": "Enter as…",
+    "enterAsHint": "Try the app with a shared demo account, no password needed.",
+    "signingIn": "Signing in…",
+    "roles": {
+      "volunteer": "Volunteer",
+      "coordinator": "Coordinator",
+      "admin": "Admin"
+    }
+  },
   "common": {
     "appName": "A Will To Change",
     "login": "Log In",

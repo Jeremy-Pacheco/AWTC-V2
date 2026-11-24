@@ -7,7 +7,9 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "react-i18next";
 import AlertModal from "./AlertModal";
+import { getDemoConfig, loginAsDemo, type DemoConfig, type DemoRole } from "../utils/demo";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -28,6 +30,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
   const [pass, setPass] = useState("");
   const [name, setName] = useState("");
 
+  // Demo mode: one-click access to the shared demo accounts
+  const { t } = useTranslation();
+  const [demoConfig, setDemoConfig] = useState<DemoConfig>({ enabled: false });
+  const [demoLoading, setDemoLoading] = useState<DemoRole | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -35,8 +41,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
       setEmail("");
       setPass("");
       setName("");
+      getDemoConfig().then(setDemoConfig);
     }
   }, [open, mode]);
+
+  const handleDemoLogin = async (role: DemoRole) => {
+    setDemoLoading(role);
+    try {
+      await loginAsDemo(role);
+      onClose();
+    } catch (err) {
+      setAlertMessage(err instanceof Error ? err.message : String(err));
+      setAlertOpen(true);
+    } finally {
+      setDemoLoading(null);
+    }
+  };
 
   // LOGIN
   const handleLogin = async (e: React.FormEvent) => {
@@ -182,6 +202,26 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                 {currentMode === "login" ? "Log In" : "Sign Up"}
               </button>
             </form>
+
+            {currentMode === "login" && demoConfig.enabled && demoConfig.accounts && demoConfig.accounts.length > 0 && (
+              <div className="mt-5 rounded-xl border border-dashed border-[#F0BB00] bg-yellow-50 p-3">
+                <p className="text-sm font-semibold text-center">{t("demo.enterAs")}</p>
+                <p className="text-xs text-gray-600 text-center mt-1 mb-3">{t("demo.enterAsHint")}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {demoConfig.accounts.map((account) => (
+                    <button
+                      key={account.role}
+                      type="button"
+                      onClick={() => handleDemoLogin(account.role)}
+                      disabled={demoLoading !== null}
+                      className="rounded-3xl border border-[#1f2124] px-3 py-1.5 text-sm font-medium hover:bg-[#1f2124] hover:text-white transition disabled:opacity-50 disabled:cursor-wait"
+                    >
+                      {demoLoading === account.role ? t("demo.signingIn") : t(`demo.roles.${account.role}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <p className="text-center text-sm mt-4 text-gray-600">
               {currentMode === "login" ? (

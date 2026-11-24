@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const reviewsController = require("../controllers/reviews.controller");
 const authMiddleware = require("../middlewares/auth.middlewares");
-// Shared uploader: image MIME whitelist, 5MB limit and server-chosen extension.
+// Shared uploader: image MIME whitelist, size limit (5MB, 1MB in DEMO_MODE) and server-chosen extension.
 // Never keep the client's original extension (it allowed .html/.svg uploads -> XSS).
 const upload = require("../multer/upload");
 const { handleUploadError } = upload;

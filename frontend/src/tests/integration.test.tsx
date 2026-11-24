@@ -6,12 +6,21 @@ import * as api from '../api';
 
 vi.mock('../api');
 
+// Demo mode is off by default so the modal does not consume the mocked fetch calls
+const demoMocks = vi.hoisted(() => ({
+  getDemoConfig: vi.fn(),
+  loginAsDemo: vi.fn(),
+}));
+vi.mock('../utils/demo', () => demoMocks);
+
 describe('Integration Tests', () => {
   let fetchSpy: any;
 
   beforeEach(() => {
     localStorage.clear();
     fetchSpy = vi.spyOn(global, 'fetch');
+    demoMocks.getDemoConfig.mockResolvedValue({ enabled: false });
+    demoMocks.loginAsDemo.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -212,5 +221,36 @@ describe('Integration Tests', () => {
 
     const errorMessage = await screen.findByText(/Server error - please try again later/);
     expect(errorMessage).toBeDefined();
+  });
+
+  // Test: Demo mode - "Enter as…" buttons
+  it('should show demo account buttons only in demo mode and sign in with one click', async () => {
+    demoMocks.getDemoConfig.mockResolvedValue({
+      enabled: true,
+      accounts: [
+        { role: 'volunteer', name: 'Demo Volunteer' },
+        { role: 'coordinator', name: 'Demo Coordinator' },
+        { role: 'admin', name: 'Demo Admin' },
+      ],
+    });
+    const mockOnClose = vi.fn();
+    render(<AuthModal open={true} mode="login" onClose={mockOnClose} />);
+
+    const adminButton = await screen.findByRole('button', { name: 'demo.roles.admin' });
+    expect(screen.getByRole('button', { name: 'demo.roles.volunteer' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'demo.roles.coordinator' })).toBeTruthy();
+
+    fireEvent.click(adminButton);
+
+    await waitFor(() => {
+      expect(demoMocks.loginAsDemo).toHaveBeenCalledWith('admin');
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it('should not show demo account buttons when demo mode is off', async () => {
+    render(<AuthModal open={true} mode="login" onClose={vi.fn()} />);
+    await waitFor(() => expect(demoMocks.getDemoConfig).toHaveBeenCalled());
+    expect(screen.queryByRole('button', { name: /demo\.roles/ })).toBeNull();
   });
 });

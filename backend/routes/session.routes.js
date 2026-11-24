@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sessionController = require('../controllers/session.controller');
+const demoCtrl = require('../controllers/demo.controller');
 const { dashboardLoginLimiter } = require('../middlewares/rateLimit.middlewares');
 
 /**
@@ -38,6 +39,9 @@ const { dashboardLoginLimiter } = require('../middlewares/rateLimit.middlewares'
  */
 router.get('/login', sessionController.showLogin);
 router.post('/login', dashboardLoginLimiter, sessionController.login);
+
+// One-click access to the admin dashboard as the demo admin (DEMO_MODE only)
+router.post('/demo-login', dashboardLoginLimiter, demoCtrl.sessionLogin);
 
 /**
  * @swagger

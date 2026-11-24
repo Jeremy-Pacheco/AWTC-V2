@@ -60,6 +60,19 @@
         </div>
       </form>
 
+      <% if (typeof demoMode !== 'undefined' && demoMode) { %>
+        <div class="demo-box">
+          <p class="demo-title"><i class="fas fa-flask"></i> Test site</p>
+          <p class="demo-text">This is a public demo with fake data that is reset every night. Do not enter real personal data.</p>
+          <form method="POST" action="/demo-login">
+            <button type="submit" class="demo-button">
+              <i class="fas fa-user-shield"></i>
+              Enter as demo admin
+            </button>
+          </form>
+        </div>
+      <% } %>
+
       <div class="login-footer">
         <p>A Will To Change &copy; 2025</p>
       </div>
