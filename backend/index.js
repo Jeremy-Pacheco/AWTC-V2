@@ -139,45 +139,9 @@ async function safeFindAll(model) {
   }
 }
 
-// Debug route to inspect available models and a small sample of rows
-app.get('/debug-models', async (req, res) => {
-  const keys = Object.keys(db).filter(k => ['sequelize','Sequelize'].indexOf(k) === -1);
-  const samples = {};
-  for (const k of keys) {
-    try {
-      const model = db[k];
-      const rows = await safeFindAll(model);
-      samples[k] = { count: Array.isArray(rows) ? rows.length : 0, sample: (rows || []).slice(0,5) };
-    } catch (err) {
-      samples[k] = { error: err.message };
-    }
-  }
-  res.json({ models: keys, samples });
-});
-
-// Debug route to check messages
-app.get('/debug-messages', async (req, res) => {
-  try {
-    const messages = await db.Message.findAll({
-      include: [
-        { model: db.User, as: 'sender', attributes: ['id', 'name', 'email'] },
-        { model: db.User, as: 'receiver', attributes: ['id', 'name', 'email'] }
-      ]
-    });
-    
-    const [counts] = await db.sequelize.query(
-      `SELECT senderId, COUNT(*) as count FROM \`Messages\` GROUP BY senderId`
-    );
-    
-    res.json({
-      totalMessages: messages.length,
-      messages: messages,
-      countsBySender: counts
-    });
-  } catch (err) {
-    res.json({ error: err.message, stack: err.stack });
-  }
-});
+// NOTE: the former /debug-models and /debug-messages routes were removed:
+// they were public and dumped users, contacts, private messages and push
+// subscriptions (see AUDIT_REPORT.md, SEC-02).
 
 // Auth middleware that supports Bearer/Basic headers (keeps API auth intact)
 const authMiddleware = require("./middlewares/auth.middlewares");
@@ -440,9 +404,8 @@ const frontendPath = path.join(__dirname, "../frontend/dist");
 app.use(express.static(frontendPath));
 
 app.use((req, res, next) => {
-  // Skip frontend serving for API routes, debug routes, and dashboard routes
-  if (req.path.startsWith("/api") || 
-      req.path.startsWith("/debug") || 
+  // Skip frontend serving for API routes and dashboard routes
+  if (req.path.startsWith("/api") ||
       req.path === "/login" || 
       req.path === "/logout" ||
       req.path === "/" ||
