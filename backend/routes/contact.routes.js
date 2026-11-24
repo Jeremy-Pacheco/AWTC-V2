@@ -3,6 +3,7 @@ const router = express.Router();
 const controller = require('../controllers/contact.controller');
 const authMiddleware = require('../middlewares/auth.middlewares');
 const { isAdmin } = require('../middlewares/role.middlewares');
+const { contactLimiter } = require('../middlewares/rateLimit.middlewares');
 
 /**
  * @swagger
@@ -38,7 +39,7 @@ const { isAdmin } = require('../middlewares/role.middlewares');
  *               items:
  *                 $ref: '#/components/schemas/Contact'
  */
-router.post('/', controller.create);
+router.post('/', contactLimiter, controller.create);
 router.get('/', authMiddleware, isAdmin, controller.findAll);
 
 /**

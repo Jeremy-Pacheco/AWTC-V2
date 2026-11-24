@@ -31,7 +31,8 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ where: { email } });
     if (!user) {
       logger.error(`Login error: User ${email} authenticated in LDAP but not found in DB`);
-      return res.render('login', { error: 'User not found in local database', email, frontendUrl: FRONTEND_URL });
+      // Same message as a wrong password: do not reveal which accounts exist
+      return res.render('login', { error: 'Invalid credentials', email, frontendUrl: FRONTEND_URL });
     }
 
     // Save user id in session cookie (server-side session)
