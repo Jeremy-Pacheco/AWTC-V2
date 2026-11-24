@@ -2,6 +2,19 @@ const path = require('path');
 const env = process.env.NODE_ENV || 'development';
 require('dotenv').config({ path: path.resolve(__dirname, `../.env.${env}`) });
 
+/**
+ * DB_SSL=true enables TLS. With DB_SSL_CA (the provider's CA certificate in
+ * PEM, e.g. Aiven's ca.pem; literal "\n" escapes are accepted) the server
+ * certificate is verified; without it the connection is encrypted but not
+ * authenticated.
+ */
+function sslOptions() {
+  if (process.env.DB_SSL !== 'true') return false;
+  const ca = process.env.DB_SSL_CA;
+  if (ca && ca.trim()) return { ca: ca.replace(/\\n/g, '\n'), rejectUnauthorized: true };
+  return { rejectUnauthorized: false };
+}
+
 module.exports = {
   development: {
     username: process.env.DB_USER || 'root',
@@ -26,7 +39,7 @@ module.exports = {
     port: process.env.DB_PORT,
     dialect: 'mysql',
     dialectOptions: {
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false
+      ssl: sslOptions()
     }
   }
 };

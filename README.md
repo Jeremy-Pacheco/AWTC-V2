@@ -196,6 +196,10 @@ After running seeders and LDAP sync, an admin user is automatically created:
 - **Email**: admin@awtc.es
 - **Password**: (Check with administrator)
 
+### Free public demo deployment
+To publish a test site (Vercel + Render + Aiven MySQL + Cloudinary) with one-click demo accounts
+for the three roles and a nightly data reset, follow [docs/deploy-demo.md](docs/deploy-demo.md).
+
 ---
 
 ## 📂 Project Structure
