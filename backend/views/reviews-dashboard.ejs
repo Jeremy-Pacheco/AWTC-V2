@@ -85,7 +85,7 @@
 <script>
   // Reviews data from server
   try {
-    const allReviews = <%- JSON.stringify(reviews || []) %>;
+    const allReviews = <%- safeJson(reviews || []) %>;
     console.log('All reviews loaded:', allReviews);
     if (allReviews && allReviews.length > 0) {
       console.log('Sample review data:', allReviews[0]);
@@ -94,7 +94,7 @@
   } catch (err) {
     console.error('Error parsing reviews:', err);
   }
-  const allReviews = <%- JSON.stringify(reviews || []) %>;
+  const allReviews = <%- safeJson(reviews || []) %>;
   const REVIEWS_PER_PAGE = 6;
   let currentPage = 1;
   let selectedUserId = null;
@@ -140,15 +140,15 @@
     }
 
     container.innerHTML = activeReviewers.map((reviewer, index) => `
-      <div class="review-item" data-user-id="${reviewer.user.id}" onclick="filterByUser(${reviewer.user.id}, '${(reviewer.user.name || reviewer.user.email).replace(/'/g, "\\'")}')" style="cursor: pointer;">
+      <div class="review-item" data-user-id="${Number(reviewer.user.id)}" onclick="filterByUser(${Number(reviewer.user.id)})" style="cursor: pointer;">
         <div class="review-item-header">
           <div style="flex: 1;">
             <span style="color: #F0BB00; font-weight: 700; font-size: 18px; margin-right: 10px;">#${index + 1}</span>
             <span class="review-item-user">
               <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 6px;"></i>
-              ${reviewer.user.name || reviewer.user.email}
+              ${escapeHtml(reviewer.user.name || reviewer.user.email)}
             </span>
-            <span class="user-item-role role-${reviewer.user.role || 'volunteer'}" style="margin-left: 8px;">${reviewer.user.role || 'volunteer'}</span>
+            <span class="user-item-role role-${escapeHtml(reviewer.user.role || 'volunteer')}" style="margin-left: 8px;">${escapeHtml(reviewer.user.role || 'volunteer')}</span>
           </div>
           <div style="text-align: right; color: #718096; font-size: 12px;">
             <i class="fas fa-star" style="color: #F0BB00; margin-right: 4px;"></i>
@@ -160,15 +160,19 @@
   }
 
   // Function to filter reviews by user
-  function filterByUser(userId, userName) {
+  function filterByUser(userId) {
     selectedUserId = userId;
     currentPage = 1;
-    
+
+    // Resolve the name from data instead of passing it through an inline onclick
+    const reviewOfUser = allReviews.find(r => r.user && r.user.id === userId);
+    const userName = reviewOfUser ? (reviewOfUser.user.name || reviewOfUser.user.email) : '';
+
     // Update title to show filtering
     const titleElement = document.querySelector('.reviews-list-title');
     titleElement.innerHTML = `
       <i class="fas fa-comments"></i>
-      Reviews by ${userName}
+      Reviews by ${escapeHtml(userName)}
       <button onclick="clearFilter()" style="margin-left: 10px; padding: 4px 8px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
         <i class="fas fa-times"></i> Clear Filter
       </button>
@@ -271,12 +275,12 @@
         <div class="review-item-header">
           <span class="review-item-user">
             <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 6px;"></i>
-            ${review.user ? (review.user.name || review.user.email) : 'Unknown User'}
+            ${review.user ? escapeHtml(review.user.name || review.user.email) : 'Unknown User'}
           </span>
           <span class="review-item-date">${formatDate(review.date)}</span>
         </div>
-        <div class="review-item-content">${review.content || 'No content'}</div>
-        ${review.image ? `<div style="margin-top: 10px;"><img src="${review.image}" style="max-width: 100%; max-height: 150px; border-radius: 6px; object-fit: cover;"></div>` : ''}
+        <div class="review-item-content">${escapeHtml(review.content || 'No content')}</div>
+        ${review.image ? `<div style="margin-top: 10px;"><img src="${escapeHtml(review.image)}" style="max-width: 100%; max-height: 150px; border-radius: 6px; object-fit: cover;"></div>` : ''}
       </div>
     `).join('');
 
@@ -482,14 +486,14 @@
     container.innerHTML = `
       <div class="images-grid">
         ${reviewsWithImages.map(review => `
-          <div class="image-card" onclick="goToReview(${review.id})" style="cursor: pointer;">
-            <img src="${review.image}" alt="Review image" class="image-card-img" onerror="this.src='https://via.placeholder.com/200x150?text=Image+Not+Found'">
+          <div class="image-card" onclick="goToReview(${Number(review.id)})" style="cursor: pointer;">
+            <img src="${escapeHtml(review.image)}" alt="Review image" class="image-card-img" onerror="this.src='https://via.placeholder.com/200x150?text=Image+Not+Found'">
             <div class="image-card-info">
               <div class="image-card-user">
                 <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 4px;"></i>
-                ${review.user ? (review.user.name || review.user.email) : 'Unknown'}
+                ${review.user ? escapeHtml(review.user.name || review.user.email) : 'Unknown'}
               </div>
-              <div class="image-card-content">${truncateText(review.content, 60)}</div>
+              <div class="image-card-content">${escapeHtml(truncateText(review.content, 60))}</div>
               <div class="image-card-date">${formatDate(review.date)}</div>
             </div>
           </div>

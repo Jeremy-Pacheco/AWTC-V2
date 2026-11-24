@@ -85,6 +85,16 @@ app.set('view engine', 'ejs');
 // Make frontend URL available in all templates
 app.locals.frontendUrl = FRONTEND_URL;
 
+// Serialize data for embedding inside <script> blocks in EJS views.
+// Plain JSON.stringify does not escape "</script>", which allowed stored XSS.
+app.locals.safeJson = (value) =>
+  JSON.stringify(value === undefined ? null : value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 

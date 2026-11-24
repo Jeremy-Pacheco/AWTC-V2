@@ -84,9 +84,9 @@
 
 <script>
   // Categories data from server
-  const categoriesData = <%- JSON.stringify(categories || []) %>;
-  const categoriesProjects = <%- JSON.stringify(projects || []) %>;
-  const categoriesUserProjects = <%- JSON.stringify(typeof allUserProjects !== 'undefined' ? allUserProjects : []) %>;
+  const categoriesData = <%- safeJson(categories || []) %>;
+  const categoriesProjects = <%- safeJson(projects || []) %>;
+  const categoriesUserProjects = <%- safeJson(typeof allUserProjects !== 'undefined' ? allUserProjects : []) %>;
 
   // Render categories list
   function renderCategoryList() {
@@ -113,8 +113,8 @@
 
       return `
         <div class="category-item">
-          <div class="category-item-name">${cat.name}</div>
-          ${cat.description ? `<div class="category-item-description">${cat.description}</div>` : ''}
+          <div class="category-item-name">${escapeHtml(cat.name)}</div>
+          ${cat.description ? `<div class="category-item-description">${escapeHtml(cat.description)}</div>` : ''}
           <div class="category-item-stats">
             <span class="category-item-stat">
               <i class="fas fa-project-diagram" style="color: #F0BB00;"></i>
