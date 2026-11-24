@@ -92,6 +92,18 @@
       <div class="container">
 
     <script>
+      // Escape any user-controlled value before inserting it into HTML
+      // (innerHTML / d3 .html()). Prevents stored XSS in the admin dashboard.
+      window.escapeHtml = function (value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      };
+
       // Sidebar toggle
       const sidebar = document.getElementById('sidebar');
       const sidebarToggle = document.getElementById('sidebarToggle');

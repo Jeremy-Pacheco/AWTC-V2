@@ -86,10 +86,10 @@
 </div>
 
 <!-- Hidden data containers -->
-<script id="usersData" type="application/json"><%- JSON.stringify(users || []).replace(/<\//g, '<\\/') %></script>
-<script id="projectsData" type="application/json"><%- JSON.stringify(projects || []).replace(/<\//g, '<\\/') %></script>
-<script id="projectsPerUserData" type="application/json"><%- JSON.stringify(typeof projectsPerUser !== 'undefined' ? projectsPerUser : []).replace(/<\//g, '<\\/') %></script>
-<script id="allUserProjectsData" type="application/json"><%- JSON.stringify(typeof allUserProjects !== 'undefined' ? allUserProjects : []).replace(/<\//g, '<\\/') %></script>
+<script id="usersData" type="application/json"><%- safeJson(users || []).replace(/<\//g, '<\\/') %></script>
+<script id="projectsData" type="application/json"><%- safeJson(projects || []).replace(/<\//g, '<\\/') %></script>
+<script id="projectsPerUserData" type="application/json"><%- safeJson(typeof projectsPerUser !== 'undefined' ? projectsPerUser : []).replace(/<\//g, '<\\/') %></script>
+<script id="allUserProjectsData" type="application/json"><%- safeJson(typeof allUserProjects !== 'undefined' ? allUserProjects : []).replace(/<\//g, '<\\/') %></script>
 
 <script>
   // Parse data from hidden containers
@@ -110,10 +110,10 @@
 
     const container = document.getElementById('userListContent');
     container.innerHTML = pageUsers.map(user => `
-      <div class="user-item" data-user-id="${user.id}" onclick="selectUser(${user.id})" style="cursor: pointer;">
-        <div class="user-item-name">${user.name || 'No name'}</div>
-        <div class="user-item-email">${user.email || 'no-email'}</div>
-        <span class="user-item-role role-${user.role || 'volunteer'}">${user.role || 'volunteer'}</span>
+      <div class="user-item" data-user-id="${Number(user.id)}" onclick="selectUser(${Number(user.id)})" style="cursor: pointer;">
+        <div class="user-item-name">${escapeHtml(user.name || 'No name')}</div>
+        <div class="user-item-email">${escapeHtml(user.email || 'no-email')}</div>
+        <span class="user-item-role role-${escapeHtml(user.role || 'volunteer')}">${escapeHtml(user.role || 'volunteer')}</span>
       </div>
     `).join('');
 
