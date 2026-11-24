@@ -124,7 +124,8 @@ async function safeFindAll(model) {
       if (!tableName) throw err;
       console.warn(`Model query failed for ${model.name}, falling back to raw SELECT * FROM ${tableName}:`, err.message);
       const [rows] = await db.sequelize.query(`SELECT * FROM \`${tableName}\``);
-      return rows;
+      // Raw rows bypass the model's defaultScope: never leak password hashes
+      return rows.map(({ passwordHash, ...row }) => row);
     } catch (err2) {
       console.error('Fallback raw query also failed for model', model && model.name, err2.message);
       return [];

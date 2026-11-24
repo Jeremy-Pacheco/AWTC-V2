@@ -1,5 +1,4 @@
-const { User } = require('../models');
-const ldapUtil = require('../utils/ldap.util');
+const authService = require('../services/auth.service');
 const logger = require('../utils/logger');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
@@ -17,21 +16,14 @@ exports.login = async (req, res) => {
     const { email, password } = req.body || {};
     if (!email || !password) {
       logger.warn(`Login attempt failed: Missing credentials for ${email || 'unknown user'}`);
-      return res.render('login', { error: 'Email and password are required', email: email || '' });
+      return res.render('login', { error: 'Email and password are required', email: email || '', frontendUrl: FRONTEND_URL });
     }
 
-    // Authenticate against LDAP
-    const isAuthenticated = await ldapUtil.authenticate(email, password);
-    if (!isAuthenticated) {
-      logger.warn(`Login failed: Invalid credentials for ${email}`);
-      return res.render('login', { error: 'Invalid credentials', email, frontendUrl: FRONTEND_URL });
-    }
-
-    // Find user in DB to get role and ID
-    const user = await User.findOne({ where: { email } });
+    // Authenticate with the configured provider (LDAP or local).
+    // Same message for unknown email and wrong password: no user enumeration.
+    const user = await authService.authenticate(email, password);
     if (!user) {
-      logger.error(`Login error: User ${email} authenticated in LDAP but not found in DB`);
-      // Same message as a wrong password: do not reveal which accounts exist
+      logger.warn(`Login failed: Invalid credentials for ${email}`);
       return res.render('login', { error: 'Invalid credentials', email, frontendUrl: FRONTEND_URL });
     }
 
