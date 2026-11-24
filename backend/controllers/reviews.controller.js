@@ -45,7 +45,7 @@ exports.createReview = async (req, res) => {
     res.status(201).json(reviewWithUser);
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: "Error creating review", error });
+    res.status(400).json({ message: "Error creating review" });
   }
 };
 
@@ -57,7 +57,8 @@ exports.getAllReviews = async (req, res) => {
     });
     res.status(200).json(reviews);
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving reviews", error });
+    console.error('Get reviews error:', error.message);
+    res.status(500).json({ message: "Error retrieving reviews" });
   }
 };
 
@@ -106,7 +107,7 @@ exports.updateReview = async (req, res) => {
     res.status(200).json(review);
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: "Error updating review", error });
+    res.status(400).json({ message: "Error updating review" });
   }
 };
 
@@ -175,6 +176,6 @@ exports.deleteReview = async (req, res) => {
     res.status(200).json({ message: "Review deleted successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting review", error });
+    res.status(500).json({ message: "Error deleting review" });
   }
 };

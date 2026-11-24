@@ -17,6 +17,6 @@ exports.getVolunteerOpportunities = async (req, res) => {
     res.status(200).json(response.data);
   } catch (error) {
     console.error("Error fetching external opportunities:", error.message);
-    res.status(500).json({ message: "Error fetching external opportunities", error: error.message });
+    res.status(500).json({ message: "Error fetching external opportunities" });
   }
 };
