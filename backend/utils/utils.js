@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
-
-const JWT_SECRET = process.env.JWT_SECRET || "SecretAWTCKey";
+const { getJwtSecret } = require("../config/secrets");
 
 function generateToken(user) {
   if (!user) return null;
@@ -12,7 +11,7 @@ function generateToken(user) {
     role: user.role,
   };
 
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+  return jwt.sign(payload, getJwtSecret(), { algorithm: "HS256", expiresIn: "24h" });
 }
 
 function getCleanUser(user) {

@@ -1,9 +1,9 @@
 const ldap = require('ldapjs');
+const { getLdapAdminPassword } = require('../config/secrets');
 
 const LDAP_URL = process.env.LDAP_URL || 'ldap://localhost:389';
 const LDAP_BASE_DN = process.env.LDAP_BASE_DN || 'dc=awtc,dc=com';
 const LDAP_ADMIN_DN = process.env.LDAP_ADMIN_DN || 'cn=admin,dc=awtc,dc=com';
-const LDAP_ADMIN_PASSWORD = process.env.LDAP_ADMIN_PASSWORD || 'admin';
 const LDAP_USERS_DN = `ou=users,${LDAP_BASE_DN}`;
 
 function getClient() {
@@ -51,7 +51,15 @@ exports.addUser = (name, email, password) => {
     const client = getClient();
 
     // First bind as admin to add user
-    client.bind(LDAP_ADMIN_DN, LDAP_ADMIN_PASSWORD, (err) => {
+    let adminPassword;
+    try {
+      adminPassword = getLdapAdminPassword();
+    } catch (configErr) {
+      client.unbind();
+      return reject(configErr);
+    }
+
+    client.bind(LDAP_ADMIN_DN, adminPassword, (err) => {
       if (err) {
         client.unbind();
         return reject(err);

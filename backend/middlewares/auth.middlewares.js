@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
-
-const JWT_SECRET = process.env.JWT_SECRET || "SecretAWTCKey";
+const { getJwtSecret } = require("../config/secrets");
 
 module.exports = async (req, res, next) => {
   try {
@@ -35,7 +34,7 @@ module.exports = async (req, res, next) => {
       let payload;
 
       try {
-        payload = jwt.verify(token, JWT_SECRET);
+        payload = jwt.verify(token, getJwtSecret(), { algorithms: ["HS256"] });
       } catch (err) {
         req.user = null;
         return next();

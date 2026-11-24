@@ -9,8 +9,14 @@ const morgan = require('morgan');
 const logger = require('./utils/logger');
 
 const env = process.env.NODE_ENV || 'development';
-const envPath = path.resolve(__dirname, `.env.${env}`);
-dotenv.config({ path: envPath });
+// `.env.<env>.local` (git-ignored) is loaded first so it takes precedence and
+// can hold real secrets; `.env.<env>` keeps the non-secret defaults.
+dotenv.config({ path: path.resolve(__dirname, `.env.${env}.local`) });
+dotenv.config({ path: path.resolve(__dirname, `.env.${env}`) });
+
+// Fail fast: never start with missing or publicly known secrets.
+const { assertRequiredSecrets, getSessionSecret } = require('./config/secrets');
+assertRequiredSecrets();
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -92,7 +98,7 @@ app.use(cookieParser());
 
 app.use(session({
   name: process.env.SESSION_NAME || 'awtc.sid',
-  secret: process.env.SESSION_SECRET || 'awtc_session_secret',
+  secret: getSessionSecret(),
   resave: false,
   saveUninitialized: false,
   cookie: {
