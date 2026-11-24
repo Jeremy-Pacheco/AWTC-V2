@@ -31,7 +31,7 @@ exports.createProject = async (req, res) => {
   } catch (error) {
     logger.error(`Failed to create project: ${error.message}`);
     console.error(error);
-    res.status(400).json({ message: 'Error creating project', error });
+    res.status(400).json({ message: 'Error creating project' });
   }
 };
 
@@ -65,7 +65,7 @@ exports.getAllProjects = async (req, res) => {
     res.status(200).json(projectsWithCount);
   } catch (error) {
     console.error('Error retrieving projects:', error);
-    res.status(500).json({ message: 'Error retrieving projects', error });
+    res.status(500).json({ message: 'Error retrieving projects' });
   }
 };
 
@@ -164,7 +164,7 @@ exports.updateProject = async (req, res) => {
     res.status(200).json(updated);
   } catch (error) {
     console.error(error);
-    res.status(400).json({ message: 'Error updating project', error });
+    res.status(400).json({ message: 'Error updating project' });
   }
 };
 
@@ -178,7 +178,8 @@ exports.deleteProject = async (req, res) => {
     await project.destroy();
     res.status(200).json({ message: 'Project deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting project', error });
+    console.error('Delete project error:', error.message);
+    res.status(500).json({ message: 'Error deleting project' });
   }
 };
 

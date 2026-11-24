@@ -6,7 +6,8 @@ exports.createCategory = async (req, res) => {
     const category = await Category.create(req.body);
     res.status(201).json(category);
   } catch (error) {
-    res.status(400).json({ message: 'Error creating category', error });
+    console.error('Category controller error:', error.message);
+    res.status(400).json({ message: 'Error creating category' });
   }
 };
 
@@ -16,7 +17,8 @@ exports.getAllCategories = async (req, res) => {
     const categories = await Category.findAll();
     res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving categories', error });
+    console.error('Category controller error:', error.message);
+    res.status(500).json({ message: 'Error retrieving categories' });
   }
 };
 
@@ -29,7 +31,8 @@ exports.updateCategory = async (req, res) => {
     await category.update(req.body);
     res.status(200).json(category);
   } catch (error) {
-    res.status(400).json({ message: 'Error updating category', error });
+    console.error('Category controller error:', error.message);
+    res.status(400).json({ message: 'Error updating category' });
   }
 };
 
@@ -42,6 +45,7 @@ exports.deleteCategory = async (req, res) => {
     await category.destroy();
     res.status(200).json({ message: 'Category deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting category', error });
+    console.error('Category controller error:', error.message);
+    res.status(500).json({ message: 'Error deleting category' });
   }
 };
