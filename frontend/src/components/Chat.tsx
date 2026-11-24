@@ -107,10 +107,10 @@ export default function Chat({ currentUser, token }: ChatProps) {
 
   // Initialize Socket.IO
   useEffect(() => {
+    // The server derives the user's identity from the JWT; never send userId/role.
     const newSocket = io(API_URL, {
       auth: {
-        userId: currentUser.id,
-        userRole: currentUser.role
+        token: localStorage.getItem('jwtToken')
       }
     });
 
