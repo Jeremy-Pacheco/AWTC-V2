@@ -1,5 +1,7 @@
 const socketIO = require('socket.io');
+const jwt = require('jsonwebtoken');
 const db = require('../models');
+const { getJwtSecret } = require('./secrets');
 const { sendNotificationToUser } = require('../controllers/subscription.controller');
 
 let io;
@@ -51,37 +53,35 @@ function initializeSocketIO(server) {
   });
 
   // Authentication middleware for Socket.IO
+  // Identity comes ONLY from a server-verified JWT. Client-supplied
+  // userId/userRole are ignored (they allowed impersonating any admin).
   io.use(async (socket, next) => {
     try {
-      const userId = socket.handshake.auth.userId;
-      const userRole = socket.handshake.auth.userRole;
+      const token = socket.handshake.auth && socket.handshake.auth.token;
 
       // Allow connections without auth for public events (like review_deleted)
-      if (!userId || !userRole) {
-        console.log('Public socket connection (no auth)');
+      if (!token) {
         socket.isPublic = true;
         return next();
       }
 
-      // Verify that user exists and has admin or coordinator role for messaging
-      const user = await db.User.findByPk(userId);
-      
+      let payload;
+      try {
+        payload = jwt.verify(token, getJwtSecret(), { algorithms: ['HS256'] });
+      } catch (err) {
+        return next(new Error('Invalid or expired token'));
+      }
+
+      const user = await db.User.findByPk(payload.id);
       if (!user) {
         return next(new Error('User not found'));
       }
 
-      if (user.role !== 'admin' && user.role !== 'coordinator') {
-        // Allow regular users to connect but not use messaging
-        socket.userId = userId;
-        socket.userRole = user.role;
-        socket.userName = user.name;
-        socket.isRegularUser = true;
-        return next();
-      }
-
-      socket.userId = userId;
+      socket.userId = user.id;
       socket.userRole = user.role;
       socket.userName = user.name;
+      // Regular users may connect but cannot use messaging
+      socket.isRegularUser = user.role !== 'admin' && user.role !== 'coordinator';
       next();
     } catch (error) {
       console.error('Socket authentication error:', error);
@@ -90,11 +90,12 @@ function initializeSocketIO(server) {
   });
 
   io.on('connection', (socket) => {
-    if (socket.isPublic) {
-      console.log('Public socket connected (listening to broadcasts only)');
+    if (socket.isPublic || socket.isRegularUser) {
       socket.emit('connected', { message: 'Connected to public events' });
-      return; // Don't register messaging handlers for public connections
+      return; // Messaging is only for admins and coordinators
     }
+
+    socket.join('staff');
 
     console.log(`User connected: ${socket.userName} (ID: ${socket.userId})`);
     
@@ -129,7 +130,7 @@ function initializeSocketIO(server) {
       try {
         const { receiverId, content } = data;
 
-        if (!receiverId || !content) {
+        if (!receiverId || typeof content !== 'string' || !content.trim()) {
           socket.emit('error', { message: 'Invalid message data' });
           return;
         }
@@ -267,7 +268,11 @@ function initializeSocketIO(server) {
     // Event: Disconnection
     socket.on('disconnect', () => {
       console.log(`User disconnected: ${socket.userName} (ID: ${socket.userId})`);
-      userSockets.delete(socket.userId);
+      // Only remove the entry if it still belongs to this socket (another tab may have replaced it)
+      const current = userSockets.get(socket.userId);
+      if (current && current.socketId === socket.id) {
+        userSockets.delete(socket.userId);
+      }
       emitOnlineUsers();
     });
   });
@@ -275,7 +280,8 @@ function initializeSocketIO(server) {
   // Helper function to emit connected users
   function emitOnlineUsers() {
     const onlineUserIds = Array.from(userSockets.keys());
-    io.emit('online_users', { userIds: onlineUserIds });
+    // Only staff (admins/coordinators) need to know who is online
+    io.to('staff').emit('online_users', { userIds: onlineUserIds });
   }
 
   return io;
