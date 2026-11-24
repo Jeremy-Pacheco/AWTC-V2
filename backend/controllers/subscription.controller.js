@@ -69,8 +69,7 @@ const subscribe = async (req, res) => {
   } catch (error) {
     console.error('Error creating subscription:', error);
     res.status(500).json({
-      message: 'Error creating subscription',
-      error: error.message
+      message: 'Error creating subscription'
     });
   }
 };
@@ -110,8 +109,7 @@ const unsubscribe = async (req, res) => {
   } catch (error) {
     console.error('Error deleting subscription:', error);
     res.status(500).json({
-      message: 'Error deleting subscription',
-      error: error.message
+      message: 'Error deleting subscription'
     });
   }
 };
@@ -136,8 +134,7 @@ const getUserSubscriptions = async (req, res) => {
   } catch (error) {
     console.error('Error fetching subscriptions:', error);
     res.status(500).json({
-      message: 'Error fetching subscriptions',
-      error: error.message
+      message: 'Error fetching subscriptions'
     });
   }
 };

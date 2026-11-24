@@ -451,6 +451,11 @@ app.use((req, res, next) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+// Centralised error handling (must be registered after all routes)
+const { apiNotFound, errorHandler } = require('./middlewares/errorHandler.middlewares');
+app.use('/api', apiNotFound);
+app.use(errorHandler);
+
 const PORT = process.env.PORT || 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 8443;
 const USE_HTTPS = process.env.USE_HTTPS === 'true';
