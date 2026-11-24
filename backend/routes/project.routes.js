@@ -266,7 +266,7 @@ router.post('/:id/volunteers/:userId/unban', roleMid.isAdminOrCoordinator, proje
  *       404:
  *         description: Project not found
  */
-router.put('/:id', upload.single('file'), projectController.updateProject);
-router.delete('/:id', projectController.deleteProject);
+router.put('/:id', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), projectController.updateProject);
+router.delete('/:id', authMiddleware, roleMid.isAdminOrCoordinator, projectController.deleteProject);
 
 module.exports = router;
