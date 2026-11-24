@@ -3,6 +3,7 @@
 # Disabled until you create the repository variable DEMO_RESET_ENABLED=true
 # (Settings > Secrets and variables > Actions > Variables) and these secrets:
 #   DEMO_DB_HOST, DEMO_DB_PORT, DEMO_DB_USER, DEMO_DB_PASS, DEMO_DB_NAME
+#   DEMO_DB_SSL_CA  (recommended) provider CA certificate, verifies TLS
 #   DEMO_PASSWORD   (optional) password for the demo accounts' normal login
 #   CLOUDINARY_URL  (optional) to also delete images uploaded by visitors
 #
@@ -38,6 +39,7 @@ jobs:
       DB_PASS: ${{ secrets.DEMO_DB_PASS }}
       DB_NAME: ${{ secrets.DEMO_DB_NAME }}
       DB_SSL: "true"
+      DB_SSL_CA: ${{ secrets.DEMO_DB_SSL_CA }}
       DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
       STORAGE_PROVIDER: ${{ secrets.CLOUDINARY_URL != '' && 'cloudinary' || 'local' }}
       CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
@@ -47,7 +49,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 12
+          version: 12.23.0
 
       - uses: actions/setup-node@v4
         with:

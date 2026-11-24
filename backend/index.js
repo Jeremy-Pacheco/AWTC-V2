@@ -99,8 +99,14 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === 'production',
-    secure: false, // Set to false for local testing over HTTP
+    // SESSION_COOKIE_SECURE=true on HTTPS hosts (Render, nginx + TLS) so the
+    // cookie is never sent over plain HTTP; "auto" follows req.secure (needs
+    // the trust proxy setting above). Default false keeps local HTTP working.
+    secure: (() => {
+      const value = (process.env.SESSION_COOKIE_SECURE || 'false').toLowerCase();
+      if (value === 'auto') return 'auto';
+      return value === 'true';
+    })(),
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 //1 day
   }
