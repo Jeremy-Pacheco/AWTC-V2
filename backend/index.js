@@ -405,6 +405,9 @@ app.get('/', (req, res) => renderDashboard(req, res, 'overview'));
 app.get('/projects', (req, res) => renderDashboard(req, res, 'projects'));
 app.get('/projects/:id/volunteers', async (req, res) => {
   if (!req.user) return res.redirect('/login');
+  if (req.user.role !== 'admin') {
+    return res.status(403).render('access-denied', { currentUser: req.user, frontendUrl: FRONTEND_URL });
+  }
   try {
     const projectId = parseInt(req.params.id, 10);
     const data = await getDashboardData();
