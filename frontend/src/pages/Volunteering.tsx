@@ -6,6 +6,7 @@ import AuthModal from "../components/AuthModal";
 import AlertModal from "../components/AlertModal";
 import { useSearchParams } from "react-router-dom";
 import { handleAuthFetch } from "../utils/auth";
+import { imageUrl } from '../utils/images';
 
 type Project = {
   id: number;
@@ -23,7 +24,6 @@ type Project = {
 };
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-const IMAGE_URL = import.meta.env.VITE_IMAGE_URL || 'http://localhost:8080/images';
 
 const Volunteering: React.FC = () => {
   const { t } = useTranslation();
@@ -330,7 +330,7 @@ const Volunteering: React.FC = () => {
               >
                 {proj.filename && (
                   <img
-                    src={`${IMAGE_URL}/${proj.filename}`}
+                    src={imageUrl(proj.filename)}
                     alt={proj.name}
                     className="w-full md:w-48 h-48 object-cover rounded"
                   />

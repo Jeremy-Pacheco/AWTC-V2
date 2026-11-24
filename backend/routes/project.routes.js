@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../multer/upload');
+const { persistUpload } = require('../services/storage.service');
 const projectController = require('../controllers/project.controller');
 const requireAuth = require('../middlewares/requireAuth');
 const authMiddleware = require('../middlewares/auth.middlewares');
@@ -41,7 +42,7 @@ const roleMid = require('../middlewares/role.middlewares');
  *                 $ref: '#/components/schemas/Project'
  */
 // Only coordinators or admins can create projects
-router.post('/', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), projectController.createProject);
+router.post('/', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, persistUpload('projects'), projectController.createProject);
 router.get('/', projectController.getAllProjects);
 
 /**
@@ -266,7 +267,7 @@ router.post('/:id/volunteers/:userId/unban', roleMid.isAdminOrCoordinator, proje
  *       404:
  *         description: Project not found
  */
-router.put('/:id', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), projectController.updateProject);
+router.put('/:id', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, persistUpload('projects'), projectController.updateProject);
 router.delete('/:id', authMiddleware, roleMid.isAdminOrCoordinator, projectController.deleteProject);
 
 module.exports = router;

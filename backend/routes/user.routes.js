@@ -7,6 +7,7 @@ const multer = require('multer');
 const { isAdmin, isAdminOrCoordinator } = require('../middlewares/role.middlewares');
 
 const upload = require('../multer/upload');
+const { persistUpload } = require('../services/storage.service');
 
 const requireAuth = require('../middlewares/requireAuth');
 const { loginLimiter, signupLimiter } = require('../middlewares/rateLimit.middlewares');
@@ -64,6 +65,7 @@ router.put(
   requireAuth,
   upload.single('file'),
   handleMulterError,
+  persistUpload('profiles'),
   userCtrl.updateOwnProfile
 );
 

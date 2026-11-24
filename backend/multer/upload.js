@@ -10,7 +10,9 @@ if (!fs.existsSync(uploadDir)) {
   console.log('Created upload directory:', uploadDir);
 }
 
-var storage = multer.diskStorage({
+var storageService = require('../services/storage.service');
+
+var diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Ensure directory exists before each upload (in case it was deleted)
     if (!fs.existsSync(uploadDir)) {
@@ -31,6 +33,10 @@ var storage = multer.diskStorage({
     cb(null, 'image-' + Date.now() + '-' + crypto.randomBytes(8).toString('hex') + '.' + filetype);
   }
 });
+
+// With STORAGE_PROVIDER=cloudinary files are kept in memory and then uploaded
+// by storageService.persistUpload(); otherwise they are written to disk.
+var storage = storageService.isRemote() ? multer.memoryStorage() : diskStorage;
 
 // File filter to only accept images
 var fileFilter = (req, file, cb) => {
