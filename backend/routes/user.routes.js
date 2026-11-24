@@ -11,12 +11,13 @@ const { persistUpload } = require('../services/storage.service');
 
 const requireAuth = require('../middlewares/requireAuth');
 const { loginLimiter, signupLimiter } = require('../middlewares/rateLimit.middlewares');
+const { protectDemoTarget, protectDemoSelf } = require('../middlewares/demo.middlewares');
 
 // Multer error handler middleware
 const handleMulterError = (err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+      return res.status(400).json({ message: `File too large. Maximum size is ${upload.maxUploadMb}MB.` });
     }
     return res.status(400).json({ message: `Upload error: ${err.message}` });
   } else if (err) {
@@ -77,7 +78,7 @@ router.get(
 );
 
 // Delete own account
-router.delete('/dashboard', authMiddleware, requireAuth, userCtrl.deleteOwnProfile);
+router.delete('/dashboard', authMiddleware, requireAuth, protectDemoSelf, userCtrl.deleteOwnProfile);
 
 // Get projects for current user (dashboard)
 router.get('/dashboard/projects', authMiddleware, requireAuth, userCtrl.getOwnProjects);
@@ -247,7 +248,7 @@ router.get('/', authMiddleware, isAdminOrCoordinator, userCtrl.getUsers);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/role', authMiddleware, isAdmin, userCtrl.updateUserRole);
+router.put('/:id/role', authMiddleware, isAdmin, protectDemoTarget, userCtrl.updateUserRole);
 
 /**
  * @swagger
@@ -269,6 +270,6 @@ router.put('/:id/role', authMiddleware, isAdmin, userCtrl.updateUserRole);
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id', authMiddleware, isAdmin, userCtrl.deleteUser);
+router.delete('/:id', authMiddleware, isAdmin, protectDemoTarget, userCtrl.deleteUser);
 
 module.exports = router;

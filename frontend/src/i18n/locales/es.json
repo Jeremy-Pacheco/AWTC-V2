@@ -1,4 +1,17 @@
 {
+  "demo": {
+    "badge": "Sitio de prueba",
+    "bannerText": "Esta es una demo pública con datos ficticios que se reinician cada noche. No introduzcas datos personales reales.",
+    "closeBanner": "Cerrar aviso de sitio de prueba",
+    "enterAs": "Entrar como…",
+    "enterAsHint": "Prueba la aplicación con una cuenta demo compartida, sin contraseña.",
+    "signingIn": "Entrando…",
+    "roles": {
+      "volunteer": "Voluntario",
+      "coordinator": "Coordinador",
+      "admin": "Administrador"
+    }
+  },
   "common": {
     "appName": "Voluntad Que Transforma",
     "login": "Iniciar Sesión",

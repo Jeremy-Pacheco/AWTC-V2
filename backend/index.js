@@ -74,6 +74,9 @@ app.set('view engine', 'ejs');
 // Make frontend URL available in all templates
 app.locals.frontendUrl = FRONTEND_URL;
 
+// Public test site (DEMO_MODE=true): one-click demo accounts + banner in EJS views
+app.locals.demoMode = require('./services/demo.service').isDemoMode();
+
 // Serialize data for embedding inside <script> blocks in EJS views.
 // Plain JSON.stringify does not escape "</script>", which allowed stored XSS.
 app.locals.safeJson = (value) =>
@@ -172,6 +175,7 @@ const sessionRoutes = require("./routes/session.routes");
 const externalRoutes = require("./routes/external.routes");
 const messageRoutes = require("./routes/message.routes");
 const subscriptionRoutes = require("./routes/subscription.routes");
+const demoRoutes = require("./routes/demo.routes");
 
 app.use("/api/projects", projectRoutes);
 app.use("/api/reviews", reviewRoutes);
@@ -181,6 +185,7 @@ app.use("/api/contacts", contactRoutes);
 app.use("/api/external", externalRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/demo", demoRoutes);
 app.use('/', sessionRoutes);
 
 // Simple EJS dashboard routes (demo)

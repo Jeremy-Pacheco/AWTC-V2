@@ -1,0 +1,65 @@
+# Nightly reset of the PUBLIC DEMO database (fake data + 3 demo accounts).
+#
+# Disabled until you create the repository variable DEMO_RESET_ENABLED=true
+# (Settings > Secrets and variables > Actions > Variables) and these secrets:
+#   DEMO_DB_HOST, DEMO_DB_PORT, DEMO_DB_USER, DEMO_DB_PASS, DEMO_DB_NAME
+#   DEMO_PASSWORD   (optional) password for the demo accounts' normal login
+#   CLOUDINARY_URL  (optional) to also delete images uploaded by visitors
+#
+# NEVER point these secrets at a real (non-demo) database: all data is deleted.
+name: Reset demo data
+
+on:
+  schedule:
+    - cron: "0 3 * * *" # every day at 03:00 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: demo-reset
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reset:
+    if: vars.DEMO_RESET_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      NODE_ENV: production
+      DEMO_MODE: "true"
+      DB_HOST: ${{ secrets.DEMO_DB_HOST }}
+      DB_PORT: ${{ secrets.DEMO_DB_PORT }}
+      DB_USER: ${{ secrets.DEMO_DB_USER }}
+      DB_PASS: ${{ secrets.DEMO_DB_PASS }}
+      DB_NAME: ${{ secrets.DEMO_DB_NAME }}
+      DB_SSL: "true"
+      DEMO_PASSWORD: ${{ secrets.DEMO_PASSWORD }}
+      STORAGE_PROVIDER: ${{ secrets.CLOUDINARY_URL != '' && 'cloudinary' || 'local' }}
+      CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+      CLOUDINARY_FOLDER: ${{ vars.CLOUDINARY_FOLDER || 'awtc' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prod
+
+      - name: Run migrations
+        run: npx --yes sequelize-cli@6 db:migrate
+
+      - name: Reset demo data
+        run: node scripts/reset-demo.js --yes

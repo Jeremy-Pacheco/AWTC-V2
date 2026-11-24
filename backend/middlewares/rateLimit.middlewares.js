@@ -66,8 +66,18 @@ const contactLimiter = rateLimit({
   handler: jsonHandler('Too many messages sent. Please try again later.'),
 });
 
+// One-click demo login (DEMO_MODE): no password, but avoid token farming
+const demoLoginLimiter = rateLimit({
+  windowMs: minutes(15),
+  limit: intFromEnv('DEMO_LOGIN_RATE_LIMIT', 30),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: jsonHandler('Too many demo logins. Please try again later.'),
+});
+
 module.exports = {
   loginLimiter,
+  demoLoginLimiter,
   dashboardLoginLimiter,
   signupLimiter,
   contactLimiter,

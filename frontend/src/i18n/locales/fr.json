@@ -1,4 +1,17 @@
 {
+  "demo": {
+    "badge": "Site de test",
+    "bannerText": "Ceci est une démo publique avec des données fictives réinitialisées chaque nuit. Ne saisissez pas de données personnelles réelles.",
+    "closeBanner": "Fermer l'avis du site de test",
+    "enterAs": "Entrer en tant que…",
+    "enterAsHint": "Essayez l'application avec un compte de démo partagé, sans mot de passe.",
+    "signingIn": "Connexion…",
+    "roles": {
+      "volunteer": "Bénévole",
+      "coordinator": "Coordinateur",
+      "admin": "Administrateur"
+    }
+  },
   "common": {
     "appName": "Volonté Qui Transforme",
     "login": "Se Connecter",
