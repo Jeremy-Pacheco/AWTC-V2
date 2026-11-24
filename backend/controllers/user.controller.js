@@ -1,6 +1,18 @@
 const { User } = require("../models");
 const utils = require("../utils/utils");
-const ldapUtil = require("../utils/ldap.util");
+const authService = require("../services/auth.service");
+
+// Maps validation errors from the auth service / Sequelize to a 400 response
+function sendRegistrationError(res, error, fallbackMessage) {
+  if (error && error.status === 400) {
+    return res.status(400).json({ message: error.message });
+  }
+  if (error && (error.name === "SequelizeValidationError" || error.name === "SequelizeUniqueConstraintError")) {
+    return res.status(400).json({ message: "Invalid or already registered email" });
+  }
+  console.error(fallbackMessage, error);
+  return res.status(500).json({ message: fallbackMessage });
+}
 
 // Create user (registration)
 exports.createUser = async (req, res) => {
@@ -20,19 +32,7 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: "Email is already registered" });
     }
 
-    // Add to LDAP
-    try {
-      await ldapUtil.addUser(name, email, password);
-    } catch (ldapErr) {
-      console.error("LDAP Error:", ldapErr);
-      return res.status(500).json({ message: "Error creating user in directory" });
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      role: "volunteer",
-    });
+    const user = await authService.registerUser({ name, email, password, role: "volunteer" });
 
     const token = utils.generateToken(user);
     const cleanUser = utils.getCleanUser(user);
@@ -43,8 +43,7 @@ exports.createUser = async (req, res) => {
       access_token: token,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating user" });
+    sendRegistrationError(res, error, "Error creating user");
   }
 };
 
@@ -56,29 +55,30 @@ exports.login = async (req, res) => {
     // Check for Basic Auth header (email:password in base64)
     const authHeader = req.headers["authorization"];
     if (authHeader && authHeader.startsWith("Basic ")) {
-      const base64Credentials = authHeader.split(" ")[1];
-      const credentials = Buffer.from(base64Credentials, "base64").toString("ascii");
-      [email, password] = credentials.split(":");
-    } 
+      const base64Credentials = authHeader.split(" ")[1] || "";
+      // UTF-8 (not ASCII) and split on the FIRST colon only: passwords may contain ':'
+      const credentials = Buffer.from(base64Credentials, "base64").toString("utf8");
+      const separator = credentials.indexOf(":");
+      if (separator > 0) {
+        email = credentials.slice(0, separator);
+        password = credentials.slice(separator + 1);
+      }
+    }
     // Check for JSON body (email and password in request body)
     else if (req.body && req.body.email && req.body.password) {
       email = req.body.email;
       password = req.body.password;
-    } 
-    // No credentials provided
-    else {
+    }
+
+    if (!email || !password) {
       return res.status(400).json({ message: "Authorization header or email/password body required" });
     }
 
-    // Authenticate with LDAP
-    const isAuthenticated = await ldapUtil.authenticate(email, password);
-    if (!isAuthenticated) {
+    // Same response for unknown email and wrong password: no user enumeration
+    const user = await authService.authenticate(email, password);
+    if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
-    const user = await User.findOne({ where: { email } });
-    // Same response as a wrong password: do not reveal which accounts exist
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = utils.generateToken(user);
     const cleanUser = utils.getCleanUser(user);
@@ -99,29 +99,20 @@ exports.createCoordinator = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Missing data" });
+    }
+
     const existing = await User.findOne({ where: { email } });
     if (existing) {
       return res.status(400).json({ message: "Email is already registered" });
     }
 
-    // Add to LDAP
-    try {
-      await ldapUtil.addUser(name, email, password);
-    } catch (ldapErr) {
-      console.error("LDAP Error:", ldapErr);
-      return res.status(500).json({ message: "Error creating user in directory" });
-    }
+    const user = await authService.registerUser({ name, email, password, role: "coordinator" });
 
-    const user = await User.create({
-      name,
-      email,
-      role: "coordinator",
-    });
-
-    res.status(201).json({ message: "Coordinator created successfully", user });
+    res.status(201).json({ message: "Coordinator created successfully", user: utils.getCleanUser(user) });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error creating coordinator" });
+    sendRegistrationError(res, error, "Error creating coordinator");
   }
 };
 

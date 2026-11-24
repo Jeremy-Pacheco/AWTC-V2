@@ -42,7 +42,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const tokenBasic = btoa(`${email}:${pass}`);
+      // Encode as UTF-8 first: plain btoa() throws on characters like "ñ" or accents
+      const tokenBasic = btoa(String.fromCharCode(...new TextEncoder().encode(`${email}:${pass}`)));
       const res = await fetch(`${API_URL}/api/users/login`, {
         method: "POST",
         headers: { Authorization: `Basic ${tokenBasic}` },
