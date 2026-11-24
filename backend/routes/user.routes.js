@@ -9,6 +9,7 @@ const { isAdmin, isAdminOrCoordinator } = require('../middlewares/role.middlewar
 const upload = require('../multer/upload');
 
 const requireAuth = require('../middlewares/requireAuth');
+const { loginLimiter, signupLimiter } = require('../middlewares/rateLimit.middlewares');
 
 // Multer error handler middleware
 const handleMulterError = (err, req, res, next) => {
@@ -134,7 +135,7 @@ router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, userCtrl.getUserBa
  *       400:
  *         description: Bad request
  */
-router.post('/signup', userCtrl.createUser);
+router.post('/signup', signupLimiter, userCtrl.createUser);
 
 /**
  * @swagger
@@ -164,7 +165,7 @@ router.post('/signup', userCtrl.createUser);
  *         description: Invalid credentials
  *     security: []
  */
-router.post('/login', userCtrl.login);
+router.post('/login', loginLimiter, userCtrl.login);
 
 /**
  * @swagger
