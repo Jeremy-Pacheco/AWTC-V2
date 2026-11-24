@@ -1,6 +1,7 @@
 var multer = require('multer');
 var fs = require('fs');
 var path = require('path');
+var crypto = require('crypto');
 
 // Ensure the upload directory exists
 var uploadDir = path.join(__dirname, '..', 'public', 'images');
@@ -26,7 +27,8 @@ var storage = multer.diskStorage({
     else if(file.mimetype === 'image/webp') filetype = 'webp';
     else filetype = 'bin';
 
-    cb(null, 'image-' + Date.now() + '.' + filetype);
+    // Random suffix avoids collisions between concurrent uploads in the same ms
+    cb(null, 'image-' + Date.now() + '-' + crypto.randomBytes(8).toString('hex') + '.' + filetype);
   }
 });
 
@@ -47,5 +49,19 @@ var upload = multer({
     fileSize: 5 * 1024 * 1024 // 5MB limit
   }
 });
+
+// Turns multer / fileFilter errors into a 400 JSON response instead of a 500
+upload.handleUploadError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+    }
+    return res.status(400).json({ message: 'Upload error' });
+  }
+  if (err) {
+    return res.status(400).json({ message: err.message || 'Error uploading file' });
+  }
+  next();
+};
 
 module.exports = upload;
