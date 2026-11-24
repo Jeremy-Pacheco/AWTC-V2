@@ -7,9 +7,9 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useTranslation } from "react-i18next";
 import { handleAuthFetch } from "../utils/auth";
+import { imageUrl } from '../utils/images';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-const IMAGE_URL = import.meta.env.VITE_IMAGE_URL || "http://localhost:8080/images";
 
 // --- CAROUSEL ---
 function Carousel() {
@@ -62,9 +62,7 @@ function Carousel() {
       </button>
       <div className="flex space-x-3 md:space-x-6 items-center justify-center overflow-hidden">
         <img
-          src={`${
-            IMAGE_URL
-          }/${projects[(current - 1 + projects.length) % projects.length].filename}`}
+          src={imageUrl(projects[(current - 1 + projects.length) % projects.length].filename)}
           className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
           alt={
             projects[(current - 1 + projects.length) % projects.length].name
@@ -76,15 +74,13 @@ function Carousel() {
           }
         />
         <img
-          src={`${IMAGE_URL}/${projects[current].filename}`}
+          src={imageUrl(projects[current].filename)}
           className="w-56 md:w-96 h-40 md:h-72 object-cover rounded shadow-lg shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
           alt={projects[current].name}
           onClick={() => handleImageClick(projects[current].id)}
         />
         <img
-          src={`${
-            IMAGE_URL
-          }/${projects[(current + 1) % projects.length].filename}`}
+          src={imageUrl(projects[(current + 1) % projects.length].filename)}
           className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
           alt={
             projects[(current + 1) % projects.length].name
@@ -403,7 +399,7 @@ function ReviewsSection({
                     {/* Profile Image */}
                     {review.user?.profileImage ? (
                       <img
-                        src={`${API_BASE_URL}/images/${review.user.profileImage}`}
+                        src={imageUrl(review.user.profileImage)}
                         alt={getUserDisplayName(review.user)}
                         className="w-10 h-10 rounded-full object-cover border border-gray-200"
                         onError={(e) => {
@@ -455,12 +451,12 @@ function ReviewsSection({
                 {review.image && (
                   <div className="mb-4">
                     <img
-                      src={`${API_BASE_URL}${review.image}`}
+                      src={imageUrl(review.image)}
                       alt="Attached"
                       className="h-32 w-auto object-cover rounded-xl cursor-zoom-in hover:opacity-95"
                       onClick={() =>
                         window.open(
-                          `${API_BASE_URL}${review.image}`,
+                          imageUrl(review.image),
                           "_blank"
                         )
                       }
@@ -479,7 +475,7 @@ function ReviewsSection({
                     {review.image && !editRemoveImage && !editSelectedFile && (
                       <div className="mt-3 mb-2">
                         <img
-                          src={`${API_BASE_URL}${review.image}`}
+                          src={imageUrl(review.image)}
                           alt="Current"
                           className="h-24 w-auto object-cover rounded-lg"
                         />

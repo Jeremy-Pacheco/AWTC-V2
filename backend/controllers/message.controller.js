@@ -1,5 +1,6 @@
 const db = require('../models');
 const { Op } = require('sequelize');
+const { toPublicUrl } = require('../services/storage.service');
 
 /**
  * @swagger
@@ -47,7 +48,7 @@ exports.getConversations = async (req, res) => {
           userName: otherUser.name,
           userEmail: otherUser.email,
           userRole: otherUser.role,
-          profileImage: otherUser.profileImage ? `/images/${otherUser.profileImage}` : null,
+          profileImage: toPublicUrl(otherUser.profileImage),
           lastMessage: message.content,
           lastMessageDate: message.createdAt,
           unreadCount: 0
@@ -232,7 +233,7 @@ exports.getAvailableUsers = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      profileImage: user.profileImage ? `/images/${user.profileImage}` : null
+      profileImage: toPublicUrl(user.profileImage)
     }));
 
     res.json(formattedUsers);

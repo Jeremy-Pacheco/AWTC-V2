@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { io, Socket } from 'socket.io-client';
+import { imageUrl } from '../utils/images';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-const BASE_URL = API_URL.replace('/api', '');
 
 interface User {
   id: number;
@@ -68,7 +68,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
         const registration = await navigator.serviceWorker.ready;
         await registration.showNotification(`New message from ${msg.sender.name}`, {
           body: msg.content.length > 100 ? msg.content.substring(0, 100) + '...' : msg.content,
-          icon: msg.sender.profileImage ? `${BASE_URL}${msg.sender.profileImage}` : '/logo.png',
+          icon: msg.sender.profileImage ? imageUrl(msg.sender.profileImage) : '/logo.png',
           tag: `message-${msg.id}`,
           requireInteraction: false,
           data: {
@@ -86,7 +86,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
     try {
       const notification = new Notification(`New message from ${msg.sender.name}`, {
         body: msg.content.length > 100 ? msg.content.substring(0, 100) + '...' : msg.content,
-        icon: msg.sender.profileImage ? `${BASE_URL}${msg.sender.profileImage}` : '/logo.png',
+        icon: msg.sender.profileImage ? imageUrl(msg.sender.profileImage) : '/logo.png',
         tag: `message-${msg.id}`,
         requireInteraction: false
       });
@@ -448,7 +448,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
                     {conv.profileImage ? (
                       <>
                         <img 
-                          src={`${BASE_URL}${conv.profileImage}`} 
+                          src={imageUrl(conv.profileImage)} 
                           alt={conv.userName}
                           className="w-12 h-12 rounded-full object-cover"
                           onError={(e) => { 
@@ -511,7 +511,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
                   {selectedUser.profileImage ? (
                     <>
                       <img 
-                        src={`${BASE_URL}${selectedUser.profileImage}`} 
+                        src={imageUrl(selectedUser.profileImage)} 
                         alt={selectedUser.name}
                         className="w-10 h-10 rounded-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }}

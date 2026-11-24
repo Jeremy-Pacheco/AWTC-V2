@@ -6,6 +6,7 @@ const authMiddleware = require("../middlewares/auth.middlewares");
 // Never keep the client's original extension (it allowed .html/.svg uploads -> XSS).
 const upload = require("../multer/upload");
 const { handleUploadError } = upload;
+const { persistUpload } = require("../services/storage.service");
 
 /**
  * @swagger
@@ -61,6 +62,7 @@ router.post(
   authMiddleware,
   upload.single("image"),
   handleUploadError,
+  persistUpload("reviews"),
   reviewsController.createReview
 );
 router.get("/", reviewsController.getAllReviews);
@@ -130,6 +132,7 @@ router.put(
   authMiddleware,
   upload.single("image"),
   handleUploadError,
+  persistUpload("reviews"),
   reviewsController.updateReview
 );
 

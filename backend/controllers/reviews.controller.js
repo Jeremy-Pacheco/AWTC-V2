@@ -1,8 +1,7 @@
 const { Reviews, User } = require("../models");
 const { sendNotificationToUser } = require("./subscription.controller");
 const { getReviewsNS } = require("../config/socket");
-const fs = require("fs");
-const path = require("path");
+const storage = require("../services/storage.service");
 
 exports.createReview = async (req, res) => {
   try {
@@ -12,7 +11,7 @@ exports.createReview = async (req, res) => {
 
     const { content } = req.body;
 
-    const imagePath = req.file ? `/images/${req.file.filename}` : null;
+    const imagePath = storage.toStoredImagePath(req.file);
 
     const review = await Reviews.create({
       content,
@@ -83,10 +82,9 @@ exports.updateReview = async (req, res) => {
 
     if (req.file) {
       if (review.image) {
-        const oldPath = path.join(__dirname, "../public", review.image);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        await storage.removeUpload(review.image);
       }
-      updateData.image = `/images/${req.file.filename}`;
+      updateData.image = storage.toStoredImagePath(req.file);
     }
 
     await review.update(updateData);
@@ -129,10 +127,7 @@ exports.deleteReview = async (req, res) => {
     }
 
     if (review.image) {
-      const imagePath = path.join(__dirname, "../public", review.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+      await storage.removeUpload(review.image);
     }
 
     const reviewOwnerId = review.userId;

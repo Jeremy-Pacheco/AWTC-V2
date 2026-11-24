@@ -4,6 +4,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { handleAuthFetch } from '../utils/auth';
+import { imageUrl } from '../utils/images';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -466,7 +467,7 @@ const Dashboard: React.FC = () => {
   if (!user) return <div className="p-6">{t('dashboard.loadingUser')}</div>;
 
   const profileImageUrl = user.profileImage
-    ? `${API_URL}/images/${user.profileImage}?v=${imageVersion}`
+    ? `${imageUrl(user.profileImage)}?v=${imageVersion}`
     : "/images/default-avatar.png";
 
   return (
@@ -633,7 +634,7 @@ const Dashboard: React.FC = () => {
                         <p className="text-sm text-gray-700 mb-2">{r.content}</p>
                         {r.image && (
                           <img 
-                            src={`${API_URL}${r.image}`} 
+                            src={imageUrl(r.image)} 
                             alt="Review" 
                             className="mt-2 max-w-xs rounded border"
                           />
@@ -700,7 +701,7 @@ const Dashboard: React.FC = () => {
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             {u.profileImage ? (
                               <img
-                                src={`${API_URL}/images/${u.profileImage}`}
+                                src={imageUrl(u.profileImage)}
                                 alt={u.name}
                                 className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                               />
