@@ -48,33 +48,10 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// Allowed origins come from CORS_ORIGINS / FRONTEND_URL (see config/cors.js)
+const { corsOriginCallback } = require('./config/cors');
 app.use(cors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      "http://localhost:5173",
-      "http://localhost:8080",
-      "https://localhost:5173",
-      "https://localhost:8443",
-      "http://209.97.187.131:5173",
-      "http://209.97.187.131:8080",
-      "https://209.97.187.131",
-      "http://awilltochange.me:5173",
-      "http://awilltochange.me:8080",
-      "https://awilltochange.me:5173",
-      "https://awilltochange.me:8433",
-      "http://awilltochange.me",
-      "https://awilltochange.me",
-      "https://awtc.com",
-      "https://www.awtc.com"
-    ];
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: corsOriginCallback,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],

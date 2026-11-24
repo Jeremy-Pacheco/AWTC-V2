@@ -2,6 +2,7 @@ const socketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
 const db = require('../models');
 const { getJwtSecret } = require('./secrets');
+const { corsOriginCallback } = require('./cors');
 const { sendNotificationToUser } = require('../controllers/subscription.controller');
 
 let io;
@@ -14,25 +15,8 @@ const userSockets = new Map(); // userId -> socketId
 function initializeSocketIO(server) {
   io = socketIO(server, {
     cors: {
-      origin: [
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "https://localhost:5173",
-        "https://localhost:8443",
-        "http://209.97.187.131:5173",
-        "http://209.97.187.131:8080",
-        "https://209.97.187.131",
-        "http://awilltochange.me:5173",
-        "http://awilltochange.me:8080",
-        "https://awilltochange.me:5173",
-        "https://awilltochange.me:8080",
-        "http://awilltochange.me",
-        "https://awilltochange.me",
-        "http://www.awilltochange.me",
-        "https://www.awilltochange.me",
-        "https://awtc.com",
-        "https://www.awtc.com"
-      ],
+      // Same allowed origins as the REST API (CORS_ORIGINS / FRONTEND_URL)
+      origin: corsOriginCallback,
       methods: ["GET", "POST"],
       credentials: true
     }
