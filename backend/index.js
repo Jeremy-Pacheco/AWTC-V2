@@ -16,6 +16,12 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
 const app = express();
 
+// Behind nginx the real client IP is in X-Forwarded-For. Trust exactly the
+// configured number of proxy hops (default 1) so rate limiting and secure
+// cookies work. Set TRUST_PROXY=0 when the app is exposed directly.
+const trustProxyHops = parseInt(process.env.TRUST_PROXY ?? '1', 10);
+app.set('trust proxy', Number.isFinite(trustProxyHops) ? trustProxyHops : 1);
+
 // Use morgan to log HTTP requests via winston
 const morganFormat = ":method :url :status :response-time ms";
 app.use(

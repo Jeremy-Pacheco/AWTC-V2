@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const sessionController = require('../controllers/session.controller');
+const { dashboardLoginLimiter } = require('../middlewares/rateLimit.middlewares');
 
 /**
  * @swagger
@@ -36,7 +37,7 @@ const sessionController = require('../controllers/session.controller');
  *         description: Invalid credentials
  */
 router.get('/login', sessionController.showLogin);
-router.post('/login', sessionController.login);
+router.post('/login', dashboardLoginLimiter, sessionController.login);
 
 /**
  * @swagger
