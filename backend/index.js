@@ -90,7 +90,18 @@ app.locals.safeJson = (value) =>
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 
-app.use(cookieParser());
+// Signed cookies (CSRF token of the EJS dashboard) use the session secret
+app.use(cookieParser(getSessionSecret()));
+
+// SESSION_COOKIE_SECURE=true on HTTPS hosts (Render, nginx + TLS) so cookies
+// are never sent over plain HTTP; "auto" follows req.secure (needs the trust
+// proxy setting above). Default false keeps local HTTP working.
+const sessionCookieSecure = (() => {
+  const value = (process.env.SESSION_COOKIE_SECURE || 'false').toLowerCase();
+  if (value === 'auto') return 'auto';
+  return value === 'true';
+})();
+app.set('sessionCookieSecure', sessionCookieSecure);
 
 app.use(session({
   name: process.env.SESSION_NAME || 'awtc.sid',
@@ -99,14 +110,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // SESSION_COOKIE_SECURE=true on HTTPS hosts (Render, nginx + TLS) so the
-    // cookie is never sent over plain HTTP; "auto" follows req.secure (needs
-    // the trust proxy setting above). Default false keeps local HTTP working.
-    secure: (() => {
-      const value = (process.env.SESSION_COOKIE_SECURE || 'false').toLowerCase();
-      if (value === 'auto') return 'auto';
-      return value === 'true';
-    })(),
+    secure: sessionCookieSecure,
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 //1 day
   }
@@ -146,14 +150,22 @@ async function safeFindAll(model) {
 // they were public and dumped users, contacts, private messages and push
 // subscriptions (see AUDIT_REPORT.md, SEC-02).
 
-// Auth middleware that supports Bearer/Basic headers (keeps API auth intact)
+// Two separate authentication chains (AUDIT_REPORT.md, SEC-13):
+//  - JSON API (/api/*): Bearer JWT only. The session cookie is ignored, so a
+//    cross-site request can never act with the dashboard session (no CSRF).
+//  - EJS dashboard (everything else): server-side session only, and every
+//    state-changing form carries a CSRF token (middlewares/csrf.middlewares.js).
 const authMiddleware = require("./middlewares/auth.middlewares");
-app.use(authMiddleware);
+const { provideCsrfToken } = require("./middlewares/csrf.middlewares");
+const isApiRequest = (req) => req.path === '/api' || req.path.startsWith('/api/');
 
-// If a session exists, attach the user to req.user so EJS routes can use it.
+app.use((req, res, next) => (isApiRequest(req) ? authMiddleware(req, res, next) : next()));
+
 app.use(async (req, res, next) => {
+  if (isApiRequest(req)) return next();
+  req.user = null;
   try {
-    if (!req.user && req.session && req.session.userId) {
+    if (req.session && req.session.userId) {
       const user = await db.User.findByPk(req.session.userId);
       req.user = user || null;
     }
@@ -163,6 +175,8 @@ app.use(async (req, res, next) => {
   }
   next();
 });
+
+app.use((req, res, next) => (isApiRequest(req) ? next() : provideCsrfToken(req, res, next)));
 
 db.sequelize
   .sync({ force: false })

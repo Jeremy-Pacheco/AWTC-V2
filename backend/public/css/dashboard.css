@@ -274,6 +274,21 @@ body {
   border-top: 1px solid #e2e8f0;
 }
 
+/* Logout is a POST form (CSRF protected): make its button look like the links */
+.logout-form {
+  margin: 0;
+}
+
+button.user-dropdown-item {
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .user-dropdown-item.logout i {
   color: #e53e3e;
 }

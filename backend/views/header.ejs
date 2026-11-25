@@ -74,10 +74,13 @@
                 <div class="user-dropdown-name"><%= currentUser.name %></div>
               <% } %>
             </div>
-            <a href="/logout" class="user-dropdown-item logout">
-              <i class="fas fa-sign-out-alt"></i>
-              <span>Log Out</span>
-            </a>
+            <form method="POST" action="/logout" class="logout-form">
+              <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" />
+              <button type="submit" class="user-dropdown-item logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Log Out</span>
+              </button>
+            </form>
           </div>
         </div>
       <% } else { %>

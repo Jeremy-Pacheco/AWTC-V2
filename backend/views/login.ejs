@@ -26,6 +26,7 @@
       <% } %>
 
       <form method="POST" action="/login">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" />
         <div class="form-group">
           <label for="email" class="form-label">Email</label>
           <input 
@@ -65,6 +66,7 @@
           <p class="demo-title"><i class="fas fa-flask"></i> Test site</p>
           <p class="demo-text">This is a public demo with fake data that is reset every night. Do not enter real personal data.</p>
           <form method="POST" action="/demo-login">
+            <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" />
             <button type="submit" class="demo-button">
               <i class="fas fa-user-shield"></i>
               Enter as demo admin
