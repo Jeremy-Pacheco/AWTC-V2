@@ -154,7 +154,7 @@ Guarda: Render redespliega solo.
 ## Limitaciones conocidas del plan gratuito
 
 - **Render se duerme** tras un rato sin tráfico: la primera petición puede tardar en torno a un minuto.
-- **Sesiones del panel EJS en memoria**: se pierden al reiniciar o redesplegar (hay que volver a entrar). Los JWT del frontend no se ven afectados.
+- Las sesiones del panel EJS se guardan en la tabla `Sessions` (`SESSION_STORE=database`, valor por defecto en producción), así que sobreviven a los reinicios de Render. El reset nocturno las borra.
 - Tras cada reset los IDs cambian: los usuarios con sesión abierta reciben un 401 y el frontend cierra su sesión.
 - Las cuentas demo son **compartidas**: cualquiera puede cambiar su nombre o foto hasta el siguiente reset.
 - Revisa periódicamente las cuotas de Aiven y Cloudinary.
@@ -175,6 +175,7 @@ Guarda: Render redespliega solo.
 | `CORS_ORIGINS` | recomendada | URL de Vercel | Orígenes permitidos (API + Socket.IO), separados por comas |
 | `TRUST_PROXY` | no | `1` | Saltos de proxy de confianza (IP real para el rate limit) |
 | `SESSION_COOKIE_SECURE` | recomendada | `true` | Cookie de sesión solo por HTTPS (`true`/`false`/`auto`) |
+| `SESSION_STORE` | no | `database` (por defecto en producción) | Dónde guardar las sesiones del panel: `database` o `memory` (solo desarrollo) |
 | `AUTH_PROVIDER` | sí | `local` | `local` (bcrypt en BD) o `ldap` |
 | `STORAGE_PROVIDER` | sí | `cloudinary` | `local` o `cloudinary` |
 | `CLOUDINARY_URL` | con Cloudinary | `cloudinary://…` | Credenciales de Cloudinary |
