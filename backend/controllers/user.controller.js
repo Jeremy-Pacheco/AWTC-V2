@@ -158,7 +158,8 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findByPk(id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    await user.destroy();
+    // Removes the DB row and, with LDAP, the directory entry (BUG-05)
+    await authService.deleteUser(user);
     res.json({ message: "User deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -287,8 +288,8 @@ exports.deleteOwnProfile = async (req, res) => {
     const user = req.user;
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-    // Optionally: remove related associations; for now, just destroy user record
-    await user.destroy();
+    // Removes the DB row and, with LDAP, the directory entry (BUG-05)
+    await authService.deleteUser(user);
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
     console.error('Error deleting own profile:', err);

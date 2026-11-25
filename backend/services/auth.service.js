@@ -107,12 +107,56 @@ async function registerUser({ name, email, password, role = 'volunteer' }) {
     return User.findByPk(user.id);
   }
 
-  // LDAP: validate the DB record first so a failure doesn't leave an orphan LDAP entry
+  // LDAP: validate the DB record first, then create the LDAP entry, then the
+  // DB row. If the DB write fails, the LDAP entry is removed again
+  // (compensation) so the email is not blocked forever (BUG-04).
   const user = User.build({ name, email, role });
   await user.validate();
-  await ldapUtil.addUser(name, email, password);
-  await user.save();
+  try {
+    await ldapUtil.addUser(name, email, password);
+  } catch (err) {
+    if (err && err.code === ldapUtil.LDAP_ENTRY_ALREADY_EXISTS) {
+      // Entry exists in LDAP but not in the DB: never overwrite it (it could be
+      // a directory-only account). An administrator has to resolve it.
+      console.warn(`[auth] LDAP entry already exists for an email with no DB user: ${email}`);
+      throw clientError('Email is already registered');
+    }
+    throw err;
+  }
+  try {
+    await user.save();
+  } catch (dbErr) {
+    await ldapUtil.deleteUser(email).catch((cleanupErr) => {
+      console.error(`[auth] Could not remove LDAP entry after failed registration of ${email}: ${cleanupErr.message}`);
+    });
+    throw dbErr;
+  }
   return User.findByPk(user.id);
+}
+
+/**
+ * Deletes a user from the database and, with LDAP, from the directory too
+ * (BUG-05), so a deleted account can no longer authenticate.
+ *
+ * With LDAP both deletions run inside one DB transaction: the row is deleted,
+ * then the LDAP entry; if LDAP fails the transaction is rolled back and
+ * nothing changes.
+ */
+async function deleteUser(user) {
+  if (getProvider() === 'local') {
+    await user.destroy();
+    return;
+  }
+  await User.sequelize.transaction(async (transaction) => {
+    await user.destroy({ transaction });
+    await ldapUtil.deleteUser(user.email);
+  });
+}
+
+function clientError(message) {
+  const err = new Error(message);
+  err.status = 400;
+  return err;
 }
 
 module.exports = {
@@ -120,5 +164,6 @@ module.exports = {
   validatePassword,
   authenticate,
   registerUser,
+  deleteUser,
   MIN_PASSWORD_LENGTH,
 };
