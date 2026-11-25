@@ -149,7 +149,7 @@ LDAP_BASE_DN=dc=awtc,dc=com
 LDAP_ADMIN_DN=cn=admin,dc=awtc,dc=com
 LDAP_ADMIN_PASSWORD=<hidden_for_security_reasons>
 ```
-   - Update `config/config.json` with your MySQL credentials
+   - Set your MySQL credentials (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`) in `.env.development.local` (git-ignored); `config/sequelize.config.js` reads them
 
 4. Run migrations and seeders:
 ```bash
@@ -208,7 +208,7 @@ for the three roles and a nightly data reset, follow [docs/deploy-demo.md](docs/
 AWTC/
 ├── backend/
 │   ├── config/                          # Configuration files
-│   │   ├── config.json                 # Database config
+│   │   ├── sequelize.config.js         # Database config (reads DB_* env vars)
 │   │   ├── db.config.js                # Sequelize connection
 │   │   ├── initAdmin.js                # Initial admin setup
 │   │   └── sequelize.config.js         # Sequelize CLI config
