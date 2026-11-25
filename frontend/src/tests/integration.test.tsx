@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AuthModal from '../components/AuthModal';
 import Projects from '../components/Projects';
@@ -14,11 +14,12 @@ const demoMocks = vi.hoisted(() => ({
 vi.mock('../utils/demo', () => demoMocks);
 
 describe('Integration Tests', () => {
-  let fetchSpy: any;
+  // Spy on fetch that accepts partial Response objects
+  let fetchSpy: MockInstance<(...args: Parameters<typeof fetch>) => Promise<Partial<Response>>>;
 
   beforeEach(() => {
     localStorage.clear();
-    fetchSpy = vi.spyOn(global, 'fetch');
+    fetchSpy = vi.spyOn(globalThis, 'fetch') as unknown as typeof fetchSpy;
     demoMocks.getDemoConfig.mockResolvedValue({ enabled: false });
     demoMocks.loginAsDemo.mockResolvedValue(undefined);
   });
@@ -144,7 +145,7 @@ describe('Integration Tests', () => {
       json: async () => mockProjects,
     });
 
-    (api.getProjects as any).mockImplementation(async () => {
+    vi.mocked(api.getProjects).mockImplementation(async () => {
       const token = localStorage.getItem('jwtToken');
       await fetch('http://localhost:8080/api/projects', {
         headers: {
@@ -187,7 +188,7 @@ describe('Integration Tests', () => {
       json: async () => ({ message: 'Unauthorized' }),
     });
 
-    (api.getProjects as any).mockImplementation(async () => {
+    vi.mocked(api.getProjects).mockImplementation(async () => {
       const response = await fetch('http://localhost:8080/api/projects');
       if (response.status === 401) {
         throw new Error('Unauthorized access - please login');
@@ -209,7 +210,7 @@ describe('Integration Tests', () => {
       json: async () => ({ message: 'Database connection failed' }),
     });
 
-    (api.getProjects as any).mockImplementation(async () => {
+    vi.mocked(api.getProjects).mockImplementation(async () => {
       const response = await fetch('http://localhost:8080/api/projects');
       if (response.status === 500) {
         throw new Error('Server error - please try again later');

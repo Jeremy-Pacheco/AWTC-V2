@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import Logo from "../assets/awtc-logo.png";
-import LogoWhite from "/awtc-logo-white.png";
+// Served from public/ (a plain URL: importing public files breaks vitest)
+const LogoWhite = "/awtc-logo-white.png";
 import User from "../assets/user-solid-full.svg";
 import UserWhite from "../assets/user-solid-white.svg";
 import Hamburger from "hamburger-react";
@@ -16,7 +17,6 @@ function NavBar() {
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.classList.contains("dark");
   });
@@ -26,18 +26,15 @@ function NavBar() {
   useEffect(() => {
     // Initialize
     setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-    setUserRole(localStorage.getItem("userRole"));
 
     const onStorage = (e: StorageEvent) => {
       if (e.key === "jwtToken" || e.key === "__auth_last_update" || e.key === "userRole") {
         setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-        setUserRole(localStorage.getItem("userRole"));
       }
     };
 
     const onAuthChanged = () => {
       setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-      setUserRole(localStorage.getItem("userRole"));
     };
 
     window.addEventListener("storage", onStorage);
@@ -80,11 +77,10 @@ function NavBar() {
     localStorage.removeItem("userName");
     localStorage.removeItem("userRole");
     setIsLoggedIn(false);
-    setUserRole(null);
 
     // Notify other components
     window.dispatchEvent(new CustomEvent("authChanged", { detail: { loggedIn: false } }));
-    try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch {}
+    try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch { /* storage unavailable (private mode) */ }
 
     navigate("/");
   };

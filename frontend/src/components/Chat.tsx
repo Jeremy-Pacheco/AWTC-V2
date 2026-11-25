@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { io, Socket } from 'socket.io-client';
@@ -56,7 +56,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
   const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedUserRef = useRef<User | null>(null);
   const shouldScrollRef = useRef<boolean>(true);
   
@@ -105,6 +105,42 @@ export default function Chat({ currentUser, token }: ChatProps) {
     selectedUserRef.current = selectedUser;
   }, [selectedUser]);
 
+  // Current route for the socket handlers (same reason as selectedUserRef)
+  const pathnameRef = useRef(location.pathname);
+  useEffect(() => {
+    pathnameRef.current = location.pathname;
+  }, [location.pathname]);
+
+  // Load conversations
+  const loadConversations = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/messages/conversations`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setConversations(data);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    }
+  }, [token]);
+
+  // Load available users
+  const loadAvailableUsers = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/messages/available-users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await response.json();
+      setAvailableUsers(data);
+    } catch (error) {
+      console.error('Error loading available users:', error);
+    }
+  }, [token]);
+
   // Initialize Socket.IO
   useEffect(() => {
     // The server derives the user's identity from the JWT; never send userId/role.
@@ -144,7 +180,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
       console.log('¿Es conversación actual?', currentSelectedUser?.id === otherUserId);
       
       // Show notification if message is for current user and they're not viewing it
-      const isOnMessagesPage = location.pathname === '/messages';
+      const isOnMessagesPage = pathnameRef.current === '/messages';
       const isViewingConversation = currentSelectedUser?.id === otherUserId;
       
       if (message.receiverId === currentUser.id && (!isOnMessagesPage || !isViewingConversation)) {
@@ -204,13 +240,15 @@ export default function Chat({ currentUser, token }: ChatProps) {
     });
 
     newSocket.on('user_typing', (data) => {
-      if (selectedUser && data.userId === selectedUser.id) {
+      const openConversation = selectedUserRef.current;
+      if (openConversation && data.userId === openConversation.id) {
         setIsTyping(true);
       }
     });
 
     newSocket.on('user_stop_typing', (data) => {
-      if (selectedUser && data.userId === selectedUser.id) {
+      const openConversation = selectedUserRef.current;
+      if (openConversation && data.userId === openConversation.id) {
         setIsTyping(false);
       }
     });
@@ -225,7 +263,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
     return () => {
       newSocket.close();
     };
-  }, [currentUser.id, currentUser.role]);
+  }, [currentUser.id, currentUser.role, loadConversations]);
 
   // Notify backend about current page when location changes
   useEffect(() => {
@@ -234,35 +272,6 @@ export default function Chat({ currentUser, token }: ChatProps) {
     }
   }, [location.pathname, socket]);
 
-  // Load conversations
-  const loadConversations = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/messages/conversations`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      setConversations(data);
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    }
-  };
-
-  // Load available users
-  const loadAvailableUsers = async () => {
-    try {
-      const response = await fetch(`${API_URL}/api/messages/available-users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      setAvailableUsers(data);
-    } catch (error) {
-      console.error('Error loading available users:', error);
-    }
-  };
 
   // Load message history with a user
   const loadMessageHistory = async (userId: number) => {
@@ -289,7 +298,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
   useEffect(() => {
     loadConversations();
     loadAvailableUsers();
-  }, []);
+  }, [loadConversations, loadAvailableUsers]);
 
   // Smart auto-scroll: only if user is near bottom or sent a message
   useEffect(() => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import type { Project } from '../types/api';
 import AuthModal from "../components/AuthModal";
 import HeroImage from "../components/HeroImage";
 import AlertModal from "../components/AlertModal";
@@ -15,13 +16,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 function Carousel() {
   const { t } = useTranslation();
   const [current, setCurrent] = useState<number>(0);
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/projects`)
       .then((res) => res.json())
-      .then((data: any[]) => {
+      .then((data: Project[]) => {
         // Take exactly 3 projects with images
         const projectsWithImages = data.filter((p) => p.filename).slice(0, 3);
 

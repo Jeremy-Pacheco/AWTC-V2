@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { errorMessage } from '../types/api';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import HeroImage from "../components/HeroImage";
@@ -108,7 +109,7 @@ const AboutUs: React.FC = () => {
                   e.preventDefault();
                   const form = e.target as HTMLFormElement;
                   const formData = new FormData(form);
-                  const body = Object.fromEntries(formData as any);
+                  const body = Object.fromEntries(Array.from(formData.entries(), ([key, value]) => [key, String(value)]));
 
                   try {
                     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -125,8 +126,8 @@ const AboutUs: React.FC = () => {
                     setAlertMessage(t('aboutUs.messageSent'));
                     setAlertOpen(true);
                     form.reset();
-                  } catch (err: any) {
-                    setAlertMessage(t('aboutUs.messageFailed') + (err.message || err));
+                  } catch (err) {
+                    setAlertMessage(t('aboutUs.messageFailed') + errorMessage(err, String(err)));
                     setAlertOpen(true);
                   }
                 }}

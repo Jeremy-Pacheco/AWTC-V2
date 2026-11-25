@@ -10,14 +10,14 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
  * @param {string} base64String - Base64 encoded string
  * @returns {Uint8Array} Converted array
  */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
+    .replace(/-/g, '+')
     .replace(/_/g, '/');
 
   const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+  const outputArray = new Uint8Array(new ArrayBuffer(rawData.length));
 
   for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);
@@ -169,7 +169,8 @@ export async function subscribeUserToPush(token: string): Promise<PushSubscripti
         });
 
         console.log('New push subscription created');
-      } catch (pushError: any) {
+      } catch (caught) {
+        const pushError = caught as DOMException;
         // Handle specific push subscription errors
         if (pushError.name === 'AbortError' || pushError.message?.includes('push service error') || pushError.name === 'NotAllowedError') {
           console.warn('⚠️ Push subscription failed');

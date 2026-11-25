@@ -2,8 +2,6 @@
  * Authentication utility functions
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
 /**
  * Clears all authentication data from localStorage
  */
@@ -18,7 +16,9 @@ export function clearAuth() {
   window.dispatchEvent(new CustomEvent('authChanged', { detail: { loggedIn: false } }));
   try {
     localStorage.setItem('__auth_last_update', Date.now().toString());
-  } catch {}
+  } catch {
+    /* storage unavailable (private mode) */
+  }
 }
 
 /**

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import Logo from "../assets/awtc-logo.png";
-import LogoWhite from "/awtc-logo-white.png";
+// Served from public/ (a plain URL: importing public files breaks vitest)
+const LogoWhite = "/awtc-logo-white.png";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
