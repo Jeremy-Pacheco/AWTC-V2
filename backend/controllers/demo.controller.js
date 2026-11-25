@@ -1,6 +1,7 @@
 const { User } = require('../models');
 const demo = require('../services/demo.service');
 const utils = require('../utils/utils');
+const tokenService = require('../services/token.service');
 const logger = require('../utils/logger');
 
 /** Loads the demo account for `role`, or null when the role/account is unknown. */
@@ -33,7 +34,7 @@ exports.login = async (req, res) => {
     res.json({
       message: 'Login successful',
       user: utils.getCleanUser(user),
-      access_token: utils.generateToken(user),
+      access_token: await tokenService.startSession(req, res, user),
     });
   } catch (err) {
     console.error('Demo login error:', err.message);

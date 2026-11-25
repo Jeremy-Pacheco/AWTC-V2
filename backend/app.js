@@ -68,7 +68,8 @@ const { corsOptionsDelegate } = require('./config/cors');
 app.use(cors(corsOptionsDelegate({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  // X-Requested-With guards /api/auth/refresh and /logout against CSRF
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   optionsSuccessStatus: 204
 })));
 
@@ -201,6 +202,7 @@ const externalRoutes = require("./routes/external.routes");
 const messageRoutes = require("./routes/message.routes");
 const subscriptionRoutes = require("./routes/subscription.routes");
 const demoRoutes = require("./routes/demo.routes");
+const authRoutes = require("./routes/auth.routes");
 
 app.use("/api/projects", projectRoutes);
 app.use("/api/reviews", reviewRoutes);
@@ -211,6 +213,7 @@ app.use("/api/external", externalRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/demo", demoRoutes);
+app.use("/api/auth", authRoutes);
 app.use('/', sessionRoutes);
 
 // Simple EJS dashboard routes (demo)

@@ -5,6 +5,10 @@ jest.mock('../models', () => ({
   User: { findByPk: jest.fn(), findOne: jest.fn() },
 }));
 jest.mock('../utils/logger', () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn() }));
+// The demo login starts a normal session (refresh cookie + access token)
+jest.mock('../services/token.service', () => ({
+  startSession: jest.fn(async (req, res, user) => require('../utils/utils').generateToken(user)),
+}));
 
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
@@ -157,6 +161,7 @@ describe('Demo login', () => {
     const payload = jwt.verify(res.data.access_token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     expect(payload.id).toBe(2);
     expect(payload.role).toBe('coordinator');
+    expect(require('../services/token.service').startSession).toHaveBeenCalled();
   });
 
   it('EJS demo login returns 404 when demo mode is off', async () => {

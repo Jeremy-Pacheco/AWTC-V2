@@ -11,7 +11,9 @@ function generateToken(user) {
     role: user.role,
   };
 
-  return jwt.sign(payload, getJwtSecret(), { algorithm: "HS256", expiresIn: "24h" });
+  // Short-lived access token (SEC-18); sessions are renewed with the refresh
+  // cookie (services/token.service.js)
+  return jwt.sign(payload, getJwtSecret(), { algorithm: "HS256", expiresIn: process.env.ACCESS_TOKEN_TTL || "15m" });
 }
 
 function getCleanUser(user) {

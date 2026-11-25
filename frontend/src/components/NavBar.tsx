@@ -10,7 +10,7 @@ import AuthModal from "./AuthModal";
 import DarkModeToggle from "./DarkModeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "react-i18next";
-import { clearAuth } from "../utils/auth";
+import { logoutOnServer } from "../utils/auth";
 
 function NavBar() {
   const { t } = useTranslation();
@@ -74,9 +74,9 @@ function NavBar() {
   };
 
   const handleLogout = () => {
-    // Single logout path: removes every stored auth item (including email
-    // and profile image, BUG-09) and notifies the other components
-    clearAuth();
+    // Single logout path: revokes the refresh token on the server (SEC-18),
+    // then removes every stored auth item (BUG-09) and notifies the app
+    void logoutOnServer();
     setIsLoggedIn(false);
     navigate("/");
   };

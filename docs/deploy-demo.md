@@ -158,6 +158,7 @@ Guarda: Render redespliega solo.
 - Tras cada reset los IDs cambian: los usuarios con sesión abierta reciben un 401 y el frontend cierra su sesión.
 - Las cuentas demo son **compartidas**: cualquiera puede cambiar su nombre o foto hasta el siguiente reset.
 - Revisa periódicamente las cuotas de Aiven y Cloudinary.
+- **Sesiones del frontend**: el token de acceso dura 15 minutos y se renueva con una cookie `httpOnly` del dominio de Render. Como la web está en Vercel, para el navegador es una cookie de terceros: Safari (y Chrome si el usuario bloquea cookies de terceros) no la envía, así que esos usuarios tendrán que volver a iniciar sesión cuando caduque el token. Para evitarlo, sirve la API bajo el mismo dominio que la web (dominio propio o un *rewrite* `/api` en Vercel).
 
 ## Tabla de variables
 
@@ -176,6 +177,10 @@ Guarda: Render redespliega solo.
 | `TRUST_PROXY` | no | `1` | Saltos de proxy de confianza (IP real para el rate limit) |
 | `SESSION_COOKIE_SECURE` | recomendada | `true` | Cookie de sesión solo por HTTPS (`true`/`false`/`auto`) |
 | `SESSION_STORE` | no | `database` (por defecto en producción) | Dónde guardar las sesiones del panel: `database` o `memory` (solo desarrollo) |
+| `ACCESS_TOKEN_TTL` | no | `15m` | Duración del token de acceso (formato de `jsonwebtoken`) |
+| `REFRESH_TOKEN_TTL_DAYS` | no | `7` | Duración del refresh token (cookie `httpOnly`), de 1 a 90 días |
+| `REFRESH_COOKIE_SAMESITE` | demo | `none` | `none` si frontend y API están en sitios distintos (Vercel + Render); `lax` si comparten dominio |
+| `REFRESH_RATE_LIMIT` | no | `120` | Renovaciones de sesión por IP cada 15 minutos |
 | `AUTH_PROVIDER` | sí | `local` | `local` (bcrypt en BD) o `ldap` |
 | `STORAGE_PROVIDER` | sí | `cloudinary` | `local` o `cloudinary` |
 | `CLOUDINARY_URL` | con Cloudinary | `cloudinary://…` | Credenciales de Cloudinary |
