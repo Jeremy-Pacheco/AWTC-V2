@@ -15,6 +15,8 @@ import Terms from "./pages/Terms";
 import Messages from "./pages/Messages";
 import { subscribeUserToPush, isNotificationSupported } from "./services/notificationService";
 import { initAuthCheck, startTokenRefresh } from "./utils/auth";
+import AuthProvider from "./context/AuthProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
 import './i18n';
 
 //TODO: Import other pages when you have them
@@ -68,6 +70,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <AuthProvider>
       <div className="flex flex-col min-h-screen">
         <NavBar />
         <DemoBanner />
@@ -81,13 +84,14 @@ function App() {
             <Route path="/moreinfo" element={<MoreInfo />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/messages" element={<Messages />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute roles={["admin", "coordinator"]}><Messages /></ProtectedRoute>} />
           </Routes>
         </main>
         <Footer />
         <FloatingMessageButton />
       </div>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

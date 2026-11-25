@@ -30,9 +30,8 @@ export default function Messages() {
     }
 
     try {
-      // Verify that user is admin or coordinator
+      // Role check is done by <ProtectedRoute> (App.tsx); kept as a fallback
       if (userRole !== 'admin' && userRole !== 'coordinator') {
-        alert(t('chat.accessDenied'));
         navigate('/');
         return;
       }
