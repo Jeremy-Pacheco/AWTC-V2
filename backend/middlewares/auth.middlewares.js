@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 const { getJwtSecret } = require("../config/secrets");
+const { parseBasicAuth } = require("../utils/basicAuth");
 
 module.exports = async (req, res, next) => {
   try {
@@ -14,16 +15,15 @@ module.exports = async (req, res, next) => {
 
     // Basic Auth
     if (authHeader.startsWith("Basic ")) {
-      const base64Credentials = authHeader.split(" ")[1];
-      const credentials = Buffer.from(base64Credentials, "base64").toString("ascii");
-      const [email, password] = credentials.split(":");
-
-      if (!email || !password)
+      // UTF-8 and split on the first ":" only (BUG-03, utils/basicAuth.js):
+      // the old ASCII decoding corrupted accents and cut passwords at ":"
+      const credentials = parseBasicAuth(authHeader);
+      if (!credentials)
         return res.status(400).json({ message: "Basic auth malformed" });
 
       req.body = req.body || {};
-      req.body.email = email;
-      req.body.password = password;
+      req.body.email = credentials.email;
+      req.body.password = credentials.password;
 
       return next();
     }

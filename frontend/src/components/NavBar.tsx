@@ -10,6 +10,7 @@ import AuthModal from "./AuthModal";
 import DarkModeToggle from "./DarkModeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "react-i18next";
+import { clearAuth } from "../utils/auth";
 
 function NavBar() {
   const { t } = useTranslation();
@@ -73,15 +74,10 @@ function NavBar() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("jwtToken");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userRole");
+    // Single logout path: removes every stored auth item (including email
+    // and profile image, BUG-09) and notifies the other components
+    clearAuth();
     setIsLoggedIn(false);
-
-    // Notify other components
-    window.dispatchEvent(new CustomEvent("authChanged", { detail: { loggedIn: false } }));
-    try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch { /* storage unavailable (private mode) */ }
-
     navigate("/");
   };
 

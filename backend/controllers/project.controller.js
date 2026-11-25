@@ -208,54 +208,66 @@ exports.deleteProject = async (req, res) => {
   }
 };
 
+/**
+ * Enrols a volunteer atomically (BUG-06). The project row is locked
+ * (SELECT ... FOR UPDATE) inside a transaction, so concurrent enrolments for
+ * the same project are serialised and can never exceed its capacity.
+ * Only accepted registrations count; a project without capacity is unlimited.
+ *
+ * Resolves to { status: 'created' | 'not_found' | 'banned' | 'exists' | 'full', project, enrolled }.
+ */
+async function enrollVolunteer(projectId, userId) {
+  return db.sequelize.transaction(async (transaction) => {
+    const project = await Project.findByPk(projectId, { transaction, lock: transaction.LOCK.UPDATE });
+    if (!project) return { status: 'not_found' };
+
+    const ban = await db.UserProjectBan.findOne({ where: { userId, projectId }, transaction });
+    if (ban) return { status: 'banned', project };
+
+    const existing = await db.UserProject.findOne({ where: { userId, projectId }, transaction });
+    if (existing) return { status: 'exists', project };
+
+    const enrolled = await db.UserProject.count({ where: { projectId, status: 'accepted' }, transaction });
+    if (project.capacity != null && enrolled >= project.capacity) {
+      return { status: 'full', project, enrolled };
+    }
+
+    const registration = await db.UserProject.create({ userId, projectId, status: 'accepted' }, { transaction });
+    return { status: 'created', project, enrolled: enrolled + 1, registration };
+  });
+}
+
+/** Live volunteer counter for the volunteering page (never fails the request). */
+function emitVolunteerCount(project, enrolled) {
+  try {
+    getVolunteeringNS().emit('volunteer_count_updated', {
+      projectId: project.id,
+      enrolled,
+      capacity: project.capacity
+    });
+    logger.info(`Volunteer count updated for project ${project.id}: ${enrolled}/${project.capacity}`);
+  } catch (socketError) {
+    logger.error(`Error emitting WebSocket event: ${socketError.message}`);
+  }
+}
+
 // Register current authenticated user to the project (self-registration)
 exports.registerUser = async (req, res) => {
   try {
     const projectId = parseInt(req.params.id, 10);
     if (!req.user) return res.status(401).json({ message: 'Authentication required' });
 
-    const project = await Project.findByPk(projectId);
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
-    const userId = req.user.id;
-
-    // Prevent registration if user is banned from this project
-    const existingBan = await db.UserProjectBan.findOne({ where: { userId, projectId } });
-    if (existingBan) return res.status(403).json({ message: 'Cannot register to this project' });
-
-    // Check if project has reached capacity
-    const volunteerCount = await db.UserProject.count({
-      where: { projectId: projectId }
-    });
-
-    if (volunteerCount >= project.capacity) {
-      return res.status(400).json({ message: 'Project is at full capacity' });
+    const result = await enrollVolunteer(projectId, req.user.id);
+    switch (result.status) {
+      case 'not_found': return res.status(404).json({ message: 'Project not found' });
+      case 'banned': return res.status(403).json({ message: 'Cannot register to this project' });
+      case 'exists': return res.status(409).json({ message: 'Already registered' });
+      case 'full': return res.status(400).json({ message: 'Project is at full capacity' });
+      default: break;
     }
 
-    // Check if subscription already exists
-    const [row, created] = await db.UserProject.findOrCreate({
-      where: { userId, projectId },
-      defaults: { status: 'accepted' }
-    });
-
-    if (!created) return res.status(409).json({ message: 'Already registered' });
-
-    // Emit WebSocket event to update volunteer count
-    try {
-      const updatedVolunteerCount = volunteerCount + 1;
-      const volunteeringNS = getVolunteeringNS();
-      volunteeringNS.emit('volunteer_count_updated', {
-        projectId: projectId,
-        enrolled: updatedVolunteerCount,
-        capacity: project.capacity
-      });
-      logger.info(`Volunteer count updated for project ${projectId}: ${updatedVolunteerCount}/${project.capacity}`);
-    } catch (socketError) {
-      logger.error(`Error emitting WebSocket event: ${socketError.message}`);
-      // Don't fail the request if WebSocket fails
-    }
-
-    return res.status(200).json({ message: 'Registered to project', subscription: row });
+    emitVolunteerCount(result.project, result.enrolled);
+    return res.status(200).json({ message: 'Registered to project', subscription: result.registration });
   } catch (err) {
     console.error('Register user error', err.message);
     return res.status(500).json({ message: 'Error registering user to project' });
@@ -297,41 +309,18 @@ exports.addVolunteer = async (req, res) => {
   try {
     const projectId = parseInt(req.params.id, 10);
     const volunteerId = parseInt(req.params.userId, 10);
-    const project = await Project.findByPk(projectId);
-    if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    // Do not add if a ban exists
-    const existingBan = await db.UserProjectBan.findOne({ where: { userId: volunteerId, projectId } });
-    if (existingBan) return res.status(403).json({ message: 'User is banned from this project' });
-
-    // Check if project has reached capacity
-    const volunteerCount = await db.UserProject.count({
-      where: { projectId: projectId }
-    });
-
-    if (volunteerCount >= project.capacity) {
-      return res.status(400).json({ message: 'Project is at full capacity' });
+    const result = await enrollVolunteer(projectId, volunteerId);
+    switch (result.status) {
+      case 'not_found': return res.status(404).json({ message: 'Project not found' });
+      case 'banned': return res.status(403).json({ message: 'User is banned from this project' });
+      case 'exists': return res.status(409).json({ message: 'User already registered to this project' });
+      case 'full': return res.status(400).json({ message: 'Project is at full capacity' });
+      default: break;
     }
 
-    const [row, created] = await db.UserProject.findOrCreate({ where: { userId: volunteerId, projectId }, defaults: { status: 'accepted' } });
-    if (!created) return res.status(409).json({ message: 'User already registered to this project' });
-
-    // Emit WebSocket event to update volunteer count
-    try {
-      const updatedVolunteerCount = volunteerCount + 1;
-      const volunteeringNS = getVolunteeringNS();
-      volunteeringNS.emit('volunteer_count_updated', {
-        projectId: projectId,
-        enrolled: updatedVolunteerCount,
-        capacity: project.capacity
-      });
-      logger.info(`Volunteer count updated for project ${projectId}: ${updatedVolunteerCount}/${project.capacity}`);
-    } catch (socketError) {
-      logger.error(`Error emitting WebSocket event: ${socketError.message}`);
-      // Don't fail the request if WebSocket fails
-    }
-
-    return res.status(200).json({ message: 'Volunteer added to project', subscription: row });
+    emitVolunteerCount(result.project, result.enrolled);
+    return res.status(200).json({ message: 'Volunteer added to project', subscription: result.registration });
   } catch (err) {
     console.error('Add volunteer error', err.message);
     return res.status(500).json({ message: 'Error adding volunteer to project' });
@@ -432,3 +421,4 @@ exports.unbanVolunteer = async (req, res) => {
 
 // Exposed for tests
 exports._resolveOwnerId = resolveOwnerId;
+exports._enrollVolunteer = enrollVolunteer;

@@ -1,6 +1,7 @@
 const { User } = require("../models");
 const utils = require("../utils/utils");
 const authService = require("../services/auth.service");
+const { parseBasicAuth } = require("../utils/basicAuth");
 
 // Maps validation errors from the auth service / Sequelize to a 400 response
 function sendRegistrationError(res, error, fallbackMessage) {
@@ -55,14 +56,9 @@ exports.login = async (req, res) => {
     // Check for Basic Auth header (email:password in base64)
     const authHeader = req.headers["authorization"];
     if (authHeader && authHeader.startsWith("Basic ")) {
-      const base64Credentials = authHeader.split(" ")[1] || "";
-      // UTF-8 (not ASCII) and split on the FIRST colon only: passwords may contain ':'
-      const credentials = Buffer.from(base64Credentials, "base64").toString("utf8");
-      const separator = credentials.indexOf(":");
-      if (separator > 0) {
-        email = credentials.slice(0, separator);
-        password = credentials.slice(separator + 1);
-      }
+      // UTF-8 and split on the first ":" only (utils/basicAuth.js)
+      const credentials = parseBasicAuth(authHeader);
+      if (credentials) ({ email, password } = credentials);
     }
     // Check for JSON body (email and password in request body)
     else if (req.body && req.body.email && req.body.password) {

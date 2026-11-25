@@ -109,7 +109,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
       window.dispatchEvent(new CustomEvent("authChanged", { detail: { loggedIn: true } }));
       try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch { /* storage unavailable (private mode) */ }
 
-      setCurrentMode("login");
+      // The new account is already signed in (token stored above): close the
+      // modal instead of showing the login form again (BUG-08)
+      onClose();
     } catch (err) {
       setAlertMessage(errorMessage(err));
       setAlertOpen(true);
