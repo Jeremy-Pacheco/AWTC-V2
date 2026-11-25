@@ -4,6 +4,8 @@ const controller = require('../controllers/contact.controller');
 const authMiddleware = require('../middlewares/auth.middlewares');
 const { isAdmin } = require('../middlewares/role.middlewares');
 const { contactLimiter } = require('../middlewares/rateLimit.middlewares');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 /**
  * @swagger
@@ -39,7 +41,7 @@ const { contactLimiter } = require('../middlewares/rateLimit.middlewares');
  *               items:
  *                 $ref: '#/components/schemas/Contact'
  */
-router.post('/', contactLimiter, controller.create);
+router.post('/', contactLimiter, validate({ body: schemas.contactCreate }), controller.create);
 router.get('/', authMiddleware, isAdmin, controller.findAll);
 
 /**
@@ -98,8 +100,8 @@ router.get('/', authMiddleware, isAdmin, controller.findAll);
  *       404:
  *         description: Contact not found
  */
-router.get('/:id', authMiddleware, isAdmin, controller.findOne);
-router.put('/:id', authMiddleware, isAdmin, controller.update);
-router.delete('/:id', authMiddleware, isAdmin, controller.delete);
+router.get('/:id', authMiddleware, isAdmin, validate({ params: schemas.idParams }), controller.findOne);
+router.put('/:id', authMiddleware, isAdmin, validate({ params: schemas.idParams, body: schemas.contactUpdate }), controller.update);
+router.delete('/:id', authMiddleware, isAdmin, validate({ params: schemas.idParams }), controller.delete);
 
 module.exports = router;

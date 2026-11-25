@@ -12,6 +12,8 @@ const { persistUpload } = require('../services/storage.service');
 const requireAuth = require('../middlewares/requireAuth');
 const { loginLimiter, signupLimiter } = require('../middlewares/rateLimit.middlewares');
 const { protectDemoTarget, protectDemoSelf } = require('../middlewares/demo.middlewares');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 // Multer error handler middleware
 const handleMulterError = (err, req, res, next) => {
@@ -66,6 +68,7 @@ router.put(
   requireAuth,
   upload.single('file'),
   handleMulterError,
+  validate({ body: schemas.profileUpdate }),
   persistUpload('profiles'),
   userCtrl.updateOwnProfile
 );
@@ -86,9 +89,9 @@ router.get('/dashboard/projects', authMiddleware, requireAuth, userCtrl.getOwnPr
 router.get('/dashboard/bans', authMiddleware, requireAuth, userCtrl.getOwnBans);
 
 // Admin or coordinator can list another user's projects
-router.get('/:id/projects', authMiddleware, isAdminOrCoordinator, userCtrl.getUserProjects);
+router.get('/:id/projects', authMiddleware, isAdminOrCoordinator, validate({ params: schemas.idParams }), userCtrl.getUserProjects);
 // Get bans for specific user (admin or coordinator)
-router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, userCtrl.getUserBans);
+router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, validate({ params: schemas.idParams }), userCtrl.getUserBans);
 
 /**
  * @swagger
@@ -140,7 +143,7 @@ router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, userCtrl.getUserBa
  *       400:
  *         description: Bad request
  */
-router.post('/signup', signupLimiter, userCtrl.createUser);
+router.post('/signup', signupLimiter, validate({ body: schemas.signup }), userCtrl.createUser);
 
 /**
  * @swagger
@@ -194,7 +197,7 @@ router.post('/login', loginLimiter, userCtrl.login);
  *       403:
  *         description: Forbidden
  */
-router.post('/coordinator', authMiddleware, isAdmin, userCtrl.createCoordinator);
+router.post('/coordinator', authMiddleware, isAdmin, validate({ body: schemas.coordinatorCreate }), userCtrl.createCoordinator);
 
 /**
  * @swagger
@@ -250,7 +253,7 @@ router.get('/', authMiddleware, isAdminOrCoordinator, userCtrl.getUsers);
  *       401:
  *         description: Unauthorized
  */
-router.put('/:id/role', authMiddleware, isAdmin, protectDemoTarget, userCtrl.updateUserRole);
+router.put('/:id/role', authMiddleware, isAdmin, validate({ params: schemas.idParams, body: schemas.roleUpdate }), protectDemoTarget, userCtrl.updateUserRole);
 
 /**
  * @swagger
@@ -272,6 +275,6 @@ router.put('/:id/role', authMiddleware, isAdmin, protectDemoTarget, userCtrl.upd
  *       401:
  *         description: Unauthorized
  */
-router.delete('/:id', authMiddleware, isAdmin, protectDemoTarget, userCtrl.deleteUser);
+router.delete('/:id', authMiddleware, isAdmin, validate({ params: schemas.idParams }), protectDemoTarget, userCtrl.deleteUser);
 
 module.exports = router;

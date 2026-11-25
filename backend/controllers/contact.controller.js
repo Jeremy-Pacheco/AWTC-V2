@@ -40,6 +40,7 @@ exports.update = async (req, res) => {
   try {
     const contact = await Contact.findByPk(req.params.id);
     if (!contact) return res.status(404).json({ message: 'Not found' });
+    // Only { read } passes validation (validation/schemas.js -> contactUpdate)
     await contact.update(req.body);
     return res.json(contact);
   } catch (err) {

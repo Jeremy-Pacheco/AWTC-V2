@@ -7,6 +7,8 @@ const authMiddleware = require("../middlewares/auth.middlewares");
 const upload = require("../multer/upload");
 const { handleUploadError } = upload;
 const { persistUpload } = require("../services/storage.service");
+const { validate } = require("../middlewares/validate.middlewares");
+const schemas = require("../validation/schemas");
 
 /**
  * @swagger
@@ -62,6 +64,7 @@ router.post(
   authMiddleware,
   upload.single("image"),
   handleUploadError,
+  validate({ body: schemas.reviewCreate }),
   persistUpload("reviews"),
   reviewsController.createReview
 );
@@ -132,10 +135,11 @@ router.put(
   authMiddleware,
   upload.single("image"),
   handleUploadError,
+  validate({ params: schemas.idParams, body: schemas.reviewUpdate }),
   persistUpload("reviews"),
   reviewsController.updateReview
 );
 
-router.delete("/:id", authMiddleware, reviewsController.deleteReview);
+router.delete("/:id", authMiddleware, validate({ params: schemas.idParams }), reviewsController.deleteReview);
 
 module.exports = router;

@@ -87,7 +87,7 @@ async function wipeAndSeed(db) {
     const projects = await db.Project.bulkCreate(
       data.projects.map(({ category, startInDays, durationDays, ...p }) => ({
         ...p,
-        status: 'Active',
+        status: 'active',
         start_date: new Date(now + startInDays * DAY),
         end_date: new Date(now + (startInDays + durationDays) * DAY),
         categoryId: categoryByName.get(category).id,

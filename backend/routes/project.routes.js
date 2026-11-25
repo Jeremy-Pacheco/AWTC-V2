@@ -6,6 +6,8 @@ const projectController = require('../controllers/project.controller');
 const requireAuth = require('../middlewares/requireAuth');
 const authMiddleware = require('../middlewares/auth.middlewares');
 const roleMid = require('../middlewares/role.middlewares');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 /**
  * @swagger
@@ -42,7 +44,7 @@ const roleMid = require('../middlewares/role.middlewares');
  *                 $ref: '#/components/schemas/Project'
  */
 // Only coordinators or admins can create projects
-router.post('/', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, persistUpload('projects'), projectController.createProject);
+router.post('/', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, validate({ body: schemas.projectCreate }), persistUpload('projects'), projectController.createProject);
 router.get('/', projectController.getAllProjects);
 
 /**
@@ -67,7 +69,7 @@ router.get('/', projectController.getAllProjects);
  *       404:
  *         description: Project not found
  */
-router.post('/:id/register', requireAuth, projectController.registerUser);
+router.post('/:id/register', requireAuth, validate({ params: schemas.idParams }), projectController.registerUser);
 
 /**
  * @swagger
@@ -91,7 +93,7 @@ router.post('/:id/register', requireAuth, projectController.registerUser);
  *       404:
  *         description: Project not found
  */
-router.post('/:id/unregister', requireAuth, projectController.unregisterUser);
+router.post('/:id/unregister', requireAuth, validate({ params: schemas.idParams }), projectController.unregisterUser);
 
 /**
  * @swagger
@@ -119,7 +121,7 @@ router.post('/:id/unregister', requireAuth, projectController.unregisterUser);
  *       401:
  *         description: Unauthorized
  */
-router.get('/:id/volunteers', roleMid.isAdminOrCoordinator, projectController.getVolunteers);
+router.get('/:id/volunteers', roleMid.isAdminOrCoordinator, validate({ params: schemas.idParams }), projectController.getVolunteers);
 
 /**
  * @swagger
@@ -146,7 +148,7 @@ router.get('/:id/volunteers', roleMid.isAdminOrCoordinator, projectController.ge
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/volunteers/:userId/accept', roleMid.isAdminOrCoordinator, projectController.acceptVolunteer);
+router.post('/:id/volunteers/:userId/accept', roleMid.isAdminOrCoordinator, validate({ params: schemas.projectUserParams }), projectController.acceptVolunteer);
 
 /**
  * @swagger
@@ -173,7 +175,7 @@ router.post('/:id/volunteers/:userId/accept', roleMid.isAdminOrCoordinator, proj
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/volunteers/:userId/reject', roleMid.isAdminOrCoordinator, projectController.rejectVolunteer);
+router.post('/:id/volunteers/:userId/reject', roleMid.isAdminOrCoordinator, validate({ params: schemas.projectUserParams }), projectController.rejectVolunteer);
 
 /**
  * @swagger
@@ -200,7 +202,7 @@ router.post('/:id/volunteers/:userId/reject', roleMid.isAdminOrCoordinator, proj
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/volunteers/:userId', roleMid.isAdminOrCoordinator, projectController.addVolunteer);
+router.post('/:id/volunteers/:userId', roleMid.isAdminOrCoordinator, validate({ params: schemas.projectUserParams }), projectController.addVolunteer);
 
 /**
  * @swagger
@@ -227,7 +229,7 @@ router.post('/:id/volunteers/:userId', roleMid.isAdminOrCoordinator, projectCont
  *       401:
  *         description: Unauthorized
  */
-router.post('/:id/volunteers/:userId/unban', roleMid.isAdminOrCoordinator, projectController.unbanVolunteer);
+router.post('/:id/volunteers/:userId/unban', roleMid.isAdminOrCoordinator, validate({ params: schemas.projectUserParams }), projectController.unbanVolunteer);
 
 /**
  * @swagger
@@ -267,7 +269,7 @@ router.post('/:id/volunteers/:userId/unban', roleMid.isAdminOrCoordinator, proje
  *       404:
  *         description: Project not found
  */
-router.put('/:id', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, persistUpload('projects'), projectController.updateProject);
-router.delete('/:id', authMiddleware, roleMid.isAdminOrCoordinator, projectController.deleteProject);
+router.put('/:id', authMiddleware, roleMid.isAdminOrCoordinator, upload.single('file'), upload.handleUploadError, validate({ params: schemas.idParams, body: schemas.projectUpdate }), persistUpload('projects'), projectController.updateProject);
+router.delete('/:id', authMiddleware, roleMid.isAdminOrCoordinator, validate({ params: schemas.idParams }), projectController.deleteProject);
 
 module.exports = router;
