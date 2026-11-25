@@ -9,8 +9,13 @@ require('dotenv').config({ path: path.resolve(__dirname, `../.env.${env}`) });
  */
 function normalizePem(value) {
   const text = String(value || '').replace(/\\n/g, '\n');
-  const blocks = text.match(/-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/g);
-  if (!blocks) return null;
+  let blocks = text.match(/-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/g);
+  if (!blocks) {
+    // Only the base64 body was pasted (without the BEGIN/END lines)
+    const bare = text.replace(/\s+/g, '').replace(/^["']|["']$/g, '');
+    if (bare.length < 100 || !/^[A-Za-z0-9+/]+={0,2}$/.test(bare)) return null;
+    blocks = [`-----BEGIN CERTIFICATE-----${bare}-----END CERTIFICATE-----`];
+  }
   return blocks.map((block) => {
     const body = block
       .replace('-----BEGIN CERTIFICATE-----', '')

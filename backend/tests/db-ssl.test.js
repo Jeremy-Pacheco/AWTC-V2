@@ -37,6 +37,12 @@ describe('normalizePem', () => {
     }
   });
 
+  it('accepts the base64 body without the BEGIN/END lines', () => {
+    const pem = normalizePem(body(PEM).match(/.{1,64}/g).join('\n'));
+    expect(pem.startsWith('-----BEGIN CERTIFICATE-----\n')).toBe(true);
+    expect(body(pem)).toBe(body(PEM));
+  });
+
   it('keeps every certificate of a chain', () => {
     expect(normalizePem(`${PEM}\n${PEM}`).match(/BEGIN CERTIFICATE/g)).toHaveLength(2);
   });
