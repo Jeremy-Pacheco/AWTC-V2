@@ -134,22 +134,12 @@ npm install
 ```
 
 3. Configure environment and database:
-   - Create `.env.development` file in backend folder with:
+   - Copy the template and fill in your values (the copy is git-ignored, never commit secrets):
+```bash
+cp .env.example .env.development.local
 ```
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=yourpassword
-DB_NAME=awtc_db
-DB_PORT=3306
-NODE_ENV=development
-PORT=8080
-SESSION_SECRET=your_session_secret
-LDAP_URL=ldap://localhost:389
-LDAP_BASE_DN=dc=awtc,dc=com
-LDAP_ADMIN_DN=cn=admin,dc=awtc,dc=com
-LDAP_ADMIN_PASSWORD=<hidden_for_security_reasons>
-```
-   - Set your MySQL credentials (`DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`, `DB_NAME`) in `.env.development.local` (git-ignored); `config/sequelize.config.js` reads them
+   - Generate `JWT_SECRET` and `SESSION_SECRET` with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"` and VAPID keys with `npx --yes web-push generate-vapid-keys`.
+   - `config/sequelize.config.js` reads the `DB_*` variables.
 
 4. Run migrations and seeders:
 ```bash
