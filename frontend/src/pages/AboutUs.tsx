@@ -92,7 +92,7 @@ const AboutUs: React.FC = () => {
           </p>
           <button
             onClick={handleBecomeVolunteer}
-            className="inline-block bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-6 py-2 rounded-3xl font-semibold shadow transition"
+            className="inline-block bg-brand text-black hover:bg-ink hover:text-white px-6 py-2 rounded-3xl font-semibold shadow transition"
           >
             {t('aboutUs.becomeVolunteer')}
           </button>
@@ -135,7 +135,7 @@ const AboutUs: React.FC = () => {
               <input
                 name="name"
                 placeholder={t('aboutUs.namePlaceholder')}
-                className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-[#767676] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none text-black dark:text-white"
+                className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-muted dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-400 outline-none text-black dark:text-white"
                 required
               />
 
@@ -143,27 +143,27 @@ const AboutUs: React.FC = () => {
                 name="email"
                 type="email"
                 placeholder={t('aboutUs.emailPlaceholder')}
-                className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-[#767676] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none text-black dark:text-white"
+                className="w-full pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-muted dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-400 outline-none text-black dark:text-white"
                 required
               />
 
               <input
                 name="subject"
                 placeholder={t('aboutUs.subjectPlaceholder')}
-                className="w-full md:col-span-2 pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-[#767676] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none text-black dark:text-white"
+                className="w-full md:col-span-2 pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-muted dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-400 outline-none text-black dark:text-white"
               />
 
               <textarea
                 name="message"
                 placeholder={t('aboutUs.messagePlaceholder')}
-                className="w-full md:col-span-2 pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-[#767676] dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none h-40 resize-y text-black dark:text-white"
+                className="w-full md:col-span-2 pl-3 pr-3 py-2 bg-white dark:bg-[var(--bg-secondary)] border border-muted dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-400 outline-none h-40 resize-y text-black dark:text-white"
                 required
               />
 
               <div className="md:col-span-2 text-right">
                 <button
                   type="submit"
-                  className="inline-block bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-6 py-2 rounded-3xl font-semibold shadow transition"
+                  className="inline-block bg-brand text-black hover:bg-ink hover:text-white px-6 py-2 rounded-3xl font-semibold shadow transition"
                 >
                   {t('aboutUs.sendMessage')}
                 </button>

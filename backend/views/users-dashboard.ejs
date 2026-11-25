@@ -4,7 +4,7 @@
 
 <div class="section-card">
   <h2 class="section-title">
-    <i class="fas fa-users" style="color: #F0BB00;"></i>
+    <i class="fas fa-users" style="color: var(--accent);"></i>
     Users Dashboard
   </h2>
 </div>
@@ -39,7 +39,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-line" style="color: #F0BB00;"></i>
+          <i class="fas fa-chart-line" style="color: var(--accent);"></i>
           Registrations - 7 Days
         </div>
         <div class="chart-subtitle">Daily trends</div>
@@ -51,7 +51,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-pie" style="color: #F0BB00;"></i>
+          <i class="fas fa-chart-pie" style="color: var(--accent);"></i>
           Role Distribution
         </div>
         <div class="chart-subtitle">By user role</div>
@@ -63,7 +63,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-user-circle" style="color: #F0BB00;"></i>
+          <i class="fas fa-user-circle" style="color: var(--accent);"></i>
           <span id="selectedUserTitle">User Projects</span>
         </div>
         <div class="chart-subtitle" id="selectedUserSubtitle">Click on any user</div>
@@ -75,7 +75,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-area" style="color: #F0BB00;"></i>
+          <i class="fas fa-chart-area" style="color: var(--accent);"></i>
           User Activity Trend
         </div>
         <div class="chart-subtitle">Active users in projects - Last 7 days</div>
@@ -125,7 +125,7 @@
     if (selectedUserId) {
       const selectedElement = container.querySelector(`[data-user-id="${selectedUserId}"]`);
       if (selectedElement) {
-        selectedElement.style.borderLeft = '3px solid #F0BB00';
+        selectedElement.style.borderLeft = '3px solid #12A36F';
         selectedElement.style.background = '#fffbeb';
       }
     }
@@ -143,12 +143,12 @@
     
     // Highlight selected user
     document.querySelectorAll('.user-item').forEach(item => {
-      item.style.borderLeft = '3px solid #cbd5e0';
-      item.style.background = '#f7fafc';
+      item.style.borderLeft = '3px solid #B9C4BE';
+      item.style.background = '#F4F7F5';
     });
     const selectedElement = document.querySelector(`[data-user-id="${userId}"]`);
     if (selectedElement) {
-      selectedElement.style.borderLeft = '3px solid #F0BB00';
+      selectedElement.style.borderLeft = '3px solid #12A36F';
       selectedElement.style.background = '#fffbeb';
     }
     
@@ -164,7 +164,7 @@
     
     if (projectCount === 0) {
       document.getElementById('projectsPerUserChart').innerHTML = 
-        '<div style="text-align:center;padding:60px;color:#718096;"><i class="fas fa-folder-open" style="font-size:48px;color:#cbd5e0;margin-bottom:16px;display:block;"></i><p>This user has not enrolled in any projects yet</p></div>';
+        '<div style="text-align:center;padding:60px;color:#57665E;"><i class="fas fa-folder-open" style="font-size:48px;color:#B9C4BE;margin-bottom:16px;display:block;"></i><p>This user has not enrolled in any projects yet</p></div>';
       return;
     }
     
@@ -190,7 +190,7 @@
       .attr('cy', centerY)
       .attr('r', radius)
       .attr('fill', 'none')
-      .attr('stroke', '#e2e8f0')
+      .attr('stroke', '#D6DED9')
       .attr('stroke-width', 12);
     
     // Progress circle
@@ -203,7 +203,7 @@
       .attr('cy', centerY)
       .attr('r', radius)
       .attr('fill', 'none')
-      .attr('stroke', '#F0BB00')
+      .attr('stroke', '#12A36F')
       .attr('stroke-width', 12)
       .attr('stroke-linecap', 'round')
       .attr('stroke-dasharray', `${circumference} ${circumference}`)
@@ -221,7 +221,7 @@
       .attr('dominant-baseline', 'middle')
       .style('font-size', '48px')
       .style('font-weight', '700')
-      .style('fill', '#1a202c')
+      .style('fill', '#0D1A14')
       .text('0')
       .transition()
       .duration(1000)
@@ -238,7 +238,7 @@
       .attr('y', centerY + 25)
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Projects Enrolled');
     
     // Add comparison text
@@ -251,12 +251,12 @@
       .attr('y', height - 40)
       .attr('text-anchor', 'middle')
       .style('font-size', '13px')
-      .style('fill', '#4a5568')
+      .style('fill', '#3E4B44')
       .text(`Platform average: ${avgProjects} projects per user`);
     
     // Status badge
     const status = projectCount > avgProjects ? 'Above Average' : projectCount == avgProjects ? 'Average' : 'Below Average';
-    const statusColor = projectCount > avgProjects ? '#48bb78' : projectCount == avgProjects ? '#F0BB00' : '#718096';
+    const statusColor = projectCount > avgProjects ? '#0A6143' : projectCount == avgProjects ? '#12A36F' : '#57665E';
     
     svg.append('rect')
       .attr('x', centerX - 60)
@@ -355,7 +355,7 @@
       .attr('width', x.bandwidth())
       .attr('y', height)
       .attr('height', 0)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('rx', 4)
       .transition()
       .duration(800)
@@ -371,7 +371,7 @@
       .attr('x', d => x(d.label) + x.bandwidth() / 2)
       .attr('y', d => y(d.count) - 5)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1a202c')
+      .attr('fill', '#0D1A14')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
       .text(d => d.count);
@@ -420,7 +420,7 @@
 
     const color = d3.scaleOrdinal()
       .domain(data.map(d => d.role))
-      .range(['#feb2b2', '#bee3f8', '#c6f6d5', '#fbd38d']);
+      .range(['#26322C', '#6FD0A8', '#B9C4BE', '#2FBF86']);
 
     const pie = d3.pie()
       .value(d => d.count)
@@ -483,14 +483,14 @@
       .attr('dy', '-0.5em')
       .style('font-size', '32px')
       .style('font-weight', '700')
-      .style('fill', '#1a202c')
+      .style('fill', '#0D1A14')
       .text(allUsers.length);
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '1.2em')
       .style('font-size', '14px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Total Users');
 
     // Legend - Responsive
@@ -520,7 +520,7 @@
 
         item.append('span')
           .style('font-size', '11px')
-          .style('color', '#4a5568')
+          .style('color', '#3E4B44')
           .text(`${d.role} (${d.count})`);
       });
     } else if (isTablet) {
@@ -543,7 +543,7 @@
         .attr('y', 7)
         .attr('dy', '.35em')
         .style('font-size', '11px')
-        .style('fill', '#4a5568')
+        .style('fill', '#3E4B44')
         .text(d => `${d.role} (${d.count})`);
     } else {
       // Desktop: leyenda normal
@@ -565,7 +565,7 @@
         .attr('y', 9)
         .attr('dy', '.35em')
         .style('font-size', '13px')
-        .style('fill', '#4a5568')
+        .style('fill', '#3E4B44')
         .text(d => `${d.role} (${d.count})`);
     }
   }
@@ -650,12 +650,12 @@
 
     gradient.append('stop')
       .attr('offset', '0%')
-      .attr('stop-color', '#F0BB00')
+      .attr('stop-color', '#12A36F')
       .attr('stop-opacity', 0.6);
 
     gradient.append('stop')
       .attr('offset', '100%')
-      .attr('stop-color', '#F0BB00')
+      .attr('stop-color', '#12A36F')
       .attr('stop-opacity', 0.1);
 
     // Draw area
@@ -672,7 +672,7 @@
     svg.append('path')
       .datum(days)
       .attr('fill', 'none')
-      .attr('stroke', '#F0BB00')
+      .attr('stroke', '#12A36F')
       .attr('stroke-width', 3)
       .attr('d', line)
       .attr('stroke-dasharray', function() {
@@ -698,7 +698,7 @@
       .attr('cx', d => x(d.month))
       .attr('cy', d => y(d.accumulated))
       .attr('r', 0)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .on('mouseover', function(event, d) {
@@ -748,7 +748,7 @@
       .attr('x', -(height / 2))
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Total Active Users');
   }
 

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><%= shopName %> - Dashboard</title>
     <link rel="icon" type="image/png" href="/images/awtc-logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="/css/theme.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/dashboard.css">
   </head>
@@ -14,7 +18,7 @@
       <div class="sidebar-header">
         <a href="<%= frontendUrl || '/' %>" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;text-decoration:none;color:inherit;">
           <div class="sidebar-logo">
-            <img src="/images/awtc-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-hands-helping\\' style=\\'color:#F0BB00;font-size:24px\\'></i>'">
+            <img src="/images/awtc-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-hands-helping\\' style=\\'color:var(--accent);font-size:24px\\'></i>'">
           </div>
           <span class="sidebar-title">A Will To Change</span>
         </a>
@@ -84,7 +88,7 @@
           </div>
         </div>
       <% } else { %>
-        <a href="/login" style="color:#F0BB00;text-decoration:none;font-weight:500">
+        <a href="/login" style="color:var(--accent-text);text-decoration:none;font-weight:500">
           <i class="fas fa-sign-in-alt"></i> Login
         </a>
       <% } %>

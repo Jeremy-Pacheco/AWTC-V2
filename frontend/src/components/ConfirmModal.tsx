@@ -21,8 +21,8 @@ const ConfirmModal: React.FC<Props> = ({ open, title, message, confirmText = 'Ye
             {title && <h3 className="text-xl font-bold mb-2">{title}</h3>}
             {message && <p className="mb-4 text-base">{message}</p>}
             <div className="flex justify-end gap-2 mt-2">
-              <button onClick={onCancel} className="border border-[#767676] text-black px-4 py-2 rounded-3xl hover:bg-[#1f2124] hover:text-white transition">{cancelText}</button>
-              <button onClick={onConfirm} className={`px-4 py-2 rounded-3xl transition font-semibold ${danger ? 'bg-[#B33A3A] text-white hover:bg-[#1f2124] hover:text-white' : 'bg-[#B33A3A] text-white hover:bg-[#1f2124] hover:text-white'}`}>{confirmText}</button>
+              <button onClick={onCancel} className="border border-muted text-black px-4 py-2 rounded-3xl hover:bg-ink hover:text-white transition">{cancelText}</button>
+              <button onClick={onConfirm} className={`px-4 py-2 rounded-3xl transition font-semibold ${danger ? 'bg-danger text-white hover:bg-ink hover:text-white' : 'bg-danger text-white hover:bg-ink hover:text-white'}`}>{confirmText}</button>
             </div>
           </motion.div>
         </motion.div>

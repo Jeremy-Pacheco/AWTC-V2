@@ -147,9 +147,9 @@ const Volunteering: React.FC = () => {
             if (element) {
               element.scrollIntoView({ behavior: "smooth", block: "center" });
               // Add highlight effect
-              element.classList.add("ring-4", "ring-yellow-400");
+              element.classList.add("ring-4", "ring-brand-400");
               setTimeout(() => {
-                element.classList.remove("ring-4", "ring-yellow-400");
+                element.classList.remove("ring-4", "ring-brand-400");
               }, 2000);
             }
           }, 300);
@@ -340,7 +340,7 @@ const Volunteering: React.FC = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-2xl font-bold">{proj.name}</h3>
                       {proj.category && (
-                        <span className="bg-[#1f2124] text-white px-3 py-1 rounded-full text-xs font-bold">
+                        <span className="bg-ink text-white px-3 py-1 rounded-full text-xs font-bold">
                           {proj.category.name}
                         </span>
                       )}
@@ -356,7 +356,7 @@ const Volunteering: React.FC = () => {
                       {bannedProjectIds.includes(proj.id) ? (
                         <button
                           disabled
-                          className="bg-[#B33A3A] text-white px-4 py-2 rounded-3xl font-semibold cursor-not-allowed w-full sm:w-fit text-center"
+                          className="bg-danger text-white px-4 py-2 rounded-3xl font-semibold cursor-not-allowed w-full sm:w-fit text-center"
                         >
                           {t('volunteering.notAvailable')}
                         </button>
@@ -377,7 +377,7 @@ const Volunteering: React.FC = () => {
                       ) : (
                         <button
                           onClick={() => handleEnroll(proj.id)}
-                          className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-4 py-2 rounded-3xl font-semibold transition-colors w-full sm:w-fit text-center"
+                          className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold transition-colors w-full sm:w-fit text-center"
                         >
                           {t('volunteering.enroll')}
                         </button>
@@ -386,7 +386,7 @@ const Volunteering: React.FC = () => {
 
                     {/* Display volunteer capacity */}
                     <div className="text-sm font-semibold whitespace-nowrap self-end">
-                      <span className={isFull ? 'text-red-600 font-bold' : 'text-[#F0BB00] font-bold'}>
+                      <span className={isFull ? 'text-red-600 font-bold' : 'text-brand-text font-bold'}>
                         {t('volunteering.volunteers')}: {count ? `${count.enrolled}/${count.capacity}` : `0/${proj.capacity}`}
                       </span>
                       {isFull}
@@ -416,7 +416,7 @@ const Volunteering: React.FC = () => {
                   onClick={() => handlePageChange(page)}
                   className={`px-3 py-2 rounded border text-sm min-w-[40px] ${
                     currentPage === page
-                      ? 'bg-[#F0BB00] text-black border-[#F0BB00] font-semibold'
+                      ? 'bg-brand text-black border-brand font-semibold'
                       : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }`}
                 >

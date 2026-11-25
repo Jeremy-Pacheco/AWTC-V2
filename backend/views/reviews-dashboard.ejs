@@ -4,7 +4,7 @@
 
 <div class="section-card">
   <h2 class="section-title">
-    <i class="fas fa-star" style="color: #F0BB00;"></i>
+    <i class="fas fa-star" style="color: var(--accent);"></i>
     Reviews Dashboard
   </h2>
 </div>
@@ -49,7 +49,7 @@
   <div class="chart-container">
     <div class="chart-header">
       <div class="chart-title">
-        <i class="fas fa-chart-line" style="color: #F0BB00;"></i>
+        <i class="fas fa-chart-line" style="color: var(--accent);"></i>
         Daily Reviews
       </div>
       <div class="chart-subtitle">Reviews created - Last 7 days</div>
@@ -61,7 +61,7 @@
   <div class="chart-container">
     <div class="chart-header">
       <div class="chart-title">
-        <i class="fas fa-chart-bar" style="color: #F0BB00;"></i>
+        <i class="fas fa-chart-bar" style="color: var(--accent);"></i>
         Reviews Statistics
       </div>
       <div class="chart-subtitle">Content analysis</div>
@@ -143,15 +143,15 @@
       <div class="review-item" data-user-id="${Number(reviewer.user.id)}" onclick="filterByUser(${Number(reviewer.user.id)})" style="cursor: pointer;">
         <div class="review-item-header">
           <div style="flex: 1;">
-            <span style="color: #F0BB00; font-weight: 700; font-size: 18px; margin-right: 10px;">#${index + 1}</span>
+            <span style="color: #12A36F; font-weight: 700; font-size: 18px; margin-right: 10px;">#${index + 1}</span>
             <span class="review-item-user">
-              <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 6px;"></i>
+              <i class="fas fa-user-circle" style="color: #12A36F; margin-right: 6px;"></i>
               ${escapeHtml(reviewer.user.name || reviewer.user.email)}
             </span>
             <span class="user-item-role role-${escapeHtml(reviewer.user.role || 'volunteer')}" style="margin-left: 8px;">${escapeHtml(reviewer.user.role || 'volunteer')}</span>
           </div>
-          <div style="text-align: right; color: #718096; font-size: 12px;">
-            <i class="fas fa-star" style="color: #F0BB00; margin-right: 4px;"></i>
+          <div style="text-align: right; color: #57665E; font-size: 12px;">
+            <i class="fas fa-star" style="color: #12A36F; margin-right: 4px;"></i>
             ${reviewer.count} review${reviewer.count > 1 ? 's' : ''}
           </div>
         </div>
@@ -173,20 +173,20 @@
     titleElement.innerHTML = `
       <i class="fas fa-comments"></i>
       Reviews by ${escapeHtml(userName)}
-      <button onclick="clearFilter()" style="margin-left: 10px; padding: 4px 8px; background: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+      <button onclick="clearFilter()" style="margin-left: 10px; padding: 4px 8px; background: #D6DED9; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
         <i class="fas fa-times"></i> Clear Filter
       </button>
     `;
     
     // Highlight selected user
     document.querySelectorAll('.review-item[data-user-id]').forEach(item => {
-      item.style.background = '#f7fafc';
-      item.style.borderLeft = '4px solid #cbd5e0';
+      item.style.background = '#F4F7F5';
+      item.style.borderLeft = '4px solid #B9C4BE';
     });
     const selectedElement = document.querySelector(`.review-item[data-user-id="${userId}"]`);
     if (selectedElement) {
       selectedElement.style.background = '#fffbeb';
-      selectedElement.style.borderLeft = '4px solid #F0BB00';
+      selectedElement.style.borderLeft = '4px solid #12A36F';
     }
     
     renderReviewsList(1);
@@ -207,8 +207,8 @@
     
     // Remove highlights
     document.querySelectorAll('.review-item[data-user-id]').forEach(item => {
-      item.style.background = '#f7fafc';
-      item.style.borderLeft = '4px solid #cbd5e0';
+      item.style.background = '#F4F7F5';
+      item.style.borderLeft = '4px solid #B9C4BE';
     });
     
     renderReviewsList(1);
@@ -232,8 +232,8 @@
     
     // Remove highlights
     document.querySelectorAll('.review-item[data-user-id]').forEach(item => {
-      item.style.background = '#f7fafc';
-      item.style.borderLeft = '4px solid #cbd5e0';
+      item.style.background = '#F4F7F5';
+      item.style.borderLeft = '4px solid #B9C4BE';
     });
     
     renderReviewsList(1);
@@ -274,7 +274,7 @@
       <div class="review-item">
         <div class="review-item-header">
           <span class="review-item-user">
-            <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 6px;"></i>
+            <i class="fas fa-user-circle" style="color: #12A36F; margin-right: 6px;"></i>
             ${review.user ? escapeHtml(review.user.name || review.user.email) : 'Unknown User'}
           </span>
           <span class="review-item-date">${formatDate(review.date)}</span>
@@ -349,7 +349,7 @@
       .attr('width', x.bandwidth())
       .attr('y', height)
       .attr('height', 0)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('rx', 4)
       .transition()
       .duration(800)
@@ -365,7 +365,7 @@
       .attr('x', d => x(d.label) + x.bandwidth() / 2)
       .attr('y', d => y(d.count) - 5)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1a202c')
+      .attr('fill', '#0D1A14')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
       .text(d => d.count);
@@ -419,7 +419,7 @@
       .domain([0, d3.max(data, d => d.count) + 2])
       .range([chartHeight, 0]);
 
-    const colors = ['#F0BB00', '#bee3f8'];
+    const colors = ['#12A36F', '#6FD0A8'];
 
     // Grid lines
     svg.append('g')
@@ -452,7 +452,7 @@
       .attr('x', d => x(d.category) + x.bandwidth() / 2)
       .attr('y', d => y(d.count) - 5)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1a202c')
+      .attr('fill', '#0D1A14')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
       .text(d => d.count);
@@ -490,7 +490,7 @@
             <img src="${escapeHtml(review.image)}" alt="Review image" class="image-card-img" onerror="this.src='https://via.placeholder.com/200x150?text=Image+Not+Found'">
             <div class="image-card-info">
               <div class="image-card-user">
-                <i class="fas fa-user-circle" style="color: #F0BB00; margin-right: 4px;"></i>
+                <i class="fas fa-user-circle" style="color: #12A36F; margin-right: 4px;"></i>
                 ${review.user ? escapeHtml(review.user.name || review.user.email) : 'Unknown'}
               </div>
               <div class="image-card-content">${escapeHtml(truncateText(review.content, 60))}</div>
