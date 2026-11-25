@@ -27,7 +27,11 @@ exports.login = async (req, res) => {
       return res.render('login', { error: 'Invalid credentials', email, frontendUrl: FRONTEND_URL });
     }
 
-    // Save user id in session cookie (server-side session)
+    // New session id on login: a session id planted before login (session
+    // fixation, SEC-15) is discarded instead of becoming authenticated.
+    await new Promise((resolve, reject) =>
+      req.session.regenerate((err) => (err ? reject(err) : resolve()))
+    );
     req.session.userId = user.id;
     req.session.userRole = user.role;
 

@@ -131,6 +131,17 @@ async function wipeAndSeed(db) {
   });
 }
 
+/** Logs everyone out of the EJS dashboard (sessions point to deleted users). */
+async function clearSessions(db) {
+  try {
+    await db.sequelize.query('DELETE FROM `Sessions`');
+    console.log('[reset-demo] Dashboard sessions cleared');
+  } catch (err) {
+    // The table only exists when SESSION_STORE=database has been migrated
+    console.warn(`[reset-demo] Sessions not cleared: ${err.message}`);
+  }
+}
+
 /** Best effort: remove images uploaded by visitors to Cloudinary. */
 async function cleanCloudinary() {
   if ((process.env.STORAGE_PROVIDER || '').toLowerCase() !== 'cloudinary' || !process.env.CLOUDINARY_URL) return;
@@ -160,6 +171,7 @@ async function main() {
     await db.sequelize.authenticate();
     await wipeAndSeed(db);
     console.log('[reset-demo] Demo data reset successfully');
+    await clearSessions(db);
     await cleanCloudinary();
   } finally {
     await db.sequelize.close();

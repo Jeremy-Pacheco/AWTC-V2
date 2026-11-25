@@ -103,20 +103,24 @@ const sessionCookieSecure = (() => {
 })();
 app.set('sessionCookieSecure', sessionCookieSecure);
 
+const db = require("./models");
+
+// Persistent session store in production (SEC-16), see config/session-store.js
+const { createSessionStore, SESSION_TTL_MS } = require('./config/session-store');
+
 app.use(session({
   name: process.env.SESSION_NAME || 'awtc.sid',
   secret: getSessionSecret(),
+  store: createSessionStore(session, db.sequelize),
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     secure: sessionCookieSecure,
     sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000 //1 day
+    maxAge: SESSION_TTL_MS
   }
 }));
-
-const db = require("./models");
 
 db.sequelize
   .sync({ force: false })
