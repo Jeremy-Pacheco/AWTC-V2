@@ -4,6 +4,7 @@
  * request is dropped. Limits are generous for real use but bounded.
  */
 const { z } = require('zod');
+const { isAllowedPushEndpoint } = require('../services/push.service');
 
 // Multipart forms send everything as strings, and empty inputs as "".
 const blankToUndefined = (value) => (value === '' || value === null ? undefined : value);
@@ -125,9 +126,14 @@ const pushEndpoint = z.string({ required_error: 'is required' }).trim()
   .max(2048, 'is too long')
   .url('must be a URL')
   .refine((value) => value.startsWith('https://'), 'must use https');
+// Only browsers' push services may be subscribed (SSRF protection, SEC-20)
+const allowedPushEndpoint = pushEndpoint
+  .refine((value) => isAllowedPushEndpoint(value), 'is not a supported push service');
 const subscribe = z.object({
-  endpoint: pushEndpoint,
-  expirationTime: z.number().int().nonnegative().nullable().optional(),
+  endpoint: allowedPushEndpoint,
+  // DOMHighResTimeStamp (may have decimals) or null; stored in a BIGINT column
+  expirationTime: z.number().nonnegative().nullable().optional()
+    .transform((value) => (value == null ? value : Math.round(value))),
   keys: z.object({ p256dh: text(200), auth: text(100) }, { required_error: 'is required' }),
 });
 const unsubscribe = z.object({ endpoint: pushEndpoint });
