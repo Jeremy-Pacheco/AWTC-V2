@@ -51,8 +51,10 @@ describe('Sign-up and login (local provider)', () => {
 describe('Admin dashboard session (EJS)', () => {
   let agent;
 
-  async function csrfToken() {
-    const page = await agent.get('/login');
+  // Logged out: the login form carries the token; logged in, /login redirects,
+  // so the token comes from the logout form in the dashboard header
+  async function csrfToken(path = '/login') {
+    const page = await agent.get(path);
     const match = /name="_csrf" value="([0-9a-f]{64})"/.exec(page.text);
     expect(match).not.toBeNull();
     return match[1];
@@ -87,7 +89,7 @@ describe('Admin dashboard session (EJS)', () => {
 
   it('only logs out with POST + CSRF', async () => {
     expect((await agent.get('/logout')).status).toBe(404);
-    const token = await csrfToken();
+    const token = await csrfToken('/overview'); // logout form in the dashboard header
     const res = await agent.post('/logout').type('form').send({ _csrf: token });
     expect(res.status).toBe(302);
     const after = await agent.get('/overview');
