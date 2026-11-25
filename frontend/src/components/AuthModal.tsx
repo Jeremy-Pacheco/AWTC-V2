@@ -67,6 +67,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
       const tokenBasic = btoa(String.fromCharCode(...new TextEncoder().encode(`${email}:${pass}`)));
       const res = await fetch(`${API_URL}/api/users/login`, {
         method: "POST",
+        credentials: "include", // receive the httpOnly refresh cookie
         headers: { Authorization: `Basic ${tokenBasic}` },
       });
 
@@ -94,6 +95,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
     try {
       const res = await fetch(`${API_URL}/api/users/signup`, {
         method: "POST",
+        credentials: "include", // receive the httpOnly refresh cookie
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password: pass }),
       });

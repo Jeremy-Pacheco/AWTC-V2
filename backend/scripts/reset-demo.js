@@ -31,6 +31,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 // Children first, so foreign keys never block the deletion
 const TABLES_IN_DELETE_ORDER = [
+  'RefreshToken',
   'Message',
   'Subscription',
   'UserProjectBan',

@@ -9,7 +9,7 @@ const { generateToken } = require('../../utils/utils');
 
 // Children first so foreign keys never block the deletion
 const TABLES_IN_DELETE_ORDER = [
-  'Message', 'Subscription', 'UserProjectBan', 'UserProject', 'Reviews',
+  'RefreshToken', 'Message', 'Subscription', 'UserProjectBan', 'UserProject', 'Reviews',
   'Contact', 'Project', 'Category', 'User',
 ];
 

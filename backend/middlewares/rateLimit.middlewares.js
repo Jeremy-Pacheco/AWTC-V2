@@ -75,7 +75,17 @@ const demoLoginLimiter = rateLimit({
   handler: jsonHandler('Too many demo logins. Please try again later.'),
 });
 
+// Session renewal (refresh token rotation)
+const refreshLimiter = rateLimit({
+  windowMs: minutes(15),
+  limit: intFromEnv('REFRESH_RATE_LIMIT', 120),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  handler: jsonHandler('Too many session refreshes. Please try again later.'),
+});
+
 module.exports = {
+  refreshLimiter,
   loginLimiter,
   demoLoginLimiter,
   dashboardLoginLimiter,

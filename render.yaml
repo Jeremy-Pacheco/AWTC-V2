@@ -22,6 +22,10 @@ services:
         value: "1"
       - key: SESSION_COOKIE_SECURE
         value: "true"
+      # Frontend (Vercel) and API (Render) are different sites: the refresh
+      # cookie must be SameSite=None (always Secure)
+      - key: REFRESH_COOKIE_SAMESITE
+        value: none
       - key: DEMO_MODE
         value: "true"
       - key: AUTH_PROVIDER

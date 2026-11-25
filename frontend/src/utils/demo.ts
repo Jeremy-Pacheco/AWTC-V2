@@ -30,6 +30,7 @@ export function getDemoConfig(): Promise<DemoConfig> {
 export async function loginAsDemo(role: DemoRole): Promise<void> {
   const res = await fetch(`${API_URL}/api/demo/login`, {
     method: 'POST',
+    credentials: 'include', // receive the httpOnly refresh cookie
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ role }),
   });

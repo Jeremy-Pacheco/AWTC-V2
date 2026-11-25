@@ -14,14 +14,16 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Messages from "./pages/Messages";
 import { subscribeUserToPush, isNotificationSupported } from "./services/notificationService";
-import { initAuthCheck } from "./utils/auth";
+import { initAuthCheck, startTokenRefresh } from "./utils/auth";
 import './i18n';
 
 //TODO: Import other pages when you have them
 function App() {
-  // Check for expired tokens on app startup
+  // Renew an expired access token with the refresh cookie on startup, then
+  // keep it fresh while the app is open (SEC-18)
   useEffect(() => {
-    initAuthCheck();
+    void initAuthCheck();
+    return startTokenRefresh();
   }, []);
 
   // Subscribe to push notifications when user is logged in

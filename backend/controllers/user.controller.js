@@ -2,6 +2,7 @@ const { User } = require("../models");
 const utils = require("../utils/utils");
 const authService = require("../services/auth.service");
 const { parseBasicAuth } = require("../utils/basicAuth");
+const tokenService = require("../services/token.service");
 
 // Maps validation errors from the auth service / Sequelize to a 400 response
 function sendRegistrationError(res, error, fallbackMessage) {
@@ -35,7 +36,8 @@ exports.createUser = async (req, res) => {
 
     const user = await authService.registerUser({ name, email, password, role: "volunteer" });
 
-    const token = utils.generateToken(user);
+    // Short access token + httpOnly refresh cookie (SEC-18)
+    const token = await tokenService.startSession(req, res, user);
     const cleanUser = utils.getCleanUser(user);
 
     res.status(201).json({
@@ -76,7 +78,8 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = utils.generateToken(user);
+    // Short access token + httpOnly refresh cookie (SEC-18)
+    const token = await tokenService.startSession(req, res, user);
     const cleanUser = utils.getCleanUser(user);
 
     res.json({
