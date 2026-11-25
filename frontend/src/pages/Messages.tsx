@@ -57,7 +57,7 @@ export default function Messages() {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   if (loading) {
     return (

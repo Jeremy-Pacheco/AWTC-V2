@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import AlertModal from "./AlertModal";
+import { errorMessage } from "../types/api";
 import { getDemoConfig, loginAsDemo, type DemoConfig, type DemoRole } from "../utils/demo";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -78,11 +79,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
 
       // Notify other components
       window.dispatchEvent(new CustomEvent("authChanged", { detail: { loggedIn: true } }));
-      try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch {}
+      try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch { /* storage unavailable (private mode) */ }
 
       onClose();
-    } catch (err: any) {
-      setAlertMessage(err.message);
+    } catch (err) {
+      setAlertMessage(errorMessage(err));
       setAlertOpen(true);
     }
   };
@@ -106,11 +107,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
 
       // Notify other components
       window.dispatchEvent(new CustomEvent("authChanged", { detail: { loggedIn: true } }));
-      try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch {}
+      try { localStorage.setItem("__auth_last_update", Date.now().toString()); } catch { /* storage unavailable (private mode) */ }
 
       setCurrentMode("login");
-    } catch (err: any) {
-      setAlertMessage(err.message);
+    } catch (err) {
+      setAlertMessage(errorMessage(err));
       setAlertOpen(true);
     }
   };

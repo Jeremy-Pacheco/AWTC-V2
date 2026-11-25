@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { handleAuthFetch } from '../utils/auth';
 import { imageUrl } from '../utils/images';
+import type { AppUser, Category, Contact, Project, ProjectForm, Review, UserProjectEntry } from '../types/api';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -36,31 +37,31 @@ const Dashboard: React.FC = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [imageVersion, setImageVersion] = useState<number>(Date.now());
   const [token, setToken] = useState<string | null>(null);
-  const [myProjects, setMyProjects] = useState<any[]>([]);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const [myProjects, setMyProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [projectsFilter, setProjectsFilter] = useState<number | "">("");
   const [projectModalOpen, setProjectModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<any | null>(null);
-  const [projectForm, setProjectForm] = useState<any>({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '', ownerId: '' });
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [projectForm, setProjectForm] = useState<ProjectForm>({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '', ownerId: '' });
   const [projectFile, setProjectFile] = useState<File | null>(null);
   const [projectFileName, setProjectFileName] = useState<string>("");
-  const [usersData, setUsersData] = useState<any[]>([]);
+  const [usersData, setUsersData] = useState<AppUser[]>([]);
   const [userRoleFilter, setUserRoleFilter] = useState<string | "">("");
-  const [selectedUser, setSelectedUser] = useState<any | null>(null);
-  const [userProjects, setUserProjects] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<AppUser | null>(null);
+  const [userProjects, setUserProjects] = useState<UserProjectEntry[]>([]);
   const [userModalOpen, setUserModalOpen] = useState(false);
 
   const [newUserForm, setNewUserForm] = useState({ name: '', email: '', password: '', role: 'volunteer' });
   const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<any | null>(null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '' });
   const navigate = useNavigate();
   // old inline project creation state removed; using modal projectForm/projectFile
-  const [contacts, setContacts] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [contactsFilter, setContactsFilter] = useState<'open'|'closed'|'all'>('open');
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   // Pagination states
   const [myProjectsPage, setMyProjectsPage] = useState(1);
@@ -83,7 +84,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Pagination helper functions
-  const paginate = (items: any[], page: number, itemsPerPage: number) => {
+  const paginate = <T,>(items: T[], page: number, itemsPerPage: number): T[] => {
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return items.slice(startIndex, endIndex);
@@ -593,7 +594,7 @@ const Dashboard: React.FC = () => {
                       )}
                     </div>
                     <div className="flex gap-2 flex-wrap md:flex-nowrap">
-                      <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => { setEditingProject(p); setProjectModalOpen(true); setProjectForm({ name: p.name, description: p.description, start_date: p.start_date?.split('T')[0] || '', end_date: p.end_date?.split('T')[0] || '', location: p.location || '', capacity: p.capacity || 1, status: p.status || 'active', categoryId: p.categoryId || '', ownerId: p.ownerId ?? '' }); setProjectFile(null); setProjectFileName(''); }}>{t('common.edit')}</button>
+                      <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => { setEditingProject(p); setProjectModalOpen(true); setProjectForm({ name: p.name, description: p.description || '', start_date: p.start_date?.split('T')[0] || '', end_date: p.end_date?.split('T')[0] || '', location: p.location || '', capacity: p.capacity || 1, status: p.status || 'active', categoryId: p.categoryId || '', ownerId: p.ownerId ?? '' }); setProjectFile(null); setProjectFileName(''); }}>{t('common.edit')}</button>
                       <button className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => openConfirm(t('dashboard.deleteProject'), t('dashboard.deleteProjectConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/projects/${p.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorDeleting') }); return; } setProjects(prev => prev.filter(x => x.id !== p.id)); setStatusMessage({ type: 'success', text: t('dashboard.projectDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
                     </div>
                   </div>
@@ -749,10 +750,11 @@ const Dashboard: React.FC = () => {
                                 const res2 = await fetch(`${API_URL}/api/users/${u.id}/bans`, { headers: { Authorization: `Bearer ${token}` } });
                                 const b = res2.ok ? await res2.json() : { projects: [] };
                                 // combine projects and bans
-                                const projectsWithBanFlag = (d.projects || []).map((p: any) => ({ ...p, banned: (b.projects || []).some((bp: any) => bp.id === p.id) }));
+                                const bannedProjects: UserProjectEntry[] = b.projects || [];
+                                const projectsWithBanFlag: UserProjectEntry[] = ((d.projects || []) as UserProjectEntry[]).map((p) => ({ ...p, banned: bannedProjects.some((bp) => bp.id === p.id) }));
                                 // for bans that are not in projects, add them
-                                (b.projects || []).forEach((bp: any) => {
-                                  if (!projectsWithBanFlag.some((pp: any) => pp.id === bp.id)) {
+                                bannedProjects.forEach((bp) => {
+                                  if (!projectsWithBanFlag.some((pp) => pp.id === bp.id)) {
                                     projectsWithBanFlag.push({ id: bp.id, name: bp.name || '', description: '', banned: true });
                                   }
                                 });
@@ -804,7 +806,7 @@ const Dashboard: React.FC = () => {
                             </div>
                           </div>
                           <div className="mt-2 text-sm">{c.message}</div>
-                          <div className="mt-2 text-xs md:text-sm text-gray-500">{new Date(c.createdAt).toLocaleString()}</div>
+                          <div className="mt-2 text-xs md:text-sm text-gray-500">{c.createdAt ? new Date(c.createdAt).toLocaleString() : ''}</div>
                         </div>
                       ))}
                     </div>
@@ -1005,7 +1007,7 @@ const Dashboard: React.FC = () => {
                 {userProjects.length === 0 ? (
                   <p className="text-gray-500 text-center py-4">{t('dashboard.noProjects')}</p>
                 ) : (
-                  paginate(userProjects, userProjectsPage, ITEMS_PER_PAGE.userProjects).map((p: any) => (
+                  paginate(userProjects, userProjectsPage, ITEMS_PER_PAGE.userProjects).map((p) => (
                     <div key={p.id} className="border p-3 mb-2 rounded flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                       <div className="flex-1 min-w-0">
                         <strong className="block truncate">{p.name}</strong>

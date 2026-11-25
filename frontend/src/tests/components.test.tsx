@@ -6,7 +6,17 @@ import AuthModal from '../components/AuthModal';
 import Projects from '../components/Projects';
 import * as api from '../api';
 
+// Typed fetch mock: tests return partial Response objects
+type FetchMock = (...args: Parameters<typeof fetch>) => Promise<Partial<Response>>;
+const fetchMock = vi.fn<FetchMock>();
+
 vi.mock('../api');
+
+// Demo mode off: the login modal would otherwise call fetch for /api/demo
+vi.mock('../utils/demo', () => ({
+  getDemoConfig: vi.fn().mockResolvedValue({ enabled: false }),
+  loginAsDemo: vi.fn(),
+}));
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -52,7 +62,8 @@ describe('Component Tests - Simple Static UI', () => {
 
 describe('Component Tests - Authentication Interaction', () => {
   beforeEach(() => {
-    global.fetch = vi.fn();
+    fetchMock.mockReset();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
     localStorage.clear();
   });
 
@@ -71,7 +82,7 @@ describe('Component Tests - Authentication Interaction', () => {
 
   // Test 3: AuthModal - Successful login with token storage
   it('should handle successful login and store token', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         access_token: 'test-jwt-token-123',
@@ -101,7 +112,7 @@ describe('Component Tests - Authentication Interaction', () => {
 
   // Test 4: AuthModal - Error handling
   it('should display error message on failed login', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: false,
       json: async () => ({ message: 'Invalid credentials' }),
     });
@@ -129,7 +140,7 @@ describe('Component Tests - Asynchronous Data Fetching', () => {
 
   // Test 5: Projects - Loading state
   it('should display loading state initially', () => {
-    (api.getProjects as any).mockImplementation(() => new Promise(() => {}));
+    vi.mocked(api.getProjects).mockImplementation(() => new Promise(() => {}));
 
     render(<Projects />);
 
@@ -144,7 +155,7 @@ describe('Component Tests - Asynchronous Data Fetching', () => {
       { id: 3, name: 'Tree Planting', description: 'Plant trees', categoryId: 1 },
     ];
 
-    (api.getProjects as any).mockResolvedValueOnce(mockProjects);
+    vi.mocked(api.getProjects).mockResolvedValueOnce(mockProjects);
 
     render(<Projects />);
 

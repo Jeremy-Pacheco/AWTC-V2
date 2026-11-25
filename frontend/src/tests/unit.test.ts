@@ -2,9 +2,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getProjects, getCategories, getReviews } from '../api';
 import { isNotificationSupported, getNotificationPermission } from '../services/notificationService';
 
+// Typed fetch mock: tests return partial Response objects
+type FetchMock = (...args: Parameters<typeof fetch>) => Promise<Partial<Response>>;
+const fetchMock = vi.fn<FetchMock>();
+// Browser globals replaced by the notification tests
+const browserGlobals = globalThis as unknown as Record<string, unknown>;
+
 describe('Unit Tests - API Functions', () => {
   beforeEach(() => {
-    global.fetch = vi.fn();
+    fetchMock.mockReset();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
   afterEach(() => {
@@ -13,7 +20,7 @@ describe('Unit Tests - API Functions', () => {
 
   // Test 1: getProjects
   it('should fetch projects successfully', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => [
         { id: 1, name: 'Project 1', description: 'Test', categoryId: 1 },
@@ -28,7 +35,7 @@ describe('Unit Tests - API Functions', () => {
 
   // Test 2: getCategories
   it('should fetch categories successfully', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => [
         { id: 1, name: 'Environment' },
@@ -43,7 +50,7 @@ describe('Unit Tests - API Functions', () => {
 
   // Test 3: getReviews
   it('should fetch reviews successfully', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => [
         { id: 1, rating: 5, comment: 'Great!', userId: 1 }
@@ -57,7 +64,7 @@ describe('Unit Tests - API Functions', () => {
 
   // Test 4: API error handling
   it('should handle API errors correctly', async () => {
-    (global.fetch as any).mockResolvedValueOnce({
+    fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 500,
     });
@@ -68,31 +75,31 @@ describe('Unit Tests - API Functions', () => {
 
 describe('Unit Tests - Notification Service', () => {
   beforeEach(() => {
-    (global as any).Notification = { permission: 'default' };
-    (global as any).navigator = { serviceWorker: {} };
-    (global as any).PushManager = {};
+    browserGlobals.Notification = { permission: 'default' };
+    browserGlobals.navigator = { serviceWorker: {} };
+    browserGlobals.PushManager = {};
   });
 
   // Test 5: isNotificationSupported
   it('should check if notifications are supported', () => {
     expect(isNotificationSupported()).toBe(true);
 
-    delete (global as any).Notification;
+    delete browserGlobals.Notification;
     expect(isNotificationSupported()).toBe(false);
   });
 
   // Test 6: getNotificationPermission
   it('should get notification permission status', () => {
-    (global as any).Notification = { permission: 'granted' };
-    (global as any).navigator = { serviceWorker: {} };
-    (global as any).PushManager = {};
+    browserGlobals.Notification = { permission: 'granted' };
+    browserGlobals.navigator = { serviceWorker: {} };
+    browserGlobals.PushManager = {};
 
     expect(getNotificationPermission()).toBe('granted');
 
-    (global as any).Notification.permission = 'denied';
+    (browserGlobals.Notification as { permission: string }).permission = 'denied';
     expect(getNotificationPermission()).toBe('denied');
 
-    (global as any).Notification.permission = 'default';
+    (browserGlobals.Notification as { permission: string }).permission = 'default';
     expect(getNotificationPermission()).toBe('default');
   });
 });
