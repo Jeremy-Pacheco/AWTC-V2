@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" />
     <link rel="stylesheet" href="/css/theme.css">
+    <script src="/js/image-fallback.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/dashboard.css">
   </head>
@@ -18,7 +19,7 @@
       <div class="sidebar-header">
         <a href="<%= frontendUrl || '/' %>" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;text-decoration:none;color:inherit;">
           <div class="sidebar-logo">
-            <img src="/images/awtc-logo.png" alt="Logo" onerror="this.parentElement.innerHTML='<i class=\\'fas fa-hands-helping\\' style=\\'color:var(--accent);font-size:24px\\'></i>'">
+            <img src="/images/awtc-logo.png" alt="Logo" data-fallback="icon">
           </div>
           <span class="sidebar-title">A Will To Change</span>
         </a>
@@ -66,7 +67,7 @@
                   imgSrc = '/images/' + imgSrc;
                 }
               %>
-              <img src="<%= imgSrc %>" alt="<%= currentUser.name || currentUser.email %>" onerror="this.style.display='none'; this.parentElement.textContent='<%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %>';">
+              <img src="<%= imgSrc %>" alt="<%= currentUser.name || currentUser.email %>" data-fallback="initial" data-initial="<%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %>">
             <% } else { %>
               <%= (currentUser.name || currentUser.email).charAt(0).toUpperCase() %>
             <% } %>
@@ -98,7 +99,7 @@
     <div class="main-content">
       <div class="container">
 
-    <script>
+    <script nonce="<%= cspNonce %>">
       // Escape any user-controlled value before inserting it into HTML
       // (innerHTML / d3 .html()). Prevents stored XSS in the admin dashboard.
       window.escapeHtml = function (value) {

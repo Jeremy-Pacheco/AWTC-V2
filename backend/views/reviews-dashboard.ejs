@@ -1,5 +1,5 @@
 ﻿<!-- D3.js Library -->
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/vendor/d3/d3.min.js"></script>
 <link rel="stylesheet" href="/css/reviews-dashboard.css">
 
 <div class="section-card">
@@ -82,7 +82,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
   // Reviews data from server
   try {
     const allReviews = <%- safeJson(reviews || []) %>;
@@ -140,7 +140,7 @@
     }
 
     container.innerHTML = activeReviewers.map((reviewer, index) => `
-      <div class="review-item" data-user-id="${Number(reviewer.user.id)}" onclick="filterByUser(${Number(reviewer.user.id)})" style="cursor: pointer;">
+      <div class="review-item" data-user-id="${Number(reviewer.user.id)}" data-action="filter-user" style="cursor: pointer;">
         <div class="review-item-header">
           <div style="flex: 1;">
             <span style="color: #12A36F; font-weight: 700; font-size: 18px; margin-right: 10px;">#${index + 1}</span>
@@ -173,7 +173,7 @@
     titleElement.innerHTML = `
       <i class="fas fa-comments"></i>
       Reviews by ${escapeHtml(userName)}
-      <button onclick="clearFilter()" style="margin-left: 10px; padding: 4px 8px; background: #D6DED9; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+      <button type="button" data-action="clear-filter" style="margin-left: 10px; padding: 4px 8px; background: #D6DED9; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
         <i class="fas fa-times"></i> Clear Filter
       </button>
     `;
@@ -185,7 +185,7 @@
     });
     const selectedElement = document.querySelector(`.review-item[data-user-id="${userId}"]`);
     if (selectedElement) {
-      selectedElement.style.background = '#fffbeb';
+      selectedElement.style.background = '#ECF8F2';
       selectedElement.style.borderLeft = '4px solid #12A36F';
     }
     
@@ -486,8 +486,8 @@
     container.innerHTML = `
       <div class="images-grid">
         ${reviewsWithImages.map(review => `
-          <div class="image-card" onclick="goToReview(${Number(review.id)})" style="cursor: pointer;">
-            <img src="${escapeHtml(review.image)}" alt="Review image" class="image-card-img" onerror="this.src='https://via.placeholder.com/200x150?text=Image+Not+Found'">
+          <div class="image-card" data-action="go-to-review" data-review-id="${Number(review.id)}" style="cursor: pointer;">
+            <img src="${escapeHtml(review.image)}" alt="Review image" class="image-card-img" data-fallback="hide">
             <div class="image-card-info">
               <div class="image-card-user">
                 <i class="fas fa-user-circle" style="color: #12A36F; margin-right: 4px;"></i>
@@ -528,4 +528,13 @@
   }
   
   renderReviewsImages();
+
+  // Delegated clicks: inline onclick= attributes are blocked by the CSP
+  document.addEventListener('click', function (event) {
+    const el = event.target.closest('[data-action]');
+    if (!el) return;
+    if (el.dataset.action === 'filter-user') filterByUser(Number(el.dataset.userId));
+    else if (el.dataset.action === 'clear-filter') clearFilter();
+    else if (el.dataset.action === 'go-to-review') goToReview(Number(el.dataset.reviewId));
+  });
 </script>

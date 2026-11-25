@@ -187,6 +187,9 @@ Guarda: Render redespliega solo.
 | `DEMO_LOGIN_RATE_LIMIT` | no | `30` | Logins demo por IP cada 15 minutos |
 | `LOGIN_RATE_LIMIT` / `SIGNUP_RATE_LIMIT` / `CONTACT_RATE_LIMIT` | no | por defecto | Ajuste de los rate limits |
 | `PORT` | no | la pone Render | Puerto HTTP |
+| `HOST` | no | `0.0.0.0` (necesario en Render) | Interfaz de escucha; detrás de nginx usa `127.0.0.1` para no exponer 8080/8443 |
+| `CSP_REPORT_ONLY` | no | sin definir | `true` envía la CSP en modo solo informe (para probarla sin bloquear nada) |
+| `CSP_CONNECT_SRC` | no | sin definir | Orígenes extra para `fetch`/websockets si la API está en otro dominio que la página servida por Express |
 
 No uses en Render: `USE_HTTPS` (Render ya termina TLS) ni las variables `LDAP_*`.
 

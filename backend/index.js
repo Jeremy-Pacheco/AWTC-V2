@@ -28,6 +28,13 @@ const app = express();
 const trustProxyHops = parseInt(process.env.TRUST_PROXY ?? '1', 10);
 app.set('trust proxy', Number.isFinite(trustProxyHops) ? trustProxyHops : 1);
 
+// Security headers and Content-Security-Policy with a per-request nonce
+// (SEC-23), see config/security-headers.js. HTTPS-only extras (HSTS,
+// upgrade-insecure-requests) follow SESSION_COOKIE_SECURE=true.
+const { cspNonce, securityHeaders } = require('./config/security-headers');
+app.use(cspNonce);
+app.use(securityHeaders({ httpsOnly: (process.env.SESSION_COOKIE_SECURE || '').toLowerCase() === 'true' }));
+
 // Use morgan to log HTTP requests via winston
 const morganFormat = ":method :url :status :response-time ms";
 app.use(
@@ -48,6 +55,8 @@ app.use(
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
+// d3 for the dashboard charts is served locally (no third-party script in the CSP)
+app.use('/vendor/d3', express.static(path.join(__dirname, 'node_modules', 'd3', 'dist')));
 // Allowed origins come from CORS_ORIGINS / FRONTEND_URL (see config/cors.js)
 const { corsOriginCallback } = require('./config/cors');
 app.use(cors({
@@ -454,6 +463,9 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 8080;
 const HTTPS_PORT = process.env.HTTPS_PORT || 8443;
 const USE_HTTPS = process.env.USE_HTTPS === 'true';
+// Behind nginx set HOST=127.0.0.1 so ports 8080/8443 are not reachable from
+// outside (SEC-23); hosts like Render need the default 0.0.0.0.
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Create HTTP or HTTPS server
 const http = require('http');
@@ -484,11 +496,11 @@ if (USE_HTTPS) {
     initializeSocketIO(httpsServer);
     
     // Start both servers
-    httpServer.listen(PORT, () => {
+    httpServer.listen(PORT, HOST, () => {
       console.log(`🌐 HTTP server running on http://localhost:${PORT}`);
     });
     
-    httpsServer.listen(HTTPS_PORT, () => {
+    httpsServer.listen(HTTPS_PORT, HOST, () => {
       console.log(`🔐 HTTPS server running on https://localhost:${HTTPS_PORT}`);
       console.log(`📚 Swagger docs available at https://localhost:${HTTPS_PORT}/api-docs`);
       console.log(`💬 WebSocket server initialized for messaging`);
@@ -508,7 +520,7 @@ if (USE_HTTPS) {
     const { initializeSocketIO } = require('./config/socket');
     initializeSocketIO(server);
     
-    server.listen(PORT, () => {
+    server.listen(PORT, HOST, () => {
       console.log(`Server running on http://localhost:${PORT}`);
       console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
       console.log(`WebSocket server initialized for messaging`);
@@ -521,7 +533,7 @@ if (USE_HTTPS) {
   const { initializeSocketIO } = require('./config/socket');
   initializeSocketIO(server);
   
-  server.listen(PORT, () => {
+  server.listen(PORT, HOST, () => {
     console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
     console.log(`WebSocket server initialized for messaging`);
