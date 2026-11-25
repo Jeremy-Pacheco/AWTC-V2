@@ -64,6 +64,7 @@
       transition: all 0.3s ease;
       cursor: pointer;
       border: none;
+      font-family: inherit;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -136,10 +137,13 @@
     <% } %>
 
     <div class="error-buttons">
-      <a href="/logout" class="btn btn-primary">
-        <i class="fas fa-sign-out-alt"></i>
-        Log Out
-      </a>
+      <form method="POST" action="/logout" style="margin:0">
+        <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>" />
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-sign-out-alt"></i>
+          Log Out
+        </button>
+      </form>
       <a href="<%= frontendUrl || 'http://localhost:5173' %>" class="btn btn-secondary">
         <i class="fas fa-home"></i>
         Go to Home
