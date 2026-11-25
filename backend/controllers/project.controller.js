@@ -75,22 +75,12 @@ exports.updateProject = async (req, res) => {
     const project = await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
-    const { name, description, start_date, end_date, location, capacity, status, categoryId } = req.body;
-
-    const updateData = {
-      name,
-      description,
-      start_date,
-      end_date,
-      location,
-      capacity,
-      status
-    };
-
-    // allow updating category
-    if (typeof categoryId !== 'undefined') {
-      updateData.categoryId = categoryId;
-    }
+    // req.body was validated and whitelisted (validation/schemas.js -> projectUpdate);
+    // only the fields actually sent are changed
+    const { status } = req.body;
+    const updateData = Object.fromEntries(
+      Object.entries(req.body).filter(([, value]) => value !== undefined)
+    );
 
     if (req.file && req.file.filename) {
       updateData.filename = req.file.filename;

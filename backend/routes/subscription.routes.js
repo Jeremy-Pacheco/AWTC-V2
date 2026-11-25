@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const subscriptionController = require('../controllers/subscription.controller');
 const requireAuth = require('../middlewares/requireAuth');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 // Middleware to verify user is admin or coordinator
 const requireMessagingRole = (req, res, next) => {
@@ -52,7 +54,7 @@ router.use(requireAuth);
  *       401:
  *         description: Unauthorized - No valid token
  */
-router.post('/subscribe', subscriptionController.subscribe);
+router.post('/subscribe', validate({ body: schemas.subscribe }), subscriptionController.subscribe);
 
 /**
  * @swagger
@@ -79,7 +81,7 @@ router.post('/subscribe', subscriptionController.subscribe);
  *       401:
  *         description: Unauthorized - No valid token
  */
-router.post('/unsubscribe', subscriptionController.unsubscribe);
+router.post('/unsubscribe', validate({ body: schemas.unsubscribe }), subscriptionController.unsubscribe);
 
 /**
  * @swagger

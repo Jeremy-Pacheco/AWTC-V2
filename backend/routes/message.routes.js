@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const messageController = require('../controllers/message.controller');
 const requireAuth = require('../middlewares/requireAuth');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 // Middleware to verify user is admin or coordinator
 const requireMessagingRole = (req, res, next) => {
@@ -61,7 +63,7 @@ router.get('/conversations', messageController.getConversations);
  *       403:
  *         description: Forbidden - User must be admin or coordinator
  */
-router.get('/history/:userId', messageController.getMessageHistory);
+router.get('/history/:userId', validate({ params: schemas.userIdParams }), messageController.getMessageHistory);
 
 /**
  * @swagger
@@ -86,7 +88,7 @@ router.get('/history/:userId', messageController.getMessageHistory);
  *       403:
  *         description: Forbidden - User must be admin or coordinator
  */
-router.put('/:messageId/read', messageController.markAsRead);
+router.put('/:messageId/read', validate({ params: schemas.messageIdParams }), messageController.markAsRead);
 
 /**
  * @swagger

@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const categoryController = require('../controllers/category.controller');
 const { isAdminOrCoordinator } = require('../middlewares/role.middlewares');
+const { validate } = require('../middlewares/validate.middlewares');
+const schemas = require('../validation/schemas');
 
 /**
  * @swagger
@@ -43,7 +45,7 @@ const { isAdminOrCoordinator } = require('../middlewares/role.middlewares');
  *               items:
  *                 $ref: '#/components/schemas/Category'
  */
-router.post('/', isAdminOrCoordinator, categoryController.createCategory);
+router.post('/', isAdminOrCoordinator, validate({ body: schemas.categoryCreate }), categoryController.createCategory);
 router.get('/', categoryController.getAllCategories);
 
 /**
@@ -96,7 +98,7 @@ router.get('/', categoryController.getAllCategories);
  *       404:
  *         description: Category not found
  */
-router.put('/:id', isAdminOrCoordinator, categoryController.updateCategory);
-router.delete('/:id', isAdminOrCoordinator, categoryController.deleteCategory);
+router.put('/:id', isAdminOrCoordinator, validate({ params: schemas.idParams, body: schemas.categoryUpdate }), categoryController.updateCategory);
+router.delete('/:id', isAdminOrCoordinator, validate({ params: schemas.idParams }), categoryController.deleteCategory);
 
 module.exports = router;

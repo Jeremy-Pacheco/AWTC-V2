@@ -3,6 +3,7 @@ const { Category } = require('../models');
 // Create a new category
 exports.createCategory = async (req, res) => {
   try {
+    // req.body is validated and whitelisted (validation/schemas.js -> categoryCreate)
     const category = await Category.create(req.body);
     res.status(201).json(category);
   } catch (error) {
