@@ -6,3 +6,5 @@ ssl/
 *.key
 *.crt
 *.csr
+# Local secrets (loaded first by index.js) must never be committed
+.env*.local
