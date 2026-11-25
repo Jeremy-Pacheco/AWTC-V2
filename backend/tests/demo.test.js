@@ -184,3 +184,17 @@ describe('Demo login', () => {
     expect(res.redirect).toHaveBeenCalledWith('/');
   });
 });
+
+describe('demo seed data', () => {
+  // Messaging is staff-only (config/socket.js, routes/message.routes.js):
+  // a seeded conversation with a volunteer could never be answered.
+  it('only seeds messages between admins and coordinators', () => {
+    const { extraUsers, messages } = require('../scripts/demo-data');
+    const roleOf = new Map([...demo.DEMO_ACCOUNTS, ...extraUsers].map((u) => [u.email, u.role]));
+    expect(messages.length).toBeGreaterThan(0);
+    for (const m of messages) {
+      expect(['admin', 'coordinator']).toContain(roleOf.get(m.from));
+      expect(['admin', 'coordinator']).toContain(roleOf.get(m.to));
+    }
+  });
+});
