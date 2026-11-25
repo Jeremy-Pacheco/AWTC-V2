@@ -80,6 +80,11 @@ if (db.Category && db.Project) {
   db.Project.belongsTo(db.Category, { foreignKey: 'categoryId', as: 'category' });
 }
 
+// Project ownership: the coordinator responsible for a project (SEC-17)
+if (db.User && db.Project) {
+  db.Project.belongsTo(db.User, { foreignKey: 'ownerId', as: 'owner', onDelete: 'SET NULL' });
+}
+
 // Define relationship between User and Reviews
 if (db.User && db.Reviews) {
   db.User.hasMany(db.Reviews, { foreignKey: 'userId' });

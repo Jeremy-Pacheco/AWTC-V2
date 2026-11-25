@@ -77,6 +77,12 @@ const projectFields = {
     .int('must be an integer').min(1, 'must be at least 1').max(10000, 'must be at most 10000')),
   status: optional(projectStatus),
   categoryId: optional(id),
+  // Responsible coordinator (admins only, checked in the controller).
+  // "" = unchanged, "null" = remove the owner.
+  ownerId: z.preprocess(
+    (value) => (value === '' ? undefined : value === 'null' ? null : value),
+    id.nullable().optional()
+  ),
 };
 const datesInOrder = (data) => !(data.start_date && data.end_date) || data.end_date >= data.start_date;
 const datesMessage = { message: 'end_date must not be before start_date', path: ['end_date'] };
