@@ -26,13 +26,44 @@ function getProvider() {
   return provider;
 }
 
-/** Returns an error message, or null if the password is acceptable. */
-function validatePassword(password) {
+// Most common passwords of 8+ characters (public breach lists). NIST 800-63B
+// recommends rejecting known/compromised passwords instead of composition rules.
+const COMMON_PASSWORDS = new Set([
+  '12345678', '123456789', '1234567890', '12345678910', '87654321', '11111111', '00000000',
+  '88888888', '99999999', '11223344', '12341234', '123123123', 'password', 'password1',
+  'password12', 'password123', 'passw0rd', 'p@ssw0rd', 'p@ssword', 'qwertyuiop', 'qwerty123',
+  'qwerty12', 'qwertyui', 'asdfghjkl', 'zxcvbnm1', '1q2w3e4r', '1q2w3e4r5t', 'q1w2e3r4',
+  'iloveyou', 'iloveyou1', 'sunshine', 'princess', 'football', 'baseball', 'welcome1',
+  'welcome123', 'superman', 'trustno1', 'letmein1', 'abcd1234', 'abc12345', 'abcdefgh',
+  'aa123456', 'admin123', 'administrator', 'changeme', 'whatever', 'starwars', 'dragon12',
+  'contraseña', 'contrasena', 'contrasena1', 'contraseña1', 'contraseña123', 'teamo123',
+  'awtc1234', 'voluntario', 'voluntario1',
+]);
+
+/**
+ * Returns an error message, or null if the password is acceptable.
+ * `context` (email, name) rejects passwords built from the user's own data.
+ */
+function validatePassword(password, context = {}) {
   if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`;
   }
   if (Buffer.byteLength(password, 'utf8') > MAX_PASSWORD_LENGTH) {
     return `Password must be at most ${MAX_PASSWORD_LENGTH} bytes long`;
+  }
+  const lower = password.toLowerCase();
+  if (COMMON_PASSWORDS.has(lower) || /^(.)\1+$/.test(password)) {
+    return 'This password is too common. Choose a less predictable one';
+  }
+  const personal = [];
+  if (typeof context.email === 'string') {
+    personal.push(context.email.toLowerCase(), context.email.split('@')[0].toLowerCase());
+  }
+  if (typeof context.name === 'string') {
+    personal.push(...context.name.toLowerCase().split(/\s+/));
+  }
+  if (personal.some((part) => part.length >= 4 && lower.includes(part))) {
+    return 'Password must not contain your name or email';
   }
   return null;
 }
@@ -63,7 +94,7 @@ async function authenticate(email, password) {
  * Throws an Error with `status` 400 for validation problems.
  */
 async function registerUser({ name, email, password, role = 'volunteer' }) {
-  const passwordError = validatePassword(password);
+  const passwordError = validatePassword(password, { email, name });
   if (passwordError) {
     const err = new Error(passwordError);
     err.status = 400;

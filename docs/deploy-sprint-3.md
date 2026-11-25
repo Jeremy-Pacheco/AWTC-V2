@@ -257,7 +257,7 @@ All migrations are stored in `backend/migrations/`. Key migrations include:
 ### Default Admin Credentials
 Created automatically on first run:
 - **Email**: admin@awtc.com
-- **Password**: adminawtc1234
+- **Password**: set with `LDAP_SEED_PASSWORD` when running `scripts/sync-ldap-users.js` (the old hardcoded value was public and must not be used)
 
 ---
 

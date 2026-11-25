@@ -10,6 +10,8 @@ const KNOWN_INSECURE_VALUES = new Set([
   'SecretAWTCKey',
   'awtc_session_secret',
   'admin',
+  'adminawtc1234',
+  'config',
 ]);
 
 function requireSecret(name) {

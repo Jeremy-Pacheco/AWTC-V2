@@ -113,7 +113,9 @@ router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, userCtrl.getUserBa
  *                 format: email
  *               password:
  *                 type: string
- *                 minLength: 6
+ *                 minLength: 8
+ *                 maxLength: 72
+ *                 description: Must not be a common password or contain the user's name or email
  *               firstName:
  *                 type: string
  *               lastName:
