@@ -41,7 +41,7 @@ function VolunteerList() {
   if (loading)
     return (
       <div className="flex justify-center items-center py-16">
-        <ThreeDots height={80} width={80} color="#F0BB00" visible={true} />
+        <ThreeDots height={80} width={80} color="#12A36F" visible={true} />
       </div>
     );
 
@@ -69,7 +69,7 @@ function VolunteerList() {
           className="bg-white dark:bg-[var(--card-bg)] rounded-xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:scale-[1.02]"
         >
           {/* Header */}
-          <div className="bg-[#1f2124] p-4 h-20 flex items-center">
+          <div className="bg-ink p-4 h-20 flex items-center">
             <h3 className="font-bold text-white text-lg line-clamp-2">{item.title}</h3>
           </div>
 
@@ -82,7 +82,7 @@ function VolunteerList() {
                 href={item.organization.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#F0BB00] hover:text-[#D4A700] font-semibold text-sm hover:underline break-words"
+                className="text-brand-text hover:text-brand-text font-semibold text-sm hover:underline break-words"
               >
                 {item.organization.name}
               </a>
@@ -107,7 +107,7 @@ function VolunteerList() {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-4 py-2 rounded-3xl font-semibold text-sm transition-colors duration-200 w-full text-center"
+              className="inline-block bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold text-sm transition-colors duration-200 w-full text-center"
             >
               View Details →
             </a>

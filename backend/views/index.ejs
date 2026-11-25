@@ -3,14 +3,14 @@
   <% if (currentSection === 'overview') { %>
   <div class="section-card">
     <h2 class="section-title">
-      <i class="fas fa-chart-line" style="color: #F0BB00;"></i>
+      <i class="fas fa-chart-line" style="color: var(--accent);"></i>
       Overview
     </h2>
-    <p style="color: #4a5568; margin-bottom: 30px; font-size: 15px;">General dashboard statistics</p>
+    <p style="color: var(--text-2); margin-bottom: 30px; font-size: 15px;">General dashboard statistics</p>
     
     <div class="overview-stats">
       <div class="stat-card">
-        <div class="stat-icon" style="background: #F0BB00; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <i class="fas fa-project-diagram"></i>
         </div>
         <div class="stat-content">
@@ -20,7 +20,7 @@
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon" style="background: #F0BB00; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <i class="fas fa-tags"></i>
         </div>
         <div class="stat-content">
@@ -30,7 +30,7 @@
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon" style="background: #F0BB00; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-content">
@@ -40,7 +40,7 @@
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon" style="background: #F0BB00; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <i class="fas fa-star"></i>
         </div>
         <div class="stat-content">
@@ -50,7 +50,7 @@
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon" style="background: #F0BB00; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
           <i class="fas fa-exclamation-triangle"></i>
         </div>
         <div class="stat-content">
@@ -71,7 +71,7 @@
     
     .stat-card {
       background: white;
-      border: 1px solid #e2e8f0;
+      border: 1px solid var(--line);
       border-radius: 8px;
       padding: 20px;
       display: flex;
@@ -82,7 +82,7 @@
     
     .stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(240, 187, 0, 0.2);
+      box-shadow: 0 4px 12px rgba(18, 163, 111, 0.2);
     }
     
     .stat-icon {
@@ -104,14 +104,14 @@
     .stat-number {
       font-size: 28px;
       font-weight: 700;
-      color: #1a202c;
+      color: var(--ink);
       line-height: 1;
       margin-bottom: 5px;
     }
     
     .stat-label {
       font-size: 13px;
-      color: #718096;
+      color: var(--muted);
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.5px;

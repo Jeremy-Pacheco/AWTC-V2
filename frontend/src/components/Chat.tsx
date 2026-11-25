@@ -407,7 +407,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
         {/* Search new user */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-700">
           <select
-            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-[var(--bg-tertiary)] text-gray-800 dark:text-white"
+            className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-[var(--bg-tertiary)] text-gray-800 dark:text-white"
             onChange={(e) => {
               const user = availableUsers.find(u => u.id === parseInt(e.target.value));
               if (user) handleSelectUser(user);
@@ -438,8 +438,8 @@ export default function Chat({ currentUser, token }: ChatProps) {
               })}
               className={`p-4 border-b border-gray-100 dark:border-gray-700 cursor-pointer transition ${
                 selectedUser?.id === conv.userId 
-                  ? 'bg-yellow-50 dark:!bg-[#1a1a1a]' 
-                  : 'hover:bg-gray-50 dark:hover:!bg-[#252525]'
+                  ? 'bg-brand-50 dark:!bg-surface' 
+                  : 'hover:bg-gray-50 dark:hover:!bg-surface-2'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -456,12 +456,12 @@ export default function Chat({ currentUser, token }: ChatProps) {
                             (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; 
                           }}
                         />
-                        <div className="w-12 h-12 rounded-full bg-yellow-500 items-center justify-center text-white font-bold hidden">
+                        <div className="w-12 h-12 rounded-full bg-brand-500 items-center justify-center text-on-brand font-bold hidden">
                           {conv.userName.charAt(0).toUpperCase()}
                         </div>
                       </>
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
+                      <div className="w-12 h-12 rounded-full bg-brand-500 flex items-center justify-center text-on-brand font-bold">
                         {conv.userName.charAt(0).toUpperCase()}
                       </div>
                     )}
@@ -478,7 +478,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
                   </div>
                 </div>
                 {conv.unreadCount > 0 && (
-                  <div className="ml-2 w-6 h-6 bg-yellow-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  <div className="ml-2 w-6 h-6 bg-brand-500 text-on-brand rounded-full flex items-center justify-center text-xs font-bold">
                     {conv.unreadCount}
                   </div>
                 )}
@@ -516,12 +516,12 @@ export default function Chat({ currentUser, token }: ChatProps) {
                         className="w-10 h-10 rounded-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }}
                       />
-                      <div className="w-10 h-10 rounded-full bg-yellow-500 items-center justify-center text-white font-bold hidden">
+                      <div className="w-10 h-10 rounded-full bg-brand-500 items-center justify-center text-on-brand font-bold hidden">
                         {selectedUser.name.charAt(0).toUpperCase()}
                       </div>
                     </>
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
+                    <div className="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-on-brand font-bold">
                       {selectedUser.name.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -568,11 +568,11 @@ export default function Chat({ currentUser, token }: ChatProps) {
                     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         isOwnMessage 
-                          ? 'bg-yellow-500 text-white rounded-br-none' 
+                          ? 'bg-brand text-on-brand rounded-br-none' 
                           : 'bg-white dark:bg-[var(--bg-secondary)] text-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-bl-none'
                       }`}>
                         <p className="break-words">{msg.content}</p>
-                        <div className={`text-xs mt-1 ${isOwnMessage ? 'text-yellow-100' : 'text-gray-500 dark:text-gray-400'}`}>
+                        <div className={`text-xs mt-1 ${isOwnMessage ? 'text-on-brand/70' : 'text-gray-500 dark:text-gray-400'}`}>
                           {formatTime(msg.createdAt)}
                           {isOwnMessage && (
                             <span className="ml-1">{msg.isRead ? '✓✓' : '✓'}</span>
@@ -605,12 +605,12 @@ export default function Chat({ currentUser, token }: ChatProps) {
                   value={messageInput}
                   onChange={(e) => handleTyping(e.target.value)}
                   placeholder={t('chat.typeMessage')}
-                  className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-[var(--bg-tertiary)] text-gray-800 dark:text-white"
+                  className="flex-1 p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white dark:bg-[var(--bg-tertiary)] text-gray-800 dark:text-white"
                 />
                 <button
                   type="submit"
                   disabled={!messageInput.trim() || !isConnected}
-                  className="px-6 py-3 bg-[#F0BB00] text-black rounded-lg hover:bg-[#1f2124] hover:text-white disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition"
+                  className="px-6 py-3 bg-brand text-black rounded-lg hover:bg-ink hover:text-white disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition"
                 >
                   {t('chat.send')}
                 </button>
@@ -623,7 +623,7 @@ export default function Chat({ currentUser, token }: ChatProps) {
               {/* Button to open sidebar on mobile when no conversation selected */}
               <button
                 onClick={() => setShowSidebar(true)}
-                className="lg:hidden mb-4 px-6 py-3 bg-[#F0BB00] text-black rounded-lg hover:bg-[#1f2124] hover:text-white transition flex items-center gap-2 mx-auto"
+                className="lg:hidden mb-4 px-6 py-3 bg-brand text-black rounded-lg hover:bg-ink hover:text-white transition flex items-center gap-2 mx-auto"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

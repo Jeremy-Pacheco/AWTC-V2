@@ -3,45 +3,100 @@
 /* Force Tailwind to use class-based dark mode instead of prefers-color-scheme */
 @variant dark (&:where(.dark, .dark *));
 
-/**--------- DARK MODE VARIABLES --------- */
+/**--------- DESIGN TOKENS (Esmeralda palette) ---------
+ * Four base colors: paper (background), ink (text), muted (secondary text)
+ * and emerald (accent). Everything else is derived from them.
+ * Tokens that change between light and dark read the CSS variables below
+ * (`@theme inline` keeps the var() so the .dark class can switch them).
+ */
+@theme inline {
+  --color-brand: var(--accent-color);
+  --color-brand-hover: var(--accent-hover);
+  --color-brand-text: var(--accent-text);
+  --color-on-brand: var(--on-accent);
+  --color-ink: var(--ink);
+  --color-muted: var(--text-muted);
+  --color-danger: var(--danger-color);
+  --color-surface: var(--bg-secondary);
+  --color-surface-2: var(--bg-tertiary);
+}
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Emerald accent scale (500 = brand color in light mode) */
+  --color-brand-50: #ecf8f2;
+  --color-brand-100: #d3f0e2;
+  --color-brand-200: #a8e2c8;
+  --color-brand-300: #6fd0a8;
+  --color-brand-400: #2fbf86;
+  --color-brand-500: #12a36f;
+  --color-brand-600: #0b7a52;
+  --color-brand-700: #0a6143;
+  --color-brand-800: #0a4c35;
+  --color-brand-900: #083b2a;
+
+  /* Neutrals with a slight green bias so greys belong to the palette */
+  --color-gray-50: #f4f7f5;
+  --color-gray-100: #e9eeeb;
+  --color-gray-200: #d6ded9;
+  --color-gray-300: #b9c4be;
+  --color-gray-400: #8e9c94;
+  --color-gray-500: #66766d;
+  --color-gray-600: #57665e;
+  --color-gray-700: #3e4b44;
+  --color-gray-800: #26322c;
+  --color-gray-900: #16201b;
+  --color-gray-950: #0d1a14;
+
+  --color-black: #0d1a14;
+}
+
+/**--------- THEME VARIABLES (light / dark) --------- */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f3f4f6;
-  --bg-tertiary: #e5e7eb;
-  --text-primary: #000000;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
-  --border-color: #d1d5db;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --bg-primary: #f7faf8;
+  --bg-secondary: #eef3f0;
+  --bg-tertiary: #e1e9e4;
+  --text-primary: #0d1a14;
+  --text-secondary: #3e4b44;
+  --text-muted: #57665e;
+  --border-color: #d6ded9;
+  --shadow-color: rgba(13, 26, 20, 0.08);
   --card-bg: #ffffff;
   --nav-bg: #ffffff;
-  --footer-bg: #1f2124;
-  --accent-color: #F0BB00;
-  --accent-hover: #d4a600;
-  --danger-color: #B33A3A;
-  --scrollbar-track: #f1f1f1;
-  --scrollbar-thumb: rgb(177, 177, 177);
-  --scrollbar-thumb-hover: #1f2124;
+  --footer-bg: #0d1a14;
+  --accent-color: #12a36f;
+  --accent-hover: #0b7a52;
+  --accent-text: #0b7a52;
+  --on-accent: #04140d;
+  --ink: #0d1a14;
+  --danger-color: #b33a3a;
+  --scrollbar-track: #eef3f0;
+  --scrollbar-thumb: #b9c4be;
+  --scrollbar-thumb-hover: #57665e;
 }
 
 .dark {
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --bg-tertiary: #2d2d2d;
-  --text-primary: #ffffff;
-  --text-secondary: #e5e7eb;
-  --text-muted: #9ca3af;
-  --border-color: #404040;
+  --bg-primary: #0a1410;
+  --bg-secondary: #111d18;
+  --bg-tertiary: #1a2822;
+  --text-primary: #eaf3ee;
+  --text-secondary: #c5d3cb;
+  --text-muted: #93a89c;
+  --border-color: #26352e;
   --shadow-color: rgba(0, 0, 0, 0.5);
-  --card-bg: #1e1e1e;
-  --nav-bg: #1a1a1a;
-  --footer-bg: #0a0a0a;
-  --accent-color: #F0BB00;
-  --accent-hover: #ffc926;
+  --card-bg: #111d18;
+  --nav-bg: #0d1713;
+  --footer-bg: #060d0a;
+  --accent-color: #2fcb8e;
+  --accent-hover: #4fd7a2;
+  --accent-text: #4fd7a2;
+  --on-accent: #04140d;
+  --ink: #20352b;
   --danger-color: #ef4444;
-  --scrollbar-track: #2d2d2d;
-  --scrollbar-thumb: #525252;
-  --scrollbar-thumb-hover: #737373;
+  --scrollbar-track: #111d18;
+  --scrollbar-thumb: #2e4037;
+  --scrollbar-thumb-hover: #4a5e54;
 }
 
 /**--------- BASE DARK MODE STYLES --------- */
@@ -65,58 +120,58 @@ body {
   .Display {
     font-size: 4rem; /**64px*/
     font-weight: bold;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h1 {
     color: var(--text-primary);
     font-size: 3.5rem; /**56px*/
     font-weight: bold;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h2 {
     color: var(--text-primary);
     font-size: 3rem;   /**48px*/
     font-weight: 600;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h3 {
     color: var(--text-primary);
     font-size: 2.5rem; /**40px*/
     font-weight: 600;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h4 {/**Subtitle 1 */
     color: var(--text-primary);
     font-size: 1.75rem; /**28px*/
     font-weight: bold;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   p {
     color: var(--text-primary);
     font-size: 1.125rem; /**18px*/
     font-weight: 400;
-    font-family: "Arial";
+    font-family: var(--font-sans);
     text-align: justify;
   }
   .body-small {
     font-size: 1rem; /**16px*/
     font-weight: 400;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .text-small-light {
     font-size: 0.875rem; /**14px*/
     font-weight: 300;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .tiny-extralight {
     font-size: 0.6875rem; /**11px*/
     font-weight: 200;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .footer-title {
     font-size: 1.125rem; /**18px*/
     font-weight: bold;
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
 }
 
@@ -179,43 +234,43 @@ body {
 @media (max-width: 768px) {
   .Display {
     font-size: 2.25rem; /**36px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h1 {
     font-size: 1.875rem; /**30px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h2 {
     font-size: 1.75rem;  /**28px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h3 {
     font-size: 1.625rem; /**26px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   h4 {
     font-size: 1.375rem; /**22px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   p {
     font-size: 1rem;     /**16px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .body-small {
     font-size: 0.875rem; /**14px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .text-small-light {
     font-size: 0.75rem;  /**12px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .tiny-extralight {
     font-size: 0.6875rem;/**11px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
   .footer-title {
     font-size: 1rem;     /**16px*/
-    font-family: "Arial";
+    font-family: var(--font-sans);
   }
 }
 
@@ -238,17 +293,16 @@ body {
   color: var(--text-primary) !important;
 }
 
-/* Keep yellow background on yellow buttons in dark mode (only when not hovering) */
-.dark button[class*="bg-[#F0BB00]"]:not(:hover),
-.dark a[class*="bg-[#F0BB00]"]:not(:hover),
-.dark [class*="bg-yellow-500"]:not(:hover) {
-  background-color: #F0BB00 !important;
-  color: #000000 !important;
+/* Keep the accent background on accent buttons in dark mode (only when not hovering) */
+.dark button[class*="bg-brand"]:not(:hover),
+.dark a[class*="bg-brand"]:not(:hover),
+.dark label[class*="bg-brand"]:not(:hover) {
+  color: var(--on-accent) !important;
 }
 
-/* White text for other buttons in dark mode */
-.dark button.text-black:not([class*="bg-[#F0BB00]"]):not([class*="bg-yellow"]),
-.dark .text-black:not([class*="bg-[#F0BB00]"]):not([class*="bg-yellow"]) {
+/* Light text for other "text-black" elements in dark mode */
+.dark button.text-black:not([class*="bg-brand"]),
+.dark .text-black:not([class*="bg-brand"]) {
   color: var(--text-primary) !important;
 }
 
@@ -311,13 +365,17 @@ body {
   background-color: var(--bg-primary) !important;
 }
 
-/** Fix for yellow backgrounds in prompts/alerts */
-.dark .bg-yellow-50 {
-  background-color: rgba(240, 187, 0, 0.1) !important;
+/** Soft accent backgrounds in prompts/alerts */
+.dark .bg-brand-50 {
+  background-color: rgba(47, 203, 142, 0.1) !important;
 }
 
-.dark .border-yellow-100 {
-  border-color: rgba(240, 187, 0, 0.3) !important;
+.dark .hover\:bg-brand-100:hover {
+  background-color: rgba(47, 203, 142, 0.18) !important;
+}
+
+.dark .border-brand-100 {
+  border-color: rgba(47, 203, 142, 0.3) !important;
 }
 
 /** Fix for red backgrounds in alerts/errors */

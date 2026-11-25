@@ -117,7 +117,7 @@ function AboutSection() {
           {t('home.aboutSection.description')}
         </p>
         <NavLink to="/aboutus">
-          <button className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto text-center transition-colors duration-300">
+          <button className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto text-center transition-colors duration-300">
             {t('home.aboutSection.readMore')}
           </button>
         </NavLink>
@@ -377,7 +377,7 @@ function ReviewsSection({
         {isLoggedIn && (
           <button
             onClick={() => setShowReviewModal(true)}
-            className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto transition-colors duration-300 mb-4"
+            className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto transition-colors duration-300 mb-4"
           >
             {t('reviews.writeReview')}
           </button>
@@ -409,7 +409,7 @@ function ReviewsSection({
                       />
                     ) : null}
                     <div 
-                      className={`w-10 h-10 rounded-full bg-[#F0BB00] flex items-center justify-center text-white font-bold text-lg ${review.user?.profileImage ? 'hidden' : ''}`}
+                      className={`w-10 h-10 rounded-full bg-brand flex items-center justify-center text-on-brand font-bold text-lg ${review.user?.profileImage ? 'hidden' : ''}`}
                     >
                       {getUserDisplayName(review.user).charAt(0).toUpperCase()}
                     </div>
@@ -469,7 +469,7 @@ function ReviewsSection({
                     <textarea
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
-                      className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:ring-2 focus:ring-yellow-400 outline-none resize-none bg-gray-50"
+                      className="w-full border border-gray-200 p-3 rounded-xl text-sm focus:ring-2 focus:ring-brand-400 outline-none resize-none bg-gray-50"
                     />
 
                     {review.image && !editRemoveImage && !editSelectedFile && (
@@ -565,7 +565,7 @@ function ReviewsSection({
                       </button>
                       <button
                         onClick={() => saveEdit(review.id)}
-                        className="px-4 py-1.5 rounded-full text-xs font-medium bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white"
+                        className="px-4 py-1.5 rounded-full text-xs font-medium bg-brand text-black hover:bg-ink hover:text-white"
                       >
                         {t('common.save')}
                       </button>
@@ -582,7 +582,7 @@ function ReviewsSection({
         </div>
 
         {!isLoggedIn && (
-          <div className="w-full bg-yellow-50 p-6 md:p-8 rounded-3xl text-center border border-yellow-100">
+          <div className="w-full bg-brand-50 p-6 md:p-8 rounded-3xl text-center border border-brand-100">
             <h3 className="font-bold text-lg mb-2 text-gray-800">
               {t('reviews.joinConversation')}
             </h3>
@@ -592,7 +592,7 @@ function ReviewsSection({
 
             <button
               onClick={onOpenSignup}
-              className="bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full transition-colors duration-300"
+              className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full transition-colors duration-300"
             >
               {t('reviews.addReview')}
             </button>
@@ -619,7 +619,7 @@ function ReviewsSection({
 
             <form onSubmit={handleCreate}>
               <textarea
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 h-40 resize-none mb-4 focus:ring-2 focus:ring-[#F0BB00] focus:bg-white outline-none transition-all placeholder-gray-400"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 h-40 resize-none mb-4 focus:ring-2 focus:ring-brand focus:bg-white outline-none transition-all placeholder-gray-400"
                 placeholder={t('reviews.placeholder')}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
@@ -676,7 +676,7 @@ function ReviewsSection({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white font-bold py-3 rounded-full transition-all shadow-lg hover:shadow-xl"
+                  className="flex-1 bg-brand text-black hover:bg-ink hover:text-white font-bold py-3 rounded-full transition-all shadow-lg hover:shadow-xl"
                 >
                   {t('reviews.postReview')}
                 </button>

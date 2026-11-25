@@ -141,13 +141,13 @@ function NavBar() {
             <>
               <button
                 onClick={() => navigate("/dashboard")}
-                className="px-4 py-2 rounded-3xl border border-[#767676] hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.profile')}
               </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 rounded-3xl bg-[#B33A3A] text-white hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="px-4 py-2 rounded-3xl bg-danger text-white hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.logout')}
               </button>
@@ -156,13 +156,13 @@ function NavBar() {
             <>
               <button
                 onClick={() => openAuth("login")}
-                className="px-4 py-2 rounded-3xl border border-[#767676] hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.login')}
               </button>
               <button
                 onClick={() => openAuth("signup")}
-                className="px-4 py-2 rounded-3xl bg-[#F0BB00] text-black hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="px-4 py-2 rounded-3xl bg-brand text-black hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.signup')}
               </button>
@@ -211,28 +211,28 @@ function NavBar() {
           <NavLink 
             to="/home" 
             onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-[#F0BB00]" : "text-gray-800 dark:text-gray-200 hover:text-[#F0BB00]"}`}
+            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
           >
             {t('nav.home')}
           </NavLink>
           <NavLink 
             to="/volunteering" 
             onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-[#F0BB00]" : "text-gray-800 dark:text-gray-200 hover:text-[#F0BB00]"}`}
+            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
           >
             {t('nav.volunteering')}
           </NavLink>
           <NavLink 
             to="/moreinfo" 
             onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-[#F0BB00]" : "text-gray-800 dark:text-gray-200 hover:text-[#F0BB00]"}`}
+            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
           >
             {t('nav.info')}
           </NavLink>
           <NavLink 
             to="/aboutus" 
             onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-[#F0BB00]" : "text-gray-800 dark:text-gray-200 hover:text-[#F0BB00]"}`}
+            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
           >
             {t('nav.aboutUs')}
           </NavLink>
@@ -250,13 +250,13 @@ function NavBar() {
             <>
               <button 
                 onClick={() => {navigate("/dashboard"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl border border-[#767676] dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="w-full px-4 py-2 rounded-3xl border border-muted dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.profile')}
               </button>
               <button 
                 onClick={() => {handleLogout(); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl bg-[#B33A3A] text-white text-center hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="w-full px-4 py-2 rounded-3xl bg-danger text-white text-center hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.logout')}
               </button>
@@ -265,13 +265,13 @@ function NavBar() {
             <>
               <button 
                 onClick={() => {openAuth("login"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl border border-[#767676] dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="w-full px-4 py-2 rounded-3xl border border-muted dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.login')}
               </button>
               <button 
                 onClick={() => {openAuth("signup"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl bg-[#F0BB00] text-black text-center hover:bg-[#1f2124] hover:text-white transition-colors duration-200"
+                className="w-full px-4 py-2 rounded-3xl bg-brand text-black text-center hover:bg-ink hover:text-white transition-colors duration-200"
               >
                 {t('common.signup')}
               </button>

@@ -1,0 +1,32 @@
+/* AWTC design tokens: Esmeralda palette (shared by every EJS view).
+ * Four base colors: paper (background), ink (text), muted (secondary text)
+ * and emerald (accent). Every other tone is derived from them.
+ * Keep in sync with frontend/src/index.css.
+ */
+:root {
+  /* The EJS dashboard only has a light design: keep native controls light too */
+  color-scheme: light;
+
+  /* Base */
+  --paper: #f7faf8;
+  --ink: #0d1a14;
+  --muted: #57665e;
+  --accent: #12a36f;
+
+  /* Derived */
+  --surface: #f4f7f5;
+  --line: #d6ded9;
+  --ink-2: #26322c;
+  --text-2: #3e4b44;
+  --gray-100: #e9eeeb;
+  --gray-300: #b9c4be;
+  --gray-400: #8e9c94;
+  --accent-hover: #0f9264;
+  --accent-text: #0b7a52;
+  --accent-ink: #0a4c35;
+  --accent-soft: #ecf8f2;
+  --accent-200: #a8e2c8;
+  --on-accent: #04140d;
+
+  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

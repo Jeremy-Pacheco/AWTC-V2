@@ -67,7 +67,7 @@ export default function FloatingMessageButton() {
   return (
     <button
       onClick={() => navigate('/messages')}
-      className="fixed bottom-6 right-6 z-50 bg-[#F0BB00] hover:bg-[#d9a700] text-black rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 group"
+      className="fixed bottom-6 right-6 z-50 bg-brand hover:bg-ink hover:text-white text-black rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 group"
       aria-label="Open messages"
     >
       {/* Message icon */}

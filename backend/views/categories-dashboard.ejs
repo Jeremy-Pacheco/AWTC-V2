@@ -4,7 +4,7 @@
 
 <div class="section-card">
   <h2 class="section-title">
-    <i class="fas fa-tags" style="color: #F0BB00;"></i>
+    <i class="fas fa-tags" style="color: var(--accent);"></i>
     Categories Dashboard
   </h2>
 </div>
@@ -36,7 +36,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-bar" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-bar" style="color: var(--accent); margin-right: 8px;"></i>
           Categories Usage
         </div>
         <div class="chart-subtitle">Projects per category</div>
@@ -48,7 +48,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-pie" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-pie" style="color: var(--accent); margin-right: 8px;"></i>
           Volunteers Distribution
         </div>
         <div class="chart-subtitle">Total volunteers per category</div>
@@ -60,7 +60,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-line" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-line" style="color: var(--accent); margin-right: 8px;"></i>
           Projects Created Trend
         </div>
         <div class="chart-subtitle">Last 7 days by category</div>
@@ -72,7 +72,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-area" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-area" style="color: var(--accent); margin-right: 8px;"></i>
           Category Activity
         </div>
         <div class="chart-subtitle">Total projects and volunteers</div>
@@ -117,7 +117,7 @@
           ${cat.description ? `<div class="category-item-description">${escapeHtml(cat.description)}</div>` : ''}
           <div class="category-item-stats">
             <span class="category-item-stat">
-              <i class="fas fa-project-diagram" style="color: #F0BB00;"></i>
+              <i class="fas fa-project-diagram" style="color: #12A36F;"></i>
               ${projectsInCat} Projects
             </span>
             <span class="category-item-stat">
@@ -138,7 +138,7 @@
     })).filter(d => d.projects > 0).sort((a, b) => b.projects - a.projects);
 
     if (categoryData.length === 0) {
-      document.getElementById('categoriesUsageChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('categoriesUsageChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -179,7 +179,7 @@
       .attr('width', x.bandwidth())
       .attr('y', height)
       .attr('height', 0)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('rx', 4)
       .transition()
       .duration(800)
@@ -195,7 +195,7 @@
       .attr('x', d => x(d.name) + x.bandwidth() / 2)
       .attr('y', d => y(d.projects) - 5)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1a202c')
+      .attr('fill', '#0D1A14')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
       .text(d => d.projects);
@@ -233,7 +233,7 @@
     }).filter(d => d.count > 0);
 
     if (volunteerData.length === 0) {
-      document.getElementById('volunteersPerCategoryChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('volunteersPerCategoryChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -251,7 +251,7 @@
 
     const color = d3.scaleOrdinal()
       .domain(volunteerData.map(d => d.name))
-      .range(['#F0BB00', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899']);
+      .range(['#12A36F', '#26322C', '#6FD0A8', '#8E9C94', '#B9C4BE', '#0A6143']);
 
     const pie = d3.pie()
       .value(d => d.count)
@@ -287,14 +287,14 @@
       .attr('dy', '-0.5em')
       .style('font-size', '32px')
       .style('font-weight', '700')
-      .style('fill', '#1a202c')
+      .style('fill', '#0D1A14')
       .text(volunteerData.reduce((s, d) => s + d.count, 0));
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '1.2em')
       .style('font-size', '14px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Total Volunteers');
 
     // Legend
@@ -316,7 +316,7 @@
       .attr('y', 7)
       .attr('dy', '.35em')
       .style('font-size', '12px')
-      .style('fill', '#4a5568')
+      .style('fill', '#3E4B44')
       .text(d => `${d.name} (${d.count})`);
   }
 
@@ -369,7 +369,7 @@
 
     const color = d3.scaleOrdinal()
       .domain(categoriesData.map(c => c.name))
-      .range(['#F0BB00', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899']);
+      .range(['#12A36F', '#26322C', '#6FD0A8', '#8E9C94', '#B9C4BE', '#0A6143']);
 
     // Grid
     svg.append('g')
@@ -421,7 +421,7 @@
         .attr('x', 20)
         .attr('y', 4)
         .style('font-size', '11px')
-        .style('fill', '#4a5568')
+        .style('fill', '#3E4B44')
         .text(cat.name);
     });
   }
@@ -448,7 +448,7 @@
     }).filter(d => d.projects > 0 || d.volunteers > 0);
 
     if (activityData.length === 0) {
-      document.getElementById('categoryActivityChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('categoryActivityChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -486,7 +486,7 @@
       .attr('cx', d => x(d.projects))
       .attr('cy', d => y(d.volunteers))
       .attr('r', d => Math.max(d.radius * 3, 20))
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('opacity', 0.6)
       .attr('stroke', '#f09500')
       .attr('stroke-width', 2);
@@ -503,7 +503,7 @@
       .attr('dy', '.3em')
       .style('font-size', '11px')
       .style('font-weight', '600')
-      .style('fill', '#1a202c')
+      .style('fill', '#0D1A14')
       .text(d => d.name.substring(0, 3).toUpperCase());
 
     // X axis
@@ -521,7 +521,7 @@
       .attr('y', height + 40)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Projects');
 
     svg.append('text')
@@ -530,7 +530,7 @@
       .attr('y', -35)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Volunteers');
   }
 

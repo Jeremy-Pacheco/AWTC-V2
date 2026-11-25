@@ -4,7 +4,7 @@
 
 <div class="section-card">
   <h2 class="section-title">
-    <i class="fas fa-tasks" style="color: #F0BB00;"></i>
+    <i class="fas fa-tasks" style="color: var(--accent);"></i>
     Projects Dashboard
   </h2>
 </div>
@@ -36,7 +36,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-pie" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-pie" style="color: var(--accent); margin-right: 8px;"></i>
           Projects by Status
         </div>
         <div class="chart-subtitle">Distribution of active, finished & cancelled</div>
@@ -48,7 +48,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-line" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-line" style="color: var(--accent); margin-right: 8px;"></i>
           Projects Created Monthly
         </div>
         <div class="chart-subtitle">Trend over the last 12 months</div>
@@ -60,7 +60,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-bar" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-bar" style="color: var(--accent); margin-right: 8px;"></i>
           Projects by Category
         </div>
         <div class="chart-subtitle">Distribution across categories</div>
@@ -72,7 +72,7 @@
     <div class="chart-container">
       <div class="chart-header">
         <div class="chart-title">
-          <i class="fas fa-chart-area" style="color: #F0BB00; margin-right: 8px;"></i>
+          <i class="fas fa-chart-area" style="color: var(--accent); margin-right: 8px;"></i>
           Occupancy & Engagement
         </div>
         <div class="chart-subtitle">Capacity vs Volunteer Participation</div>
@@ -116,7 +116,7 @@
           ${category ? `<span class="project-item-category">${escapeHtml(category.name)}</span>` : ''}
           <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
             <span class="project-item-status ${statusClass}">${statusText}</span>
-            <span style="font-size: 12px; color: #718096;">
+            <span style="font-size: 12px; color: #57665E;">
               <i class="fas fa-users" style="color: #4CAF50;"></i> ${volunteerCount} volunteers
             </span>
           </div>
@@ -153,7 +153,7 @@
     console.log('Status data after filter:', statusData);
 
     if (statusData.length === 0 || statusData.reduce((s, d) => s + d.count, 0) === 0) {
-      document.getElementById('projectsStatusChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('projectsStatusChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -171,7 +171,7 @@
 
     const color = d3.scaleOrdinal()
       .domain(['active', 'finished', 'cancelled'])
-      .range(['#48bb78', '#4299e1', '#f56565']);
+      .range(['#0A6143', '#6FD0A8', '#f56565']);
 
     const pie = d3.pie()
       .value(d => d.count)
@@ -207,14 +207,14 @@
       .attr('dy', '-0.5em')
       .style('font-size', '32px')
       .style('font-weight', '700')
-      .style('fill', '#1a202c')
+      .style('fill', '#0D1A14')
       .text(statusData.reduce((s, d) => s + d.count, 0));
 
     svg.append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '1.2em')
       .style('font-size', '14px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Total Projects');
 
     // Legend
@@ -236,7 +236,7 @@
       .attr('y', 7)
       .attr('dy', '.35em')
       .style('font-size', '12px')
-      .style('fill', '#4a5568')
+      .style('fill', '#3E4B44')
       .text(d => `${d.status.charAt(0).toUpperCase() + d.status.slice(1)} (${d.count})`);
   }
 
@@ -295,7 +295,7 @@
     svg.append('path')
       .datum(last12Months)
       .attr('fill', 'none')
-      .attr('stroke', '#F0BB00')
+      .attr('stroke', '#12A36F')
       .attr('stroke-width', 3)
       .attr('d', line);
 
@@ -308,7 +308,7 @@
 
     svg.append('path')
       .datum(last12Months)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('opacity', 0.1)
       .attr('d', area);
 
@@ -331,7 +331,7 @@
       .attr('cx', d => x(d.month))
       .attr('cy', d => y(d.count))
       .attr('r', 4)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('stroke', '#fff')
       .attr('stroke-width', 2)
       .on('mouseover', function(event, d) {
@@ -369,7 +369,7 @@
     })).filter(d => d.projects > 0).sort((a, b) => b.projects - a.projects);
 
     if (categoryData.length === 0) {
-      document.getElementById('projectsCategoryChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('projectsCategoryChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -410,7 +410,7 @@
       .attr('width', x.bandwidth())
       .attr('y', height)
       .attr('height', 0)
-      .attr('fill', '#F0BB00')
+      .attr('fill', '#12A36F')
       .attr('rx', 4)
       .transition()
       .duration(800)
@@ -426,7 +426,7 @@
       .attr('x', d => x(d.name) + x.bandwidth() / 2)
       .attr('y', d => y(d.projects) - 5)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#1a202c')
+      .attr('fill', '#0D1A14')
       .attr('font-size', '12px')
       .attr('font-weight', '600')
       .text(d => d.projects);
@@ -463,7 +463,7 @@
     }).filter(d => d.capacity > 0 && (d.volunteers > 0 || d.capacity > 0));
 
     if (occupancyData.length === 0) {
-      document.getElementById('projectsOccupancyChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #718096;">No data available</p>';
+      document.getElementById('projectsOccupancyChart').innerHTML = '<p style="padding: 20px; text-align: center; color: #57665E;">No data available</p>';
       return;
     }
 
@@ -490,7 +490,7 @@
     // Color scale based on occupancy percentage
     const colorScale = d3.scaleLinear()
       .domain([0, 50, 100])
-      .range(['#f56565', '#F0BB00', '#48bb78'])
+      .range(['#f56565', '#12A36F', '#0A6143'])
       .clamp(true);
 
     // Grid
@@ -551,7 +551,7 @@
       .attr('y', height + 40)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Capacity');
 
     svg.append('text')
@@ -560,7 +560,7 @@
       .attr('y', -35)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .text('Active Volunteers');
 
     // Legend for color scale
@@ -569,14 +569,14 @@
       .attr('x', width - 100)
       .attr('y', legendY)
       .style('font-size', '11px')
-      .style('fill', '#718096')
+      .style('fill', '#57665E')
       .style('font-weight', '600')
       .text('Occupancy:');
 
     const legendItems = [
       { color: '#f56565', label: 'Low' },
-      { color: '#F0BB00', label: 'Med' },
-      { color: '#48bb78', label: 'High' }
+      { color: '#12A36F', label: 'Med' },
+      { color: '#0A6143', label: 'High' }
     ];
 
     legendItems.forEach((item, i) => {
@@ -592,7 +592,7 @@
         .attr('x', 10)
         .attr('y', 4)
         .style('font-size', '10px')
-        .style('fill', '#718096')
+        .style('fill', '#57665E')
         .text(item.label);
     });
   }

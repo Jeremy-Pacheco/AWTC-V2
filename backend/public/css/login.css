@@ -9,11 +9,11 @@
 }
 
 body { 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font);
   margin: 0;
   padding: 0;
-  color: #1a202c;
-  background: #ffffff;
+  color: var(--ink);
+  background: var(--paper);
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -23,8 +23,8 @@ body {
 .login-container {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
-  border: 2px solid #F0BB00;
+  box-shadow: 0 12px 40px rgba(13, 26, 20, 0.08);
+  border: 1px solid var(--line);
   padding: 40px;
   max-width: 450px;
   width: 90%;
@@ -42,7 +42,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #1a202c;
+  color: var(--ink);
   font-size: 60px;
 }
 
@@ -55,13 +55,13 @@ body {
 .login-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a202c;
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
 .login-subtitle {
   font-size: 14px;
-  color: #718096;
+  color: var(--muted);
 }
 
 .error-message {
@@ -82,15 +82,17 @@ body {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--ink-2);
   margin-bottom: 8px;
 }
 
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #e2e8f0;
+  border: 1px solid var(--line);
   border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
   font-size: 15px;
   transition: all 0.2s ease;
   font-family: inherit;
@@ -98,8 +100,8 @@ body {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(18, 163, 111, 0.18);
 }
 
 .form-actions {
@@ -111,10 +113,10 @@ body {
 
 .btn-primary {
   flex: 1;
-  background: #F0BB00;
-  color: #1a202c;
+  background: var(--accent);
+  color: var(--ink);
   padding: 14px 24px;
-  border: 1px solid #767676;
+  border: 1px solid var(--muted);
   border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
@@ -127,10 +129,10 @@ body {
 }
 
 .btn-primary:hover {
-  background: #1f2124;
+  background: var(--ink);
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(240, 187, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(18, 163, 111, 0.3);
 }
 
 .btn-primary:active {
@@ -138,7 +140,7 @@ body {
 }
 
 .btn-secondary {
-  color: #718096;
+  color: var(--muted);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -147,29 +149,29 @@ body {
 }
 
 .btn-secondary:hover {
-  color: #2d3748;
+  color: var(--ink-2);
 }
 
 /* Demo mode (DEMO_MODE=true) */
 .demo-box {
   margin-top: 24px;
   padding: 16px;
-  border: 1px dashed #d69e2e;
+  border: 1px dashed var(--accent);
   border-radius: 10px;
-  background: #fffaf0;
+  background: var(--accent-soft);
   text-align: center;
 }
 
 .demo-title {
   margin: 0 0 6px;
   font-weight: 600;
-  color: #744210;
+  color: var(--accent-ink);
 }
 
 .demo-text {
   margin: 0 0 12px;
   font-size: 13px;
-  color: #4a5568;
+  color: var(--text-2);
 }
 
 .demo-button {
@@ -177,24 +179,24 @@ body {
   padding: 12px 16px;
   border: none;
   border-radius: 8px;
-  background: #F0BB00;
-  color: #1a202c;
+  background: var(--accent);
+  color: var(--ink);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .demo-button:hover {
-  background: #d9a800;
+  background: var(--accent-hover);
 }
 
 .login-footer {
   text-align: center;
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--line);
   font-size: 13px;
-  color: #718096;
+  color: var(--muted);
 }
 
 /* Mobile Responsive Styles */

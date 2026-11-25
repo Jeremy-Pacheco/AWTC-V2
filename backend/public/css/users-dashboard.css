@@ -47,7 +47,7 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--line);
 }
 
 @media (max-width: 768px) {
@@ -62,21 +62,21 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #F0BB00;
+  border-bottom: 2px solid var(--accent);
 }
 
 .user-list-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1a202c;
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .user-count-badge {
-  background: #F0BB00;
-  color: #1a202c;
+  background: var(--accent);
+  color: var(--ink);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -86,23 +86,23 @@
 .user-item {
   padding: 16px;
   margin-bottom: 12px;
-  background: #f7fafc;
+  background: var(--surface);
   border-radius: 8px;
-  border-left: 3px solid #cbd5e0;
+  border-left: 3px solid var(--gray-300);
   transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .user-item:hover {
   background: #fff;
-  border-left-color: #F0BB00;
+  border-left-color: var(--accent);
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   transform: translateX(4px);
 }
 
 .user-item-name {
   font-weight: 600;
-  color: #1a202c;
+  color: var(--ink);
   font-size: 15px;
   margin-bottom: 4px;
   word-break: break-word;
@@ -110,7 +110,7 @@
 
 .user-item-email {
   font-size: 13px;
-  color: #718096;
+  color: var(--muted);
   margin-bottom: 6px;
   word-break: break-all;
 }
@@ -122,7 +122,7 @@
   gap: 12px;
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--line);
 }
 
 @media (max-width: 480px) {
@@ -133,12 +133,12 @@
 
 .pagination-btn {
   background: #fff;
-  border: 1px solid #cbd5e0;
+  border: 1px solid var(--gray-300);
   border-radius: 6px;
   padding: 8px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #4a5568;
+  color: var(--text-2);
   min-height: 44px;
   min-width: 44px;
 }
@@ -151,9 +151,9 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: #F0BB00;
-  border-color: #F0BB00;
-  color: #1a202c;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink);
 }
 
 .pagination-btn:disabled {
@@ -163,7 +163,7 @@
 
 .pagination-info {
   font-size: 13px;
-  color: #718096;
+  color: var(--muted);
   font-weight: 500;
 }
 

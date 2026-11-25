@@ -29,12 +29,12 @@ const DemoBanner = () => {
   };
 
   return (
-    <div role="status" className="w-full bg-[#1f2124] text-white">
+    <div role="status" className="w-full bg-ink text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center gap-3">
-        <span className="shrink-0 rounded-full bg-[#F0BB00] text-black text-xs font-bold uppercase px-2 py-0.5">
+        <span className="shrink-0 rounded-full bg-brand text-black text-xs font-bold uppercase px-2 py-0.5">
           {t('demo.badge')}
         </span>
-        <p className="flex-1 text-sm">{t('demo.bannerText')}</p>
+        <p className="flex-1 text-sm !text-white">{t('demo.bannerText')}</p>
         <button
           onClick={handleClose}
           className="shrink-0 p-1 rounded-md hover:bg-white/10 transition-colors"

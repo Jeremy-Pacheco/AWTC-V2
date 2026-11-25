@@ -21,12 +21,12 @@ const InfoBanner = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="w-full bg-yellow-400 dark:bg-yellow-500 border-b border-yellow-500 dark:border-yellow-600">
+    <div className="w-full bg-brand-50 border-b border-brand-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1">
             <svg 
-              className="w-5 h-5 text-gray-800 flex-shrink-0" 
+              className="w-5 h-5 text-brand-text flex-shrink-0" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
@@ -44,7 +44,7 @@ const InfoBanner = () => {
           </div>
           <button
             onClick={handleClose}
-            className="flex-shrink-0 ml-4 p-1 rounded-md hover:bg-yellow-500 dark:hover:bg-yellow-600 transition-colors duration-200"
+            className="flex-shrink-0 ml-4 p-1 rounded-md hover:bg-brand-100 transition-colors duration-200"
             aria-label="Close banner"
           >
             <svg 

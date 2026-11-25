@@ -15,7 +15,7 @@ const AlertModal: React.FC<Props> = ({ open, message, onAccept }) => {
           <motion.div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} transition={{ duration: 0.3, type: "spring", stiffness: 120 }}>
             {message && <p className="mb-4 text-base">{message}</p>}
             <div className="flex justify-end gap-2 mt-4">
-              <button onClick={onAccept} className="bg-[#F0BB00] px-4 py-2 rounded-3xl hover:bg-[#1f2124] hover:text-white transition font-semibold">Aceptar</button>
+              <button onClick={onAccept} className="bg-brand px-4 py-2 rounded-3xl hover:bg-ink hover:text-white transition font-semibold">Aceptar</button>
             </div>
           </motion.div>
         </motion.div>

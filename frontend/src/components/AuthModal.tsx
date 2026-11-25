@@ -158,7 +158,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                     placeholder="Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
                     required
                   />
                 </div>
@@ -171,7 +171,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
                   required
                 />
               </div>
@@ -183,7 +183,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                   placeholder="Password"
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none"
+                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
                   required
                 />
                 <button
@@ -197,24 +197,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
 
               <button
                 type="submit"
-                className="w-full bg-[#F0BB00] text-black py-2 rounded-3xl hover:bg-[#1f2124] hover:text-white transition font-semibold"
+                className="w-full bg-brand text-black py-2 rounded-3xl hover:bg-ink hover:text-white transition font-semibold"
               >
                 {currentMode === "login" ? "Log In" : "Sign Up"}
               </button>
             </form>
 
             {currentMode === "login" && demoConfig.enabled && demoConfig.accounts && demoConfig.accounts.length > 0 && (
-              <div className="mt-5 rounded-xl border border-dashed border-[#F0BB00] bg-yellow-50 p-3">
+              <div className="mt-5 rounded-xl border border-dashed border-brand bg-brand-50 p-3">
                 <p className="text-sm font-semibold text-center">{t("demo.enterAs")}</p>
                 <p className="text-xs text-gray-600 text-center mt-1 mb-3">{t("demo.enterAsHint")}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {demoConfig.accounts.map((account) => (
                     <button
                       key={account.role}
                       type="button"
                       onClick={() => handleDemoLogin(account.role)}
                       disabled={demoLoading !== null}
-                      className="rounded-3xl border border-[#1f2124] px-3 py-1.5 text-sm font-medium hover:bg-[#1f2124] hover:text-white transition disabled:opacity-50 disabled:cursor-wait"
+                      className="rounded-3xl border border-ink px-3 py-1.5 text-sm font-medium hover:bg-ink hover:text-white transition disabled:opacity-50 disabled:cursor-wait"
                     >
                       {demoLoading === account.role ? t("demo.signingIn") : t(`demo.roles.${account.role}`)}
                     </button>
@@ -229,7 +229,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                   Don’t have an account?{" "}
                   <button
                     onClick={() => setCurrentMode("signup")}
-                    className="text-blue-500 hover:underline"
+                    className="text-brand-text hover:underline"
                   >
                     Sign Up
                   </button>
@@ -239,7 +239,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
                   Already have an account?{" "}
                   <button
                     onClick={() => setCurrentMode("login")}
-                    className="text-blue-500 hover:underline"
+                    className="text-brand-text hover:underline"
                   >
                     Log In
                   </button>
