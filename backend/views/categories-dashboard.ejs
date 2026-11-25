@@ -1,5 +1,5 @@
 <!-- D3.js Library -->
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/vendor/d3/d3.min.js"></script>
 <link rel="stylesheet" href="/css/categories-dashboard.css">
 
 <div class="section-card">
@@ -82,7 +82,7 @@
   </div>
 </div>
 
-<script>
+<script nonce="<%= cspNonce %>">
   // Categories data from server
   const categoriesData = <%- safeJson(categories || []) %>;
   const categoriesProjects = <%- safeJson(projects || []) %>;

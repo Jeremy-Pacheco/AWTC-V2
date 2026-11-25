@@ -1,5 +1,5 @@
 <!-- D3.js Library -->
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/vendor/d3/d3.min.js"></script>
 <link rel="stylesheet" href="/css/users-dashboard.css">
 
 <div class="section-card">
@@ -91,7 +91,7 @@
 <script id="projectsPerUserData" type="application/json"><%- safeJson(typeof projectsPerUser !== 'undefined' ? projectsPerUser : []).replace(/<\//g, '<\\/') %></script>
 <script id="allUserProjectsData" type="application/json"><%- safeJson(typeof allUserProjects !== 'undefined' ? allUserProjects : []).replace(/<\//g, '<\\/') %></script>
 
-<script>
+<script nonce="<%= cspNonce %>">
   // Parse data from hidden containers
   const allUsers = JSON.parse(document.getElementById('usersData').textContent.replace(/<\\\//g, '</') || '[]');
   const allProjects = JSON.parse(document.getElementById('projectsData').textContent.replace(/<\\\//g, '</') || '[]');
@@ -110,7 +110,7 @@
 
     const container = document.getElementById('userListContent');
     container.innerHTML = pageUsers.map(user => `
-      <div class="user-item" data-user-id="${Number(user.id)}" onclick="selectUser(${Number(user.id)})" style="cursor: pointer;">
+      <div class="user-item" data-user-id="${Number(user.id)}" data-action="select-user" style="cursor: pointer;">
         <div class="user-item-name">${escapeHtml(user.name || 'No name')}</div>
         <div class="user-item-email">${escapeHtml(user.email || 'no-email')}</div>
         <span class="user-item-role role-${escapeHtml(user.role || 'volunteer')}">${escapeHtml(user.role || 'volunteer')}</span>
@@ -126,7 +126,7 @@
       const selectedElement = container.querySelector(`[data-user-id="${selectedUserId}"]`);
       if (selectedElement) {
         selectedElement.style.borderLeft = '3px solid #12A36F';
-        selectedElement.style.background = '#fffbeb';
+        selectedElement.style.background = '#ECF8F2';
       }
     }
   }
@@ -149,7 +149,7 @@
     const selectedElement = document.querySelector(`[data-user-id="${userId}"]`);
     if (selectedElement) {
       selectedElement.style.borderLeft = '3px solid #12A36F';
-      selectedElement.style.background = '#fffbeb';
+      selectedElement.style.background = '#ECF8F2';
     }
     
     renderUserProjectsChart(userId);
@@ -759,4 +759,10 @@
     renderUserActivityChart();
     // User projects chart renders on user click
   }
+
+  // Delegated clicks: inline onclick= attributes are blocked by the CSP
+  document.addEventListener('click', function (event) {
+    const el = event.target.closest('[data-action="select-user"]');
+    if (el) selectUser(Number(el.dataset.userId));
+  });
 </script>
