@@ -15,7 +15,7 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
   const [imageVersion, setImageVersion] = useState<number>(Date.now());
   const profileImageUrl = user.profileImage
     ? `${imageUrl(user.profileImage)}?v=${imageVersion}`
-    : "/images/default-avatar.png";
+    : "/images/default-avatar.svg";
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

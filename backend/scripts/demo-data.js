@@ -116,9 +116,12 @@ const contacts = [
   },
 ];
 
+// Messaging is internal to staff (admins and coordinators): the server
+// rejects messages to volunteers, so seeded conversations are staff-only.
 const messages = [
-  { from: 'demo-volunteer@example.com', to: 'demo-coordinator@example.com', content: 'Hello! What should I bring to the beach clean-up?' },
-  { from: 'demo-coordinator@example.com', to: 'demo-volunteer@example.com', content: 'Hi! Water, sunscreen and comfortable shoes. Gloves and bags are provided.' },
+  { from: 'demo-coordinator@example.com', to: 'demo-admin@example.com', content: 'Hi! The beach clean-up is almost full. Can we raise the capacity to 30?' },
+  { from: 'demo-admin@example.com', to: 'demo-coordinator@example.com', content: 'Sure, go ahead. I will order extra gloves and bags.' },
+  { from: 'leo.santana@example.com', to: 'demo-coordinator@example.com', content: 'Could you cover the Living Libraries session next Saturday?' },
 ];
 
 module.exports = { categories, projects, extraUsers, registrations, reviews, contacts, messages };
