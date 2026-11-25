@@ -1,27 +1,57 @@
-const ldap = require('ldapjs');
+/**
+ * Creates the ou=users branch and the seed users (seeders/20251025120000-users.js)
+ * in a LOCAL LDAP directory, so they can log in with AUTH_PROVIDER=ldap.
+ *
+ * Usage (from backend/):
+ *   LDAP_ADMIN_PASSWORD=... LDAP_SEED_PASSWORD=... node scripts/sync-ldap-users.js
+ *
+ * No credentials live in this file (they were public before, see SEC-01/SEC-11):
+ *  - LDAP_ADMIN_PASSWORD: admin bind password of the directory (required).
+ *  - LDAP_SEED_PASSWORD:  password given to every seed user (required, must pass
+ *                         the password policy of services/auth.service.js).
+ * Passwords are stored hashed ({SSHA}) unless LDAP_PASSWORD_HASH=server.
+ */
 const path = require('path');
 
-// Try to load .env (production) or .env.development (local)
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 require('dotenv').config({ path: path.join(__dirname, '../.env.production') });
 require('dotenv').config({ path: path.join(__dirname, '../.env.development') });
 
+const ldap = require('ldapjs');
+const { getLdapAdminPassword, requireSecret } = require('../config/secrets');
+const { buildUserDN, buildUserEntry, LDAP_USERS_DN } = require('../utils/ldap.util');
+const { validatePassword } = require('../services/auth.service');
+
 const LDAP_URL = process.env.LDAP_URL || 'ldap://localhost:389';
 const LDAP_ADMIN_DN = process.env.LDAP_ADMIN_DN || 'cn=admin,dc=awtc,dc=com';
-const LDAP_ADMIN_PASSWORD = process.env.LDAP_ADMIN_PASSWORD || 'adminawtc1234';
-const LDAP_BASE_DN = process.env.LDAP_BASE_DN || 'dc=awtc,dc=com';
-const LDAP_USERS_DN = `ou=users,${LDAP_BASE_DN}`;
 
+// Must match the users created by the database seeder
 const usersToSync = [
-  { name: 'Admin', email: 'admin@awtc.es', password: 'adminawtc1234' },
-  { name: 'Juan', email: 'juan@gmail.com', password: 'juan' },
-  { name: 'Paco', email: 'paco@gmail.com', password: 'paco' },
-  { name: 'Maria', email: 'maria@gmail.com', password: 'maria' }
+  { name: 'Admin', email: 'admin@awtc.es' },
+  { name: 'Juan', email: 'juan@gmail.com' },
+  { name: 'Paco', email: 'paco@gmail.com' },
+  { name: 'Maria', email: 'maria@gmail.com' },
 ];
 
-const client = ldap.createClient({
-  url: LDAP_URL
-});
+function fail(message) {
+  console.error(`❌ ${message}`);
+  process.exit(1);
+}
+
+let adminPassword;
+let seedPassword;
+try {
+  adminPassword = getLdapAdminPassword();
+  seedPassword = requireSecret('LDAP_SEED_PASSWORD');
+} catch (err) {
+  fail(err.message);
+}
+for (const user of usersToSync) {
+  const problem = validatePassword(seedPassword, user);
+  if (problem) fail(`LDAP_SEED_PASSWORD rejected for ${user.email}: ${problem}`);
+}
+
+const client = ldap.createClient({ url: LDAP_URL });
 
 function ensureUsersOU() {
   return new Promise((resolve, reject) => {
@@ -46,17 +76,7 @@ function ensureUsersOU() {
 
 function addUserToLDAP(user) {
   return new Promise((resolve, reject) => {
-    const entry = {
-      cn: user.email,
-      sn: user.name,
-      mail: user.email,
-      userPassword: user.password,
-      objectClass: ['inetOrgPerson', 'top']
-    };
-
-    const userDN = `cn=${user.email},${LDAP_USERS_DN}`;
-
-    client.add(userDN, entry, (err) => {
+    client.add(buildUserDN(user.email), buildUserEntry(user.name, user.email, seedPassword), (err) => {
       if (err) {
         if (err.code === 68) {
           console.log(`⚠️  User ${user.email} already exists in LDAP.`);
@@ -70,9 +90,9 @@ function addUserToLDAP(user) {
   });
 }
 
-client.bind(LDAP_ADMIN_DN, LDAP_ADMIN_PASSWORD, async (err) => {
+client.bind(LDAP_ADMIN_DN, adminPassword, async (err) => {
   if (err) {
-    console.error('❌ Error connecting to LDAP:', err);
+    console.error('❌ Error connecting to LDAP:', err.message);
     process.exit(1);
   }
   console.log('🔌 Connected to LDAP as Admin.');
@@ -85,7 +105,8 @@ client.bind(LDAP_ADMIN_DN, LDAP_ADMIN_PASSWORD, async (err) => {
     }
     console.log('\n✨ Synchronization completed. You can now log in with these users.');
   } catch (error) {
-    console.error('❌ Error during synchronization:', error);
+    console.error('❌ Error during synchronization:', error.message);
+    process.exitCode = 1;
   } finally {
     client.unbind();
   }

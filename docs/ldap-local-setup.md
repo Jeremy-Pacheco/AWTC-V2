@@ -24,7 +24,7 @@ To work locally, we will use Docker Compose to spin up an OpenLDAP server and a 
 ### Accessing the Graphical Interface (phpLDAPadmin)
 *   **URL**: [http://localhost:8081](http://localhost:8081)
 *   **Login DN**: `cn=admin,dc=awtc,dc=com`
-*   **Password**: `adminawtc1234`
+*   **Password**: the value of `LDAP_ADMIN_PASSWORD` you started the container with
 
 ### Backend Configuration
 The `.env.development` file has been automatically configured with:
@@ -32,7 +32,7 @@ The `.env.development` file has been automatically configured with:
 LDAP_URL=ldap://localhost:389
 LDAP_BASE_DN=dc=awtc,dc=com
 LDAP_ADMIN_DN=cn=admin,dc=awtc,dc=com
-LDAP_ADMIN_PASSWORD=adminawtc1234
+LDAP_ADMIN_PASSWORD=<choose a strong password; keep it out of git>
 ```
 
 ### Notes for Local Development
@@ -44,5 +44,7 @@ LDAP_ADMIN_PASSWORD=adminawtc1234
 *   Remember that your local MySQL database must also be running (via XAMPP or similar).
 *   **Sync Users**: If your LDAP is empty but you have users in your database (or want to create the default seed users), run:
     ```bash
-    node scripts/sync-ldap-users.js
+    LDAP_SEED_PASSWORD=<password for the seed users> node scripts/sync-ldap-users.js
     ```
+    Passwords are stored hashed (`{SSHA}`). Set `LDAP_PASSWORD_HASH=server` only if the
+    server hashes them itself (ppolicy `olcPPolicyHashCleartext`).

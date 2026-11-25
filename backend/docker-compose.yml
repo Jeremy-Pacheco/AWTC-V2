@@ -4,14 +4,16 @@ services:
   openldap:
     image: osixia/openldap:1.5.0
     container_name: openldap-server
+    # Local development only: listen on localhost, never on public interfaces
     ports:
-      - "389:389"
-      - "636:636"
+      - "127.0.0.1:389:389"
+      - "127.0.0.1:636:636"
     environment:
       - LDAP_ORGANISATION=AWTC
       - LDAP_DOMAIN=awtc.com
-      - LDAP_ADMIN_PASSWORD=adminawtc1234
-      - LDAP_CONFIG_PASSWORD=config
+      # Passwords come from the shell or backend/.env (never commit them)
+      - LDAP_ADMIN_PASSWORD=${LDAP_ADMIN_PASSWORD:?Set LDAP_ADMIN_PASSWORD}
+      - LDAP_CONFIG_PASSWORD=${LDAP_CONFIG_PASSWORD:?Set LDAP_CONFIG_PASSWORD}
       - LDAP_RFC2307BIS_SCHEMA=false
     volumes:
       # - ./ldap-seed:/container/service/slapd/assets/config/bootstrap/ldif/custom
@@ -21,8 +23,9 @@ services:
   phpldapadmin:
     image: osixia/phpldapadmin:0.9.0
     container_name: phpldapadmin
+    # phpLDAPadmin has no HTTPS here: keep it reachable from this machine only
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
     environment:
       - PHPLDAPADMIN_LDAP_HOSTS=openldap-server
       - PHPLDAPADMIN_HTTPS=false

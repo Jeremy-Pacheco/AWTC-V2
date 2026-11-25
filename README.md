@@ -155,8 +155,8 @@ LDAP_ADMIN_PASSWORD=<hidden_for_security_reasons>
 ```bash
 npm run migrate
 npm run seed
-# Sync initial users to LDAP
-node scripts/sync-ldap-users.js
+# Sync initial users to LDAP (passwords are read from the environment, never hardcoded)
+LDAP_ADMIN_PASSWORD=<admin password> LDAP_SEED_PASSWORD=<password for the seed users> node scripts/sync-ldap-users.js
 ```
 
 5. Start the server:
