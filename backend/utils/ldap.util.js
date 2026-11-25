@@ -145,9 +145,47 @@ function addUser(name, email, password) {
   });
 }
 
+const LDAP_NO_SUCH_OBJECT = 32;
+const LDAP_ENTRY_ALREADY_EXISTS = 68;
+
+/**
+ * Delete a user entry from LDAP. Resolves when the entry is gone, including
+ * when it did not exist (so deletions are idempotent).
+ * @param {string} email
+ * @returns {Promise<void>}
+ */
+function deleteUser(email) {
+  if (!isValidEmail(email)) {
+    return Promise.reject(Object.assign(new Error('Invalid email'), { status: 400 }));
+  }
+  return new Promise((resolve, reject) => {
+    let adminPassword;
+    try {
+      adminPassword = getLdapAdminPassword();
+    } catch (configErr) {
+      return reject(configErr);
+    }
+
+    const client = getClient();
+    client.bind(LDAP_ADMIN_DN, adminPassword, (err) => {
+      if (err) {
+        client.unbind();
+        return reject(err);
+      }
+      client.del(buildUserDN(email), (delErr) => {
+        client.unbind();
+        if (delErr && delErr.code !== LDAP_NO_SUCH_OBJECT) return reject(delErr);
+        resolve();
+      });
+    });
+  });
+}
+
 module.exports = {
   authenticate,
   addUser,
+  deleteUser,
+  LDAP_ENTRY_ALREADY_EXISTS,
   buildUserDN,
   buildUserEntry,
   escapeDNValue,

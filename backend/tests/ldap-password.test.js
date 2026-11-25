@@ -46,6 +46,7 @@ describe('LDAP DN escaping (SEC-19)', () => {
     expect(ldapUtil.isValidEmail('ana@example.com')).toBe(true);
     await expect(ldapUtil.authenticate('cn=admin,dc=awtc', 'x')).resolves.toBe(false);
     await expect(ldapUtil.addUser('Ana', 'not-an-email', 'whatever123')).rejects.toMatchObject({ status: 400 });
+    await expect(ldapUtil.deleteUser('x,ou=admins')).rejects.toMatchObject({ status: 400 });
   });
 
   it('never sends an empty password (unauthenticated bind)', async () => {
