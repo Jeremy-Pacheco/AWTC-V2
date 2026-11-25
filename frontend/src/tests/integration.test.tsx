@@ -254,4 +254,27 @@ describe('Integration Tests', () => {
     await waitFor(() => expect(demoMocks.getDemoConfig).toHaveBeenCalled());
     expect(screen.queryByRole('button', { name: /demo\.roles/ })).toBeNull();
   });
+
+  // BUG-08: after signing up the user is logged in, so the modal closes
+  it('should close the modal after a successful signup (user is already logged in)', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        access_token: 'jwt-new-user',
+        user: { name: 'Nuevo Usuario', role: 'volunteer' },
+      }),
+    });
+    const mockOnClose = vi.fn();
+    render(<AuthModal open={true} mode="signup" onClose={mockOnClose} />);
+
+    fireEvent.change(screen.getByPlaceholderText('Full Name'), { target: { value: 'Nuevo Usuario' } });
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: 'nuevo@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: 'river-lantern-42' } });
+    fireEvent.click(screen.getByRole('button', { name: /^sign up$/i }));
+
+    await waitFor(() => {
+      expect(localStorage.getItem('jwtToken')).toBe('jwt-new-user');
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
 });

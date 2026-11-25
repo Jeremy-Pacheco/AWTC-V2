@@ -131,9 +131,11 @@ app.use(session({
   }
 }));
 
+// The schema is managed only by migrations (`pnpm migrate`); sync() is not
+// used because it could create tables that differ from them (BUG-02).
 db.sequelize
-  .sync({ force: false })
-  .then(() => console.log("Database synced without dropping data!"))
+  .authenticate()
+  .then(() => console.log("Database connection OK"))
   .catch((err) => console.error("DB Error:", err.message));
 
   //Log available models to help debug dashboard data loading
@@ -191,12 +193,6 @@ app.use(async (req, res, next) => {
 
 app.use((req, res, next) => (isApiRequest(req) ? next() : provideCsrfToken(req, res, next)));
 
-db.sequelize
-  .sync({ force: false })
-  .then(async () => {
-    console.log("Database synced!");
-  })
-  .catch((err) => console.error("DB Error: " + err.message));
 
 // Load API Routes
 const projectRoutes = require("./routes/project.routes");
@@ -284,7 +280,7 @@ async function getDashboardData() {
     const copy = arr.slice();
     copy.sort((a,b) => {
       const aDate = a && (a.createdAt || a.created_at || a.date) ? new Date(a.createdAt || a.created_at || a.date) : null;
-      const bDate = b && (b.createdAt || b.created_at || b.date) ? new Date(b.CreatedAt || b.created_at || b.date) : null;
+      const bDate = b && (b.createdAt || b.created_at || b.date) ? new Date(b.createdAt || b.created_at || b.date) : null;
       if (aDate && bDate) return bDate - aDate;
       if (aDate) return -1;
       if (bDate) return 1;
@@ -359,7 +355,7 @@ async function getDashboardData() {
 }
 
 // Render dashboard with specified section
-async function renderDashboard(req, res, section = 'overview') {
+async function renderDashboard(req, res, section = 'overview', extra = {}) {
   if (!req.user) return res.redirect('/login');
   if (req.user.role !== 'admin') {
     return res.status(403).render('access-denied', { currentUser: req.user, frontendUrl: FRONTEND_URL });
@@ -386,7 +382,7 @@ async function renderDashboard(req, res, section = 'overview') {
       categoriesNumber: Array.isArray(data.categories) ? data.categories.length : 0,
       reviewsNumber: Array.isArray(data.reviews) ? data.reviews.length : 0,
       contactsNumber: Array.isArray(data.contacts) ? data.contacts.length : 0
-    }, data));
+    }, data, extra));
   } catch (err) {
     console.error('Error fetching data for dashboard:', err.message);
     res.render('index', {
@@ -405,27 +401,25 @@ async function renderDashboard(req, res, section = 'overview') {
 
 app.get('/', (req, res) => renderDashboard(req, res, 'overview'));
 app.get('/projects', (req, res) => renderDashboard(req, res, 'projects'));
+// Volunteers of one project (projects section): goes through renderDashboard
+// so the admin check and all the usual view data apply (BUG-07, SEC-08)
 app.get('/projects/:id/volunteers', async (req, res) => {
   if (!req.user) return res.redirect('/login');
   if (req.user.role !== 'admin') {
     return res.status(403).render('access-denied', { currentUser: req.user, frontendUrl: FRONTEND_URL });
   }
+  const projectId = Number(req.params.id);
+  if (!Number.isInteger(projectId) || projectId <= 0) return res.redirect('/projects');
   try {
-    const projectId = parseInt(req.params.id, 10);
-    const data = await getDashboardData();
-    const project = await db.Project.findByPk(projectId, { include: [{ model: db.User, through: { attributes: ['status','role'] } }] });
+    const project = await db.Project.findByPk(projectId, { include: [{ model: db.User, through: { attributes: ['status', 'role'] } }] });
     if (!project) return res.redirect('/projects');
-    const volunteers = project.Users || [];
-    res.render('index', Object.assign({
-      shopName: 'A Will To Change',
-      currentUser: req.user || null,
-      currentSection: 'projects',
-      projectVolunteers: volunteers,
+    return renderDashboard(req, res, 'projects', {
+      projectVolunteers: project.Users || [],
       projectName: project.name
-    }, data));
+    });
   } catch (err) {
     console.error('Error loading project volunteers:', err.message);
-    res.redirect('/projects');
+    return res.redirect('/projects');
   }
 });
 app.get('/overview', (req, res) => renderDashboard(req, res, 'overview'));
