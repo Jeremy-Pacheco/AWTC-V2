@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ConfirmModal from '../components/ConfirmModal';
 import { handleAuthFetch } from '../utils/auth';
 import type { AppUser, Category } from '../types/api';
-import { API_URL, type DashboardUser, type StatusMessage, type TabProps } from './dashboard/shared';
+import { API_URL, adminDashboardUrl, type DashboardUser, type StatusMessage, type TabProps } from './dashboard/shared';
 import ProfileTab from './dashboard/ProfileTab';
 import ProjectsTab from './dashboard/ProjectsTab';
 import MyProjectsTab from './dashboard/MyProjectsTab';
@@ -131,9 +131,7 @@ const Dashboard: React.FC = () => {
             }`}
             onClick={() => {
               if (tab === "analytics") {
-                // In development, use API_URL (localhost:8080), in production use Nginx /admin/ route
-                const analyticsUrl = import.meta.env.DEV ? API_URL : `${window.location.origin}/admin/`;
-                window.open(analyticsUrl, '_blank');
+                window.open(adminDashboardUrl(), '_blank', 'noopener');
               } else {
                 setActiveTab(tab as Tab);
               }

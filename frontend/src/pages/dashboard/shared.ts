@@ -44,3 +44,20 @@ export const paginate = <T,>(items: T[], page: number, itemsPerPage: number): T[
 export const getTotalPages = (totalItems: number, itemsPerPage: number) => Math.ceil(totalItems / itemsPerPage);
 
   // Generate page numbers to display
+
+/**
+ * URL of the EJS admin dashboard (analytics). When the API is served from
+ * this same origin (Nginx deploy: /api and /admin/ behind one domain) it is
+ * the /admin/ route; otherwise (Vercel + Render, local dev) the dashboard is
+ * the root of the backend.
+ */
+export function adminDashboardUrl(apiUrl: string = API_URL || '', origin: string = window.location.origin): string {
+  const api = apiUrl.replace(/\/+$/, '');
+  if (!api) return `${origin}/admin/`;
+  try {
+    if (new URL(api, origin).origin === origin) return `${origin}/admin/`;
+  } catch {
+    /* malformed VITE_API_URL: fall through */
+  }
+  return `${api}/`;
+}
