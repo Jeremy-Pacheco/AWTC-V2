@@ -8,6 +8,7 @@ module.exports = {
     '!node_modules/**'
   ],
   testTimeout: 10000,
-  testPathIgnorePatterns: ['/node_modules/'],
+  // Integration tests need MySQL: run them with `pnpm test:integration`
+  testPathIgnorePatterns: ['/node_modules/', '/tests/integration/'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js']
 };

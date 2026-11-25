@@ -55,8 +55,50 @@ jobs:
           cache: pnpm
           cache-dependency-path: backend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-      # Unit tests only: the CRUD suites below need a MySQL database (audit task 3.5)
       - name: Unit tests
-        run: >-
-          pnpm exec jest tests/
-          --testPathIgnorePatterns "tests/(category|contact|project|reviews)\.test\.js$"
+        run: pnpm exec jest tests/
+
+  backend-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: awtc_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      NODE_ENV: test
+      DB_HOST: 127.0.0.1
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASS: root
+      DB_NAME: awtc_test
+      TEST_DB_HOST: 127.0.0.1
+      TEST_DB_PORT: "3306"
+      TEST_DB_USER: root
+      TEST_DB_PASS: root
+      TEST_DB_NAME: awtc_test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v5
+        with:
+          version: 12.23.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: backend/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Migrations
+        run: npx --yes sequelize-cli@6 db:migrate
+      - name: Integration tests (real MySQL)
+        run: pnpm test:integration
