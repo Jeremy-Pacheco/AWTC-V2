@@ -1,0 +1,65 @@
+// Smoke test of the split dashboard (audit task 3.8): every tab renders its data
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import Dashboard from '../pages/Dashboard';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+const admin = { id: 1, name: 'Ada Admin', email: 'ada@example.com', role: 'admin' };
+const coordinator = { id: 2, name: 'Coco Coordinator', email: 'coco@example.com', role: 'coordinator' };
+const API: Record<string, unknown> = {
+  '/api/users/dashboard': { user: admin },
+  '/api/users/dashboard/projects': { projects: [{ id: 7, name: 'My Beach Day', description: 'mine' }] },
+  '/api/categories': [{ id: 3, name: 'Environment', description: 'Green things' }],
+  '/api/users': [admin, coordinator],
+  '/api/projects': [{ id: 5, name: 'Planting trees', description: 'Trees', ownerId: 2, categoryId: 3, status: 'active' }],
+  '/api/reviews': [{ id: 9, content: 'Lovely day', date: '2026-11-20', user: { id: 4, name: 'Vera' } }],
+  '/api/contacts': [{ id: 11, name: 'Jordan', email: 'jordan@example.com', message: 'Group question', read: false }],
+};
+
+beforeEach(() => {
+  localStorage.setItem('jwtToken', 'token');
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    const path = new URL(String(input), 'http://api.test').pathname;
+    const body = API[path];
+    return { ok: body !== undefined, status: body !== undefined ? 200 : 404, json: async () => body } as Response;
+  });
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  localStorage.clear();
+});
+
+describe('Dashboard', () => {
+  it('shows every tab of an admin with its data', async () => {
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+
+    // Profile (default tab)
+    expect(await screen.findByText('Ada Admin')).toBeTruthy();
+
+    const open = async (tab: string, text: string) => {
+      fireEvent.click(screen.getByRole('button', { name: tab }));
+      expect(await screen.findByText(text)).toBeTruthy();
+    };
+    await open('dashboard.myProjects', 'My Beach Day');
+    await open('dashboard.projects', 'Planting trees');
+    // admins see the responsible coordinator of each project
+    expect(screen.getByText(/Coco Coordinator/)).toBeTruthy();
+    await open('dashboard.categories', 'Green things');
+    await open('dashboard.reviews', 'Lovely day');
+    await open('dashboard.users', 'coco@example.com');
+    await open('dashboard.incidents', 'Group question');
+  });
+
+  it('hides staff tabs from volunteers', async () => {
+    API['/api/users/dashboard'] = { user: { id: 4, name: 'Vera', role: 'volunteer' } };
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+    expect(await screen.findByText('Vera')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'dashboard.projects' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'dashboard.users' })).toBeNull();
+    API['/api/users/dashboard'] = { user: admin };
+  });
+});
