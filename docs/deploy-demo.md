@@ -182,6 +182,7 @@ Guarda: Render redespliega solo.
 | `CLOUDINARY_FOLDER` | no | `awtc` | Carpeta raíz de las subidas |
 | `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` | sí | nuevas | Notificaciones push (el servidor no arranca sin ellas) |
 | `VAPID_EMAIL` | no | correo de contacto | Identificación ante los servicios push |
+| `PUSH_ALLOWED_HOSTS` | no | sin definir | Servicios push extra (por defecto solo los de Chrome/Edge, Firefox, Safari y Windows); `*.dominio` admite subdominios |
 | `DEMO_MODE` | demo | `true` | Cuentas demo, protecciones y aviso de sitio de prueba |
 | `DEMO_MAX_UPLOAD_MB` | no | `1` | Límite de subida en modo demo (máximo 5) |
 | `DEMO_LOGIN_RATE_LIMIT` | no | `30` | Logins demo por IP cada 15 minutos |

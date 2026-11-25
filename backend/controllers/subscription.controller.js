@@ -1,5 +1,6 @@
 const webPush = require('web-push');
 const db = require('../models');
+const { isAllowedPushEndpoint, sameKeys, endpointHost } = require('../services/push.service');
 const Subscription = db.Subscription;
 
 // Configure web-push with VAPID keys from environment variables
@@ -16,45 +17,30 @@ webPush.setVapidDetails(
  */
 const subscribe = async (req, res) => {
   try {
+    // Body validated by validation/schemas.js -> subscribe (allowed push
+    // services only, SEC-20); requireAuth guarantees req.user.
     const { endpoint, expirationTime, keys } = req.body;
-    
-    // Check if user is authenticated
-    if (!req.user || !req.user.id) {
-      console.error('Subscribe error: User not authenticated', req.user);
-      return res.status(401).json({
-        message: 'User not authenticated'
-      });
-    }
-    
     const userId = req.user.id;
-    console.log('Subscribing user:', userId, 'to endpoint:', endpoint?.substring(0, 50) + '...');
 
-    // Validate required fields
-    if (!endpoint || !keys || !keys.p256dh || !keys.auth) {
-      console.error('Subscribe error: Missing fields', { endpoint: !!endpoint, keys: !!keys });
-      return res.status(400).json({
-        message: 'Missing required subscription fields'
-      });
-    }
+    const existing = await Subscription.findOne({ where: { endpoint } });
 
-    // Check if subscription already exists
-    const existingSubscription = await Subscription.findOne({
-      where: { endpoint }
-    });
-
-    if (existingSubscription) {
-      // Update userId if subscription exists but for different user
-      if (existingSubscription.userId !== userId) {
-        existingSubscription.userId = userId;
-        await existingSubscription.save();
+    if (existing) {
+      if (existing.userId !== userId) {
+        // SEC-21: never hand an endpoint to another account just because its
+        // URL is known. Only the browser that owns it (same keys) can move it,
+        // e.g. a different person logging in on a shared computer.
+        if (!sameKeys(existing.keys, keys)) {
+          console.warn(`[push] Rejected takeover of a subscription (${endpointHost(endpoint)}) by user ${userId}`);
+          return res.status(409).json({ message: 'This push subscription belongs to another account' });
+        }
+        existing.userId = userId;
       }
-      return res.status(200).json({
-        message: 'Subscription already exists',
-        subscription: existingSubscription
-      });
+      existing.keys = JSON.stringify(keys);
+      existing.expirationTime = expirationTime || null;
+      await existing.save();
+      return res.status(200).json({ message: 'Subscription updated', subscription: { id: existing.id } });
     }
 
-    // Create new subscription
     const subscription = await Subscription.create({
       userId,
       endpoint,
@@ -64,10 +50,10 @@ const subscribe = async (req, res) => {
 
     res.status(201).json({
       message: 'Successfully subscribed to notifications',
-      subscription
+      subscription: { id: subscription.id }
     });
   } catch (error) {
-    console.error('Error creating subscription:', error);
+    console.error('Error creating subscription:', error.message);
     res.status(500).json({
       message: 'Error creating subscription'
     });
@@ -147,7 +133,7 @@ const getUserSubscriptions = async (req, res) => {
  */
 const sendNotificationToUser = async (userId, payload) => {
   try {
-    console.log(`📬 Sending notification to user ${userId}:`, payload);
+    console.log(`📬 Sending notification to user ${userId}: ${payload && payload.title ? payload.title : ''}`);
     
     // Find all subscriptions for the user
     const subscriptions = await Subscription.findAll({
@@ -171,6 +157,14 @@ const sendNotificationToUser = async (userId, payload) => {
 
     // Send notification to all user's subscriptions
     for (const subscription of subscriptions) {
+      // Defence in depth (SEC-20): rows saved before the allowlist existed
+      if (!isAllowedPushEndpoint(subscription.endpoint)) {
+        console.warn(`   🗑️  Deleting subscription with a non-push endpoint (${endpointHost(subscription.endpoint)})`);
+        results.failed++;
+        results.errors.push('Endpoint is not a supported push service');
+        await subscription.destroy();
+        continue;
+      }
       try {
         const pushSubscription = {
           endpoint: subscription.endpoint,
@@ -182,7 +176,7 @@ const sendNotificationToUser = async (userId, payload) => {
           JSON.stringify(payload)
         );
 
-        console.log(`   ✅ Notification sent successfully to endpoint: ${subscription.endpoint.substring(0, 50)}...`);
+        console.log(`   ✅ Notification sent (${endpointHost(subscription.endpoint)})`);
         results.sent++;
       } catch (error) {
         console.error(`   ❌ Error sending notification to endpoint:`, error.message);
@@ -190,8 +184,8 @@ const sendNotificationToUser = async (userId, payload) => {
         results.errors.push(error.message);
 
         // If subscription is invalid (410 Gone), delete it
-        if (error.statusCode === 410) {
-          console.log(`   🗑️  Deleting invalid subscription (410 Gone)`);
+        if (error.statusCode === 404 || error.statusCode === 410) {
+          console.log(`   🗑️  Deleting expired subscription (${error.statusCode})`);
           await subscription.destroy();
         }
       }
