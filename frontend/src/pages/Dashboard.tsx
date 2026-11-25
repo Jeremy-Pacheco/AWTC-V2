@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ConfirmModal from '../components/ConfirmModal';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
-import { handleAuthFetch } from '../utils/auth';
+import { clearAuth, handleAuthFetch } from '../utils/auth';
 import { imageUrl } from '../utils/images';
 import type { AppUser, Category, Contact, Project, ProjectForm, Review, UserProjectEntry } from '../types/api';
 
@@ -395,12 +395,8 @@ const Dashboard: React.FC = () => {
     try {
       const res = await fetch(`${API_URL}/api/users/dashboard`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) { const err = await res.json(); return setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorDeleting') }); }
-      // Clear local storage and navigate home
-      localStorage.removeItem('jwtToken');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userProfileImage');
+      // The account no longer exists: clear the local session and go home
+      clearAuth();
       setStatusMessage({ type: 'success', text: t('dashboard.profileDeleted') });
       navigate('/home');
     } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); }

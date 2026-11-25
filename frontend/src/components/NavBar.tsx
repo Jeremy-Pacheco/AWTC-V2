@@ -10,42 +10,20 @@ import AuthModal from "./AuthModal";
 import DarkModeToggle from "./DarkModeToggle";
 import LanguageSelector from "./LanguageSelector";
 import { useTranslation } from "react-i18next";
-import { logoutOnServer } from "../utils/auth";
+import { useAuth } from "../context/auth-context";
 
 function NavBar() {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Session state comes from AuthProvider (single source for the app)
+  const { isLoggedIn, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return document.documentElement.classList.contains("dark");
   });
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Initialize
-    setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "jwtToken" || e.key === "__auth_last_update" || e.key === "userRole") {
-        setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-      }
-    };
-
-    const onAuthChanged = () => {
-      setIsLoggedIn(!!localStorage.getItem("jwtToken"));
-    };
-
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("authChanged", onAuthChanged);
-
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("authChanged", onAuthChanged);
-    };
-  }, []);
 
   // listen for global requests to open the auth modal (from other pages/components)
   useEffect(() => {
@@ -76,8 +54,7 @@ function NavBar() {
   const handleLogout = () => {
     // Single logout path: revokes the refresh token on the server (SEC-18),
     // then removes every stored auth item (BUG-09) and notifies the app
-    void logoutOnServer();
-    setIsLoggedIn(false);
+    void logout();
     navigate("/");
   };
 
@@ -273,7 +250,7 @@ function NavBar() {
       </div>
 
       {/* Popup Auth */}
-      <AuthModal open={authOpen} onClose={() => {setAuthOpen(false); setIsLoggedIn(!!localStorage.getItem("jwtToken"))}} mode={authMode} />
+      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} mode={authMode} />
     </nav>
   );
 }
