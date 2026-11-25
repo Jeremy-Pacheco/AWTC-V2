@@ -5,11 +5,39 @@ const logger = require('../utils/logger');
 const { sendNotificationToUser } = require('./subscription.controller');
 const { getVolunteeringNS } = require('../config/socket');
 
+/**
+ * Project ownership (SEC-17). Returns the ownerId to store, or throws an
+ * Error with `status`:
+ *  - coordinators always own the projects they create and cannot assign owners;
+ *  - admins may assign a coordinator (or null = admins only).
+ */
+async function resolveOwnerId(user, requestedOwnerId, { creating }) {
+  if (user.role !== 'admin') {
+    if (requestedOwnerId !== undefined && requestedOwnerId !== user.id) {
+      throw Object.assign(new Error('Only admins can assign the responsible coordinator'), { status: 403 });
+    }
+    return creating ? user.id : undefined;
+  }
+  if (requestedOwnerId === null) return null; // remove the owner: admins only
+  if (requestedOwnerId === undefined) return creating ? null : undefined; // keep as is
+  const owner = await User.findByPk(requestedOwnerId, { attributes: ['id', 'role'] });
+  if (!owner || owner.role !== 'coordinator') {
+    throw Object.assign(new Error('The responsible user must be a coordinator'), { status: 400 });
+  }
+  return owner.id;
+}
+
+const ownershipError = (res, error) =>
+  error && (error.status === 400 || error.status === 403)
+    ? res.status(error.status).json({ message: error.message })
+    : null;
+
 // Create a new project
 exports.createProject = async (req, res) => {
   try {
     const { name, description, start_date, end_date, location, capacity, status, categoryId } = req.body;
     const filename = req.file ? req.file.filename : null;
+    const ownerId = await resolveOwnerId(req.user, req.body.ownerId, { creating: true });
 
     const project = await Project.create({
       name,
@@ -20,7 +48,8 @@ exports.createProject = async (req, res) => {
       capacity,
       status,
       filename,
-      categoryId
+      categoryId,
+      ownerId
     });
 
     logger.info(`Project created: ${project.name} (ID: ${project.id})`);
@@ -29,6 +58,7 @@ exports.createProject = async (req, res) => {
     const created = await Project.findByPk(project.id, { include: [{ model: db.Category, as: 'category' }] });
     res.status(201).json(created);
   } catch (error) {
+    if (ownershipError(res, error)) return;
     logger.error(`Failed to create project: ${error.message}`);
     console.error(error);
     res.status(400).json({ message: 'Error creating project' });
@@ -72,15 +102,18 @@ exports.getAllProjects = async (req, res) => {
 // Update a project
 exports.updateProject = async (req, res) => {
   try {
-    const project = await Project.findByPk(req.params.id);
+    // Loaded and ownership-checked by requireProjectManager
+    const project = req.project || await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
     // req.body was validated and whitelisted (validation/schemas.js -> projectUpdate);
     // only the fields actually sent are changed
     const { status } = req.body;
     const updateData = Object.fromEntries(
-      Object.entries(req.body).filter(([, value]) => value !== undefined)
+      Object.entries(req.body).filter(([key, value]) => value !== undefined && key !== 'ownerId')
     );
+    const ownerId = await resolveOwnerId(req.user, req.body.ownerId, { creating: false });
+    if (ownerId !== undefined) updateData.ownerId = ownerId;
 
     if (req.file && req.file.filename) {
       updateData.filename = req.file.filename;
@@ -153,6 +186,7 @@ exports.updateProject = async (req, res) => {
     const updated = await Project.findByPk(project.id, { include: [{ model: db.Category, as: 'category' }] });
     res.status(200).json(updated);
   } catch (error) {
+    if (ownershipError(res, error)) return;
     console.error(error);
     res.status(400).json({ message: 'Error updating project' });
   }
@@ -162,7 +196,8 @@ exports.updateProject = async (req, res) => {
 // Delete a project
 exports.deleteProject = async (req, res) => {
   try {
-    const project = await Project.findByPk(req.params.id);
+    // Loaded and ownership-checked by requireProjectManager
+    const project = req.project || await Project.findByPk(req.params.id);
     if (!project) return res.status(404).json({ message: 'Project not found' });
 
     await project.destroy();
@@ -394,3 +429,6 @@ exports.unbanVolunteer = async (req, res) => {
     return res.status(500).json({ message: 'Error unbanning volunteer' });
   }
 };
+
+// Exposed for tests
+exports._resolveOwnerId = resolveOwnerId;

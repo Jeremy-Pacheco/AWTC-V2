@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
   const [projectsFilter, setProjectsFilter] = useState<number | "">("");
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any | null>(null);
-  const [projectForm, setProjectForm] = useState<any>({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '' });
+  const [projectForm, setProjectForm] = useState<any>({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '', ownerId: '' });
   const [projectFile, setProjectFile] = useState<File | null>(null);
   const [projectFileName, setProjectFileName] = useState<string>("");
   const [usersData, setUsersData] = useState<any[]>([]);
@@ -310,6 +310,15 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Projects this user can manage: admins all, coordinators only their own (SEC-17)
+  const manageableProjects = (projects || []).filter(p => user?.role === 'admin' || (p.ownerId != null && p.ownerId === user?.id));
+  const coordinators = usersData.filter(u => u.role === 'coordinator');
+  const ownerName = (ownerId: number | null | undefined) => {
+    if (ownerId == null) return t('dashboard.noResponsible');
+    const owner = usersData.find(u => u.id === ownerId);
+    return owner ? owner.name || owner.email : `#${ownerId}`;
+  };
+
   const handleSubmitProject = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return setStatusMessage({ type: 'error', text: t('dashboard.loginRequired') });
@@ -323,6 +332,7 @@ const Dashboard: React.FC = () => {
       fd.append('capacity', String(projectForm.capacity));
       fd.append('status', projectForm.status);
       if (projectForm.categoryId !== '') fd.append('categoryId', String(projectForm.categoryId));
+      if (user?.role === 'admin') fd.append('ownerId', projectForm.ownerId === '' ? 'null' : String(projectForm.ownerId));
       if (projectFile) fd.append('file', projectFile);
       let url = `${API_URL}/api/projects`;
       let method = 'POST';
@@ -562,22 +572,28 @@ const Dashboard: React.FC = () => {
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
-                <button className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold shadow text-sm" onClick={() => { setProjectModalOpen(true); setEditingProject(null); setProjectForm({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '' }); setProjectFile(null); setProjectFileName(''); }}>
+                <button className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold shadow text-sm" onClick={() => { setProjectModalOpen(true); setEditingProject(null); setProjectForm({ name: '', description: '', start_date: '', end_date: '', location: '', capacity: 1, status: 'active', categoryId: '', ownerId: '' }); setProjectFile(null); setProjectFileName(''); }}>
                   {t('dashboard.addProject')}
                 </button>
               </div>
             </div>
 
             <div className="mb-4">
-              {paginate((projects || []).filter(p => projectsFilter === '' ? true : p.categoryId === projectsFilter), projectsPage, ITEMS_PER_PAGE.projects).map(p => (
+              {manageableProjects.length === 0 && (
+                <p className="text-gray-500 text-center py-4">{t('dashboard.noOwnedProjects')}</p>
+              )}
+              {paginate(manageableProjects.filter(p => projectsFilter === '' ? true : p.categoryId === projectsFilter), projectsPage, ITEMS_PER_PAGE.projects).map(p => (
                 <div key={p.id} className="border p-3 mb-2 rounded">
                   <div className="flex flex-col md:flex-row justify-between md:items-start gap-3">
                     <div className="flex-1">
                       <strong className="text-sm md:text-base">{p.name}</strong> {p.status && <span className="text-gray-500 text-sm">({p.status})</span>}<br />
                       <div className="text-sm">{p.description}</div>
+                      {user?.role === 'admin' && (
+                        <div className="text-xs text-gray-500 mt-1">{t('dashboard.responsible')}: {ownerName(p.ownerId)}</div>
+                      )}
                     </div>
                     <div className="flex gap-2 flex-wrap md:flex-nowrap">
-                      <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => { setEditingProject(p); setProjectModalOpen(true); setProjectForm({ name: p.name, description: p.description, start_date: p.start_date?.split('T')[0] || '', end_date: p.end_date?.split('T')[0] || '', location: p.location || '', capacity: p.capacity || 1, status: p.status || 'active', categoryId: p.categoryId || '' }); setProjectFile(null); setProjectFileName(''); }}>{t('common.edit')}</button>
+                      <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => { setEditingProject(p); setProjectModalOpen(true); setProjectForm({ name: p.name, description: p.description, start_date: p.start_date?.split('T')[0] || '', end_date: p.end_date?.split('T')[0] || '', location: p.location || '', capacity: p.capacity || 1, status: p.status || 'active', categoryId: p.categoryId || '', ownerId: p.ownerId ?? '' }); setProjectFile(null); setProjectFileName(''); }}>{t('common.edit')}</button>
                       <button className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => openConfirm(t('dashboard.deleteProject'), t('dashboard.deleteProjectConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/projects/${p.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorDeleting') }); return; } setProjects(prev => prev.filter(x => x.id !== p.id)); setStatusMessage({ type: 'success', text: t('dashboard.projectDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
                     </div>
                   </div>
@@ -587,7 +603,7 @@ const Dashboard: React.FC = () => {
             {projects && projects.length > 0 && (
               <PaginationControls
                 currentPage={projectsPage}
-                totalPages={getTotalPages((projects || []).filter(p => projectsFilter === '' ? true : p.categoryId === projectsFilter).length, ITEMS_PER_PAGE.projects)}
+                totalPages={getTotalPages(manageableProjects.filter(p => projectsFilter === '' ? true : p.categoryId === projectsFilter).length, ITEMS_PER_PAGE.projects)}
                 onPageChange={setProjectsPage}
               />
             )}
@@ -954,6 +970,15 @@ const Dashboard: React.FC = () => {
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
+                {user?.role === 'admin' && (
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-medium">{t('dashboard.responsible')}</span>
+                    <select className="border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none text-sm" value={projectForm.ownerId} onChange={(e)=>setProjectForm({...projectForm, ownerId: e.target.value === '' ? '' : Number(e.target.value)})}>
+                      <option value="">{t('dashboard.noResponsible')}</option>
+                      {coordinators.map(c => <option key={c.id} value={c.id}>{c.name || c.email}</option>)}
+                    </select>
+                  </label>
+                )}
                 <div className="flex flex-col gap-3">
                   <label className="px-4 py-3 border-2 border-dashed border-brand rounded-lg bg-brand-50 hover:bg-brand-100 cursor-pointer transition-colors text-center">
                     <span className="text-sm font-semibold text-gray-700">{t('dashboard.uploadFile')}</span>

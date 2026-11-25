@@ -13,10 +13,13 @@ const categories = [
   { name: 'Human Rights', description: 'Human rights defense and promotion projects' },
 ];
 
-// startInDays / durationDays are relative to the moment of the reset
+// startInDays / durationDays are relative to the moment of the reset.
+// owner = responsible coordinator (SEC-17); "Smiles for All" has none, so
+// only admins can manage it.
 const projects = [
   {
     name: 'Planting trees',
+    owner: 'demo-coordinator@example.com',
     description: 'Help reforest the mountains of Gran Canaria by planting native trees, preparing the soil and learning about sustainable forestry.',
     location: 'Tejeda, Gran Canaria',
     capacity: 30,
@@ -27,6 +30,7 @@ const projects = [
   },
   {
     name: 'Community Support Program',
+    owner: 'leo.santana@example.com',
     description: 'Support local families, organise community activities and help at community centres in Vegueta.',
     location: 'Vegueta, Gran Canaria',
     capacity: 25,
@@ -37,6 +41,7 @@ const projects = [
   },
   {
     name: 'Beach Clean-Up',
+    owner: 'demo-coordinator@example.com',
     description: 'Collect waste, sort recyclables and raise awareness about marine conservation at Playa de Las Canteras.',
     location: 'Playa de Las Canteras, Gran Canaria',
     capacity: 30,
@@ -57,6 +62,7 @@ const projects = [
   },
   {
     name: 'Living Libraries',
+    owner: 'demo-coordinator@example.com',
     description: 'Run reading workshops and storytelling sessions to bring books closer to rural communities.',
     location: 'San Mateo, Gran Canaria',
     capacity: 25,

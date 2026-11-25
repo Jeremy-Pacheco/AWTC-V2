@@ -23,7 +23,9 @@ module.exports = (sequelize, DataTypes) => {
     capacity: DataTypes.INTEGER,
     status: DataTypes.STRING,
     filename: DataTypes.STRING,
-    categoryId: DataTypes.INTEGER
+    categoryId: DataTypes.INTEGER,
+    // Coordinator responsible for the project (SEC-17); NULL = admins only
+    ownerId: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'Project',
