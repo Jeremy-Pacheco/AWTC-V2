@@ -57,15 +57,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 // d3 for the dashboard charts is served locally (no third-party script in the CSP)
 app.use('/vendor/d3', express.static(path.join(__dirname, 'node_modules', 'd3', 'dist')));
-// Allowed origins come from CORS_ORIGINS / FRONTEND_URL (see config/cors.js)
-const { corsOriginCallback } = require('./config/cors');
-app.use(cors({
-  origin: corsOriginCallback,
+// Allowed origins come from CORS_ORIGINS / FRONTEND_URL plus this server's own
+// origin (see config/cors.js)
+const { corsOptionsDelegate } = require('./config/cors');
+app.use(cors(corsOptionsDelegate({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 204
-}));
+})));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
