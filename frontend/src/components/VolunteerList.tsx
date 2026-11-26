@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ThreeDots } from "react-loader-spinner";
+import { useTranslation } from "react-i18next";
 
 type Opportunity = {
   id: number;
@@ -17,6 +17,7 @@ type Opportunity = {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 function VolunteerList() {
+  const { t } = useTranslation();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,79 +41,67 @@ function VolunteerList() {
 
   if (loading)
     return (
-      <div className="flex justify-center items-center py-16">
-        <ThreeDots height={80} width={80} color="#12A36F" visible={true} />
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-64 animate-pulse rounded-2xl bg-gray-100" />
+        ))}
       </div>
     );
 
   if (error)
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <p className="text-red-700 font-semibold">Unable to load opportunities</p>
-        <p className="text-red-600 text-sm mt-2">{error}</p>
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+        <p className="text-center font-semibold text-red-700">{t('moreInfo.loadError')}</p>
+        <p className="mt-2 text-center text-sm text-red-600">{error}</p>
       </div>
     );
 
   if (!opportunities.length)
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-        <p className="text-gray-700 font-semibold">No opportunities available</p>
-        <p className="text-gray-600 text-sm mt-2">Please try again later</p>
+      <div className="rounded-2xl border border-dashed border-gray-300 p-10 text-center">
+        <p className="text-center font-semibold text-gray-700">{t('moreInfo.empty')}</p>
+        <p className="mt-2 text-center text-sm text-gray-500">{t('moreInfo.tryLater')}</p>
       </div>
     );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {opportunities.map((item) => (
-        <div
+        <article
           key={item.id}
-          className="bg-white dark:bg-[var(--card-bg)] rounded-xl shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-gray-100 dark:border-gray-700 hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:scale-[1.02]"
+          className="flex h-full flex-col rounded-2xl border border-gray-200 bg-[var(--card-bg)] p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
         >
-          {/* Header */}
-          <div className="bg-ink p-4 h-20 flex items-center">
-            <h3 className="font-bold text-white text-lg line-clamp-2">{item.title}</h3>
-          </div>
-
-          {/* Content */}
-          <div className="flex flex-col flex-1 p-4">
-            {/* Organization */}
-            <div className="mb-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Organization</p>
-              <a
-                href={item.organization.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-brand-text hover:text-brand-text font-semibold text-sm hover:underline break-words"
-              >
-                {item.organization.name}
-              </a>
-            </div>
-
-            {/* Description */}
-            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-4 flex-1">
-              {item.description}
+          <a
+            href={item.organization.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex w-fit items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-text hover:underline"
+          >
+            {item.organization.name}
+          </a>
+          <h3 className="mt-3 text-lg font-bold leading-snug line-clamp-2">{item.title}</h3>
+          <p className="mt-2 flex-1 text-left text-sm leading-relaxed text-gray-700 line-clamp-4">{item.description}</p>
+          {item.dates && (
+            <p className="mt-4 inline-flex items-center gap-1.5 text-left text-xs text-gray-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4 shrink-0" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M16 3v4M8 3v4M3 11h18" />
+              </svg>
+              {item.dates}
             </p>
-
-            {/* Dates if available */}
-            {item.dates && (
-              <div className="mb-3 text-xs text-gray-600 dark:text-gray-400">
-                <span className="font-semibold">Dates:</span> {item.dates}
-              </div>
-            )}
-          </div>
-
-          {/* Footer with CTA */}
-          <div className="border-t border-gray-100 dark:border-gray-700 p-4 pt-3">
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold text-sm transition-colors duration-200 w-full text-center"
-            >
-              View Details →
-            </a>
-          </div>
-        </div>
+          )}
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:border-brand hover:bg-brand-50 hover:text-brand-text"
+          >
+            {t('moreInfo.viewDetails')}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true">
+              <path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6" />
+            </svg>
+          </a>
+        </article>
       ))}
     </div>
   );
