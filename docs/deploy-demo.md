@@ -3,6 +3,8 @@
 Guía para publicar AWTC como **sitio de prueba** donde cualquiera puede probar los tres roles
 (voluntario, coordinador y administrador) con datos ficticios que se reinician cada noche.
 
+> Instalación real de la demo (dominios, de dónde sale cada valor, `gh secret set`, reset con líneas de código): [demo-runbook.md](demo-runbook.md).
+
 | Pieza | Servicio (plan gratuito) | Qué aloja |
 |---|---|---|
 | Frontend (React + Vite) | **Vercel** | SPA en `https://<proyecto>.vercel.app` |
