@@ -1,8 +1,8 @@
 // Home carousel: slides from the API, navigation and empty state
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import ProjectCarousel from '../components/ProjectCarousel';
+import ProjectCarousel, { AUTOPLAY_MS } from '../components/ProjectCarousel';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'es' } }),
@@ -40,5 +40,32 @@ describe('ProjectCarousel', () => {
     mockProjects([]);
     render(<MemoryRouter><ProjectCarousel /></MemoryRouter>);
     expect(await screen.findByText('home.carousel.empty')).toBeTruthy();
+  });
+
+  it('moves on by itself and stops when paused', async () => {
+    mockProjects([
+      { id: 1, name: 'First', status: 'active', filename: 'a.jpg' },
+      { id: 2, name: 'Second', status: 'active', filename: 'b.jpg' },
+    ]);
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      render(<MemoryRouter><ProjectCarousel /></MemoryRouter>);
+      await screen.findByText('First');
+      const slides = screen.getAllByRole('article', { hidden: true });
+      act(() => { vi.advanceTimersByTime(AUTOPLAY_MS); });
+      expect(slides[1].getAttribute('aria-hidden')).toBe('false');
+
+      // A manual move (e.g. after clicking an arrow) must not stop autoplay
+      fireEvent.click(screen.getByRole('button', { name: 'home.carousel.next' }));
+      expect(slides[0].getAttribute('aria-hidden')).toBe('false');
+      act(() => { vi.advanceTimersByTime(AUTOPLAY_MS); });
+      expect(slides[1].getAttribute('aria-hidden')).toBe('false');
+
+      fireEvent.click(screen.getByRole('button', { name: 'home.carousel.pause' }));
+      act(() => { vi.advanceTimersByTime(AUTOPLAY_MS * 3); });
+      expect(slides[1].getAttribute('aria-hidden')).toBe('false');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
