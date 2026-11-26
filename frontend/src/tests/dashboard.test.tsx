@@ -1,6 +1,6 @@
 // Smoke test of the split dashboard (audit task 3.8): every tab renders its data
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 
@@ -42,15 +42,22 @@ describe('Dashboard', () => {
     // Role badge in the sidebar
     expect(screen.getAllByText('dashboard.admin').length).toBeGreaterThan(0);
 
+    // The other tabs are preloaded in the background, hidden until opened
+    await waitFor(() => expect(screen.getByText('coco@example.com').closest('[hidden]')).not.toBeNull());
+
+    // Preloaded tabs stay in the DOM, so only look at the visible one
+    const visible = (text: string | RegExp) =>
+      screen.queryAllByText(text).filter((el) => !el.closest('[hidden]'));
+
     const open = async (tab: string, text: string) => {
       fireEvent.click(screen.getByRole('button', { name: tab }));
       expect(screen.getByRole('heading', { level: 1, name: tab })).toBeTruthy();
-      expect(await screen.findByText(text)).toBeTruthy();
+      await waitFor(() => expect(visible(text)).toHaveLength(1));
     };
     await open('dashboard.myProjects', 'My Beach Day');
     await open('dashboard.projects', 'Planting trees');
     // admins see the responsible coordinator of each project
-    expect(screen.getByText(/Coco Coordinator/)).toBeTruthy();
+    expect(visible(/Coco Coordinator/).length).toBeGreaterThan(0);
     await open('dashboard.categories', 'Green things');
     await open('dashboard.reviews', 'Lovely day');
     await open('dashboard.users', 'coco@example.com');
