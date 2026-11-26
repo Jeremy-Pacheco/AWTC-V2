@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
+import { heroImageProps, type HeroKey } from "../utils/heroImages";
 
 interface PageHeaderProps {
   eyebrow?: string;
   title: string;
   subtitle?: string;
-  /** Background photo; omit for a plain brand gradient */
-  image?: string;
+  /** Background photo (see utils/heroImages); omit for a plain brand gradient */
+  hero?: HeroKey;
   children?: ReactNode;
 }
 
@@ -13,15 +14,21 @@ interface PageHeaderProps {
  * Header of the inner pages: photo with a dark overlay (same look as the
  * home hero, shorter), eyebrow, title and subtitle.
  */
-export default function PageHeader({ eyebrow, title, subtitle, image = "/hero-img.jpg", children }: PageHeaderProps) {
+export default function PageHeader({ eyebrow, title, subtitle, hero, children }: PageHeaderProps) {
   return (
     <header className="relative isolate overflow-hidden">
-      {image ? (
-        <img src={image} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      {hero ? (
+        <img
+          {...heroImageProps(hero)}
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
       ) : null}
       <div
         className={`absolute inset-0 -z-10 ${
-          image ? "bg-gradient-to-r from-black/80 via-black/60 to-black/35" : "bg-gradient-to-br from-brand-800 to-gray-950"
+          hero ? "bg-gradient-to-r from-black/80 via-black/60 to-black/35" : "bg-gradient-to-br from-brand-800 to-gray-950"
         }`}
       />
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-14 md:py-20">

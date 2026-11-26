@@ -39,7 +39,7 @@ const AboutUs: React.FC = () => {
 
   return (
     <div className="min-h-[80vh]">
-      <PageHeader eyebrow={t('nav.aboutUs')} title={t('aboutUs.headerTitle')} subtitle={t('home.aboutUsDescription')} />
+      <PageHeader hero="about" eyebrow={t('nav.aboutUs')} title={t('aboutUs.headerTitle')} subtitle={t('home.aboutUsDescription')} />
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16 md:space-y-24">
         {/* About Us */}

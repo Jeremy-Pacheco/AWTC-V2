@@ -4,6 +4,7 @@ import AlertModal from "../components/AlertModal";
 import ProjectCarousel from "../components/ProjectCarousel";
 import logo4 from "../../../frontend/public/home/aboutUs-image.png";
 import { NavLink } from "react-router-dom";
+import { heroImageProps } from "../utils/heroImages";
 import { io, Socket } from "socket.io-client";
 import { useTranslation } from "react-i18next";
 import { handleAuthFetch } from "../utils/auth";
@@ -635,8 +636,10 @@ function Home() {
     <>
       <header className="relative isolate overflow-hidden">
         <img
-          src="/hero-img.jpg"
+          {...heroImageProps("home")}
           alt=""
+          fetchPriority="high"
+          decoding="async"
           className="absolute inset-0 -z-10 h-full w-full object-cover"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/55 to-black/25" />

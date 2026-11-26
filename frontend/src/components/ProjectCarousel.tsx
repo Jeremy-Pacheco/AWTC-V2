@@ -6,11 +6,8 @@ import { imageUrl } from "../utils/images";
 
 const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080").replace(/\/+$/, "");
 const MAX_SLIDES = 5;
-const AUTOPLAY_MS = 6000;
-
-function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-}
+/** Time each slide stays before moving to the next one */
+export const AUTOPLAY_MS = 5000;
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
   return (
@@ -23,15 +20,18 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 /**
  * Featured projects on the home page: one large slide at a time with the
  * project photo, its category, place and dates, and a link to it.
- * Autoplays (paused on hover/focus and with reduced motion), supports
- * arrows, dots, keyboard and swipe.
+ * Moves on by itself every AUTOPLAY_MS (a manual move restarts the count),
+ * with a pause/play button (WCAG 2.2.2) and paused while the tab is hidden.
+ * With reduced motion it still advances, without the slide animation.
+ * Supports arrows, dots, keyboard and swipe.
  */
 export default function ProjectCarousel() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const [tabHidden, setTabHidden] = useState(() => typeof document !== "undefined" && document.hidden);
   const touchX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -57,10 +57,17 @@ export default function ProjectCarousel() {
   const next = useCallback(() => go(current + 1), [go, current]);
 
   useEffect(() => {
-    if (paused || count < 2 || prefersReducedMotion()) return;
+    const onVisibility = () => setTabHidden(document.hidden);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  // One timer per slide: moving by hand (arrows, dots, swipe) restarts it
+  useEffect(() => {
+    if (!playing || tabHidden || count < 2) return;
     const id = window.setTimeout(next, AUTOPLAY_MS);
     return () => window.clearTimeout(id);
-  }, [paused, count, next]);
+  }, [playing, tabHidden, count, next, current]);
 
   const formatDate = (value?: string | null) =>
     value ? new Date(value).toLocaleDateString(i18n.language, { day: "numeric", month: "short" }) : null;
@@ -82,10 +89,6 @@ export default function ProjectCarousel() {
       className="mt-6"
       aria-roledescription="carousel"
       aria-label={t("home.newestProjects")}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
       onKeyDown={(e) => {
         if (e.key === "ArrowLeft") prev();
         if (e.key === "ArrowRight") next();
@@ -175,6 +178,19 @@ export default function ProjectCarousel() {
 
         {count > 1 && (
           <div className="absolute right-4 top-4 md:top-auto md:bottom-8 md:right-8 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPlaying((p) => !p)}
+              aria-label={playing ? t("home.carousel.pause") : t("home.carousel.play")}
+              aria-pressed={!playing}
+              className="grid h-11 w-11 place-items-center rounded-full border border-white/25 bg-black/35 !text-white backdrop-blur-sm transition hover:bg-black/60"
+            >
+              {playing ? (
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" /></svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true"><path d="M8 5.5v13a1 1 0 001.5.86l10.5-6.5a1 1 0 000-1.72L9.5 4.64A1 1 0 008 5.5z" /></svg>
+              )}
+            </button>
             <button
               type="button"
               onClick={prev}

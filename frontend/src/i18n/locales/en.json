@@ -64,7 +64,9 @@
       "previous": "Previous project",
       "next": "Next project",
       "goTo": "Go to {{name}}",
-      "slide": "{{n}} of {{total}}"
+      "slide": "{{n}} of {{total}}",
+      "pause": "Pause the carousel",
+      "play": "Play the carousel"
     },
     "projectsEyebrow": "Projects",
     "aboutEyebrow": "Who we are"
