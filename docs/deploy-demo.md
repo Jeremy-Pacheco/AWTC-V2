@@ -61,7 +61,7 @@ El repositorio incluye `render.yaml`.
 
 1. En Render: *New → Blueprint* y elige el repositorio.
 2. Render crea el servicio `awtc-backend` (plan *free*, carpeta `backend/`) y genera `JWT_SECRET` y `SESSION_SECRET` aleatorios.
-3. Rellena las variables que pide (`sync: false`), según la [tabla de variables](#tabla-de-variables).
+3. Rellena las variables que pide (`sync: false`), según la [tabla de variables](#tabla-de-variables). `REFRESH_COOKIE_SAMESITE` = `none` mientras uses los dominios de Vercel y Render (`lax` con dominio propio, paso 9).
    `FRONTEND_URL` y `CORS_ORIGINS` aún no las conoces: pon temporalmente `https://example.com` y cámbialas en el paso 7.
 
 ### Opción B: manual
@@ -149,6 +149,25 @@ Guarda: Render redespliega solo.
 - [ ] El chat funciona entre dos navegadores (Socket.IO).
 - [ ] *Actions → Reset demo data* termina en verde.
 
+## 9. Dominio propio (opcional, recomendado)
+
+Con la web y la API bajo el mismo dominio, la cookie de sesión deja de ser de terceros: Safari no la bloquea y puede usarse `SameSite=Lax`. La demo oficial usa:
+
+| Subdominio | Servicio | Registro DNS |
+|---|---|---|
+| `awtc.jeremypacheco.es` | Vercel (web) | `CNAME` al destino que indique Vercel (`<id>.vercel-dns-0xx.com`) |
+| `awtc-api.jeremypacheco.es` | Render (API + panel EJS) | `CNAME` a `<servicio>.onrender.com` |
+
+1. **Vercel** → *Settings → Domains* → añade el subdominio de la web. Opcional: edita `<proyecto>.vercel.app` y elige *Redirect to* el dominio nuevo.
+2. **Render** → *Settings → Custom Domains* → añade el subdominio de la API.
+3. En el **DNS** del dominio crea los dos `CNAME` y espera a que ambos paneles lo verifiquen y emitan el certificado.
+4. **Render** → *Environment*:
+   - `FRONTEND_URL` y `CORS_ORIGINS` = `https://<dominio de la web>`
+   - `REFRESH_COOKIE_SAMESITE` = `lax`
+5. **Vercel** → `VITE_API_URL` = `https://<dominio de la API>` (tipo *Config*, entornos *Production* y *Preview*) y *Redeploy*.
+
+Con `lax`, el login solo funciona desde el dominio propio: por eso conviene la redirección del dominio `.vercel.app`.
+
 ---
 
 ## Limitaciones conocidas del plan gratuito
@@ -158,7 +177,7 @@ Guarda: Render redespliega solo.
 - Tras cada reset los IDs cambian: los usuarios con sesión abierta reciben un 401 y el frontend cierra su sesión.
 - Las cuentas demo son **compartidas**: cualquiera puede cambiar su nombre o foto hasta el siguiente reset.
 - Revisa periódicamente las cuotas de Aiven y Cloudinary.
-- **Sesiones del frontend**: el token de acceso dura 15 minutos y se renueva con una cookie `httpOnly` del dominio de Render. Como la web está en Vercel, para el navegador es una cookie de terceros: Safari (y Chrome si el usuario bloquea cookies de terceros) no la envía, así que esos usuarios tendrán que volver a iniciar sesión cuando caduque el token. Para evitarlo, sirve la API bajo el mismo dominio que la web (dominio propio o un *rewrite* `/api` en Vercel).
+- **Sesiones del frontend sin dominio propio**: el token de acceso dura 15 minutos y se renueva con una cookie `httpOnly` del dominio de la API. Con la web en `*.vercel.app` y la API en `*.onrender.com` es una cookie de terceros: Safari (y Chrome si el usuario bloquea cookies de terceros) no la envía, así que esos usuarios tendrán que volver a iniciar sesión cuando caduque el token. Se resuelve con un [dominio propio](#9-dominio-propio-opcional-recomendado).
 
 ## Tabla de variables
 
@@ -179,7 +198,7 @@ Guarda: Render redespliega solo.
 | `SESSION_STORE` | no | `database` (por defecto en producción) | Dónde guardar las sesiones del panel: `database` o `memory` (solo desarrollo) |
 | `ACCESS_TOKEN_TTL` | no | `15m` | Duración del token de acceso (formato de `jsonwebtoken`) |
 | `REFRESH_TOKEN_TTL_DAYS` | no | `7` | Duración del refresh token (cookie `httpOnly`), de 1 a 90 días |
-| `REFRESH_COOKIE_SAMESITE` | demo | `none` | `none` si frontend y API están en sitios distintos (Vercel + Render); `lax` si comparten dominio |
+| `REFRESH_COOKIE_SAMESITE` | sí | `none` / `lax` | `none` si frontend y API están en sitios distintos (Vercel + Render); `lax` si comparten dominio |
 | `REFRESH_RATE_LIMIT` | no | `120` | Renovaciones de sesión por IP cada 15 minutos |
 | `AUTH_PROVIDER` | sí | `local` | `local` (bcrypt en BD) o `ldap` |
 | `STORAGE_PROVIDER` | sí | `cloudinary` | `local` o `cloudinary` |
