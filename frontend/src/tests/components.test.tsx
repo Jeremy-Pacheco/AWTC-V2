@@ -20,7 +20,7 @@ vi.mock('../utils/demo', () => ({
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, defaultValue?: unknown) => {
       const translations: Record<string, string> = {
         'footer.tagline': 'Connecting volunteers worldwide',
         'footer.explore': 'Explore',
@@ -35,7 +35,7 @@ vi.mock('react-i18next', () => ({
         'nav.info': 'More Info',
         'nav.aboutUs': 'About Us',
       };
-      return translations[key] || key;
+      return translations[key] || (typeof defaultValue === 'string' ? defaultValue : key);
     },
   }),
 }));
