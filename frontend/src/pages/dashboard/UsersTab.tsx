@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { imageUrl } from "../../utils/images";
 import type { AppUser, UserProjectEntry } from "../../types/api";
+import * as ui from "./ui";
 import { API_URL, ITEMS_PER_PAGE, getTotalPages, modalVariants, paginate, type TabProps } from "./shared";
 import PaginationControls from "./Pagination";
 
@@ -65,21 +66,20 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
   return (
     <>
                   <div>
-                    <h3 className="font-bold mb-2">{t('dashboard.users')}</h3>
                     <div className="mb-4 flex flex-col md:flex-row gap-2 md:items-center">
-                      <select className="border p-2 text-sm" value={userRoleFilter} onChange={(e)=>setUserRoleFilter(e.target.value === '' ? '' : e.target.value)}>
+                      <select className={`${ui.field} md:w-56`} value={userRoleFilter} onChange={(e)=>setUserRoleFilter(e.target.value === '' ? '' : e.target.value)}>
                         <option value="">{t('dashboard.allRoles')}</option>
                         <option value="admin">{t('dashboard.admin')}</option>
                         <option value="coordinator">{t('dashboard.coordinator')}</option>
                         <option value="volunteer">{t('dashboard.volunteer')}</option>
                       </select>
                       <div className="md:ml-auto">
-                        <button className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold shadow text-sm w-full md:w-auto" onClick={() => setCreateUserModalOpen(true)}>{t('dashboard.createUser')}</button>
+                        <button className={`${ui.btnPrimary} w-full md:w-auto`} onClick={() => setCreateUserModalOpen(true)}>{t('dashboard.createUser')}</button>
                       </div>
                     </div>
                     <div>
                       {paginate(usersData.filter(u => userRoleFilter === '' ? true : u.role === userRoleFilter), usersPage, ITEMS_PER_PAGE.users).map(u => (
-                        <div key={u.id} className="border p-3 mb-2 rounded flex flex-col md:flex-row justify-between md:items-start gap-3">
+                        <div key={u.id} className={`${ui.card} flex flex-col md:flex-row justify-between md:items-start gap-3`}>
                           <div className="flex items-start gap-3 flex-1 min-w-0">
                             {u.profileImage ? (
                               <img
@@ -95,10 +95,10 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
                               </div>
                             )}
                             <div className="flex-1 min-w-0">
-                              <strong className="text-sm md:text-base block">{u.name}</strong> <small className="text-gray-500 text-xs md:text-sm block truncate">{u.email}</small> <span className="text-xs md:text-sm text-gray-600">({u.role})</span>
+                              <div className="flex flex-wrap items-center gap-2"><strong className="text-base">{u.name}</strong><span className={ui.badge(u.role)}>{t(`dashboard.${u.role}`, { defaultValue: u.role })}</span></div><small className="text-gray-500 text-xs md:text-sm block truncate">{u.email}</small>
                               <div className="mt-2 flex flex-col sm:flex-row gap-2 items-start sm:items-center">
                                 <label className="text-sm">{t('dashboard.role')}:</label>
-                                <select defaultValue={u.role} onChange={async (e)=>{ const newRole = e.target.value; try { const res = await fetch(`${API_URL}/api/users/${u.id}/role`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ role: newRole }) }); if (!res.ok) { const err = await res.json(); return setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorSaving') }); } const updated = await res.json(); setUsersData(prev => prev.map(x => x.id === u.id ? { ...x, role: updated.user.role } : x)); setStatusMessage({ type: 'success', text: t('dashboard.roleUpdated') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.networkError') }); } }} className="text-sm border rounded p-1">
+                                <select defaultValue={u.role} onChange={async (e)=>{ const newRole = e.target.value; try { const res = await fetch(`${API_URL}/api/users/${u.id}/role`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ role: newRole }) }); if (!res.ok) { const err = await res.json(); return setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorSaving') }); } const updated = await res.json(); setUsersData(prev => prev.map(x => x.id === u.id ? { ...x, role: updated.user.role } : x)); setStatusMessage({ type: 'success', text: t('dashboard.roleUpdated') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.networkError') }); } }} className={`${ui.field} !w-auto !py-1`}>
                                   <option value="volunteer">{t('dashboard.volunteer')}</option>
                                   <option value="coordinator">{t('dashboard.coordinator')}</option>
                                   <option value="admin">{t('dashboard.admin')}</option>
@@ -107,7 +107,7 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
                             </div>
                           </div>
                           <div className="flex gap-2 flex-wrap md:flex-nowrap md:justify-end">
-                            <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={async ()=>{
+                            <button className={ui.btnSecondary} onClick={async ()=>{
                               try {
                                 const res = await fetch(`${API_URL}/api/users/${u.id}/projects`, { headers: { Authorization: `Bearer ${token}` } });
                                 if (!res.ok) { const err = await res.json(); return setStatusMessage({ type: 'error', text: err.message || 'Error' }); }
@@ -126,7 +126,7 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
                                 setSelectedUser(u); setUserProjects(projectsWithBanFlag); setUserModalOpen(true);
                               } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: 'Error fetching user projects' }); }
                             }}>{t('dashboard.viewProjects')}</button>
-                            <button className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => openConfirm(t('dashboard.deleteUser'), t('dashboard.deleteUserConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/users/${u.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorDeleting') }); return; } setUsersData(prev => prev.filter(x => x.id !== u.id)); setStatusMessage({ type: 'success', text: t('dashboard.userDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
+                            <button className={ui.btnDanger} onClick={() => openConfirm(t('dashboard.deleteUser'), t('dashboard.deleteUserConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/users/${u.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.errorDeleting') }); return; } setUsersData(prev => prev.filter(x => x.id !== u.id)); setStatusMessage({ type: 'success', text: t('dashboard.userDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
                           </div>
                         </div>
                       ))}
@@ -142,24 +142,24 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
       {/* User Projects Modal */}
       <AnimatePresence>
         {userModalOpen && selectedUser && (
-          <motion.div className="fixed inset-0 z-50 flex justify-center items-center bg-black/10 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setUserModalOpen(false); setSelectedUser(null); setUserProjectsPage(1); }}>
-          <motion.div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" variants={modalVariants} initial="hidden" animate="visible" exit="exit" transition={{ duration: 0.3, type: "spring", stiffness: 120 }} onClick={(e)=>e.stopPropagation()}>
-            <h2 className="text-2xl font-bold mb-4">{selectedUser.name} - {t('dashboard.projects')}</h2>
+          <motion.div className={ui.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setUserModalOpen(false); setSelectedUser(null); setUserProjectsPage(1); }}>
+          <motion.div className={`${ui.modal} max-w-2xl max-h-[90vh] overflow-y-auto`} variants={modalVariants} initial="hidden" animate="visible" exit="exit" transition={{ duration: 0.3, type: "spring", stiffness: 120 }} onClick={(e)=>e.stopPropagation()}>
+            <h2 className={ui.modalTitle}>{selectedUser.name} - {t('dashboard.projects')}</h2>
               <div className="mb-4">
                 {userProjects.length === 0 ? (
-                  <p className="text-gray-500 text-center py-4">{t('dashboard.noProjects')}</p>
+                  <p className={ui.empty}>{t('dashboard.noProjects')}</p>
                 ) : (
                   paginate(userProjects, userProjectsPage, ITEMS_PER_PAGE.userProjects).map((p) => (
-                    <div key={p.id} className="border p-3 mb-2 rounded flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                    <div key={p.id} className={`${ui.card} flex flex-col sm:flex-row justify-between sm:items-center gap-2`}>
                       <div className="flex-1 min-w-0">
                         <strong className="block truncate">{p.name}</strong>
                         <span className="text-sm text-gray-600 block truncate">{p.description}</span>
                       </div>
                       <div className="flex gap-2 flex-shrink-0">
                         {!p.banned ? (
-                          <button className="bg-danger text-white px-4 py-2 rounded-3xl hover:bg-ink transition text-sm" onClick={() => openConfirm(t('dashboard.removeBan'), t('dashboard.removeBanConfirm'), async () => { closeConfirm(); await handleRejectUserFromProject(p.id, selectedUser.id); }, true)}>{t('dashboard.removeBan')}</button>
+                          <button className={ui.btnDanger} onClick={() => openConfirm(t('dashboard.removeBan'), t('dashboard.removeBanConfirm'), async () => { closeConfirm(); await handleRejectUserFromProject(p.id, selectedUser.id); }, true)}>{t('dashboard.removeBan')}</button>
                         ) : (
-                          <button className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200 text-sm" onClick={() => openConfirm(t('dashboard.unban'), t('dashboard.unbanConfirm'), async () => { closeConfirm(); await handleUnbanUserFromProject(p.id, selectedUser.id); }, false)}>{t('dashboard.unban')}</button>
+                          <button className={ui.btnSecondary} onClick={() => openConfirm(t('dashboard.unban'), t('dashboard.unbanConfirm'), async () => { closeConfirm(); await handleUnbanUserFromProject(p.id, selectedUser.id); }, false)}>{t('dashboard.unban')}</button>
                         )}
                       </div>
                     </div>
@@ -174,7 +174,7 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
                 />
               )}
               <div className="flex justify-end mt-4">
-                <button className="px-4 py-2 rounded-3xl bg-ink text-white border hover:border-muted hover:bg-gray-700 hover:text-white transition-colors duration-200" onClick={() => { setUserModalOpen(false); setSelectedUser(null); setUserProjectsPage(1); }}>{t('dashboard.close')}</button>
+                <button className={ui.btnSecondary} onClick={() => { setUserModalOpen(false); setSelectedUser(null); setUserProjectsPage(1); }}>{t('dashboard.close')}</button>
               </div>
             </motion.div>
           </motion.div>
@@ -183,21 +183,21 @@ export default function UsersTab({ token, setStatusMessage, openConfirm, closeCo
       {/* Create User Modal */}
       <AnimatePresence>
         {createUserModalOpen && (
-          <motion.div className="fixed inset-0 z-50 flex justify-center items-center bg-black/10 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCreateUserModalOpen(false)}>
-            <motion.div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md" variants={modalVariants} initial="hidden" animate="visible" exit="exit" transition={{ duration: 0.3, type: "spring", stiffness: 120 }} onClick={(e)=>e.stopPropagation()}>
-              <h2 className="text-2xl font-bold mb-4">{t('dashboard.createUser')}</h2>
+          <motion.div className={ui.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setCreateUserModalOpen(false)}>
+            <motion.div className={`${ui.modal} max-w-md`} variants={modalVariants} initial="hidden" animate="visible" exit="exit" transition={{ duration: 0.3, type: "spring", stiffness: 120 }} onClick={(e)=>e.stopPropagation()}>
+              <h2 className={ui.modalTitle}>{t('dashboard.createUser')}</h2>
               <form onSubmit={async (e)=>{ e.preventDefault(); await createUser(); }} className="flex flex-col gap-3">
-                <input placeholder={t('dashboard.name')} className="border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none" value={newUserForm.name} onChange={(e)=>setNewUserForm({...newUserForm, name: e.target.value})} required />
-                <input placeholder={t('dashboard.email')} className="border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none" value={newUserForm.email} onChange={(e)=>setNewUserForm({...newUserForm, email: e.target.value})} required />
-                <input placeholder={t('dashboard.password')} type="password" className="border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none" value={newUserForm.password} onChange={(e)=>setNewUserForm({...newUserForm, password: e.target.value})} required />
-                <select className="border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none" value={newUserForm.role} onChange={(e)=>setNewUserForm({...newUserForm, role: e.target.value})}>
+                <input placeholder={t('dashboard.name')} className={ui.field} value={newUserForm.name} onChange={(e)=>setNewUserForm({...newUserForm, name: e.target.value})} required />
+                <input placeholder={t('dashboard.email')} className={ui.field} value={newUserForm.email} onChange={(e)=>setNewUserForm({...newUserForm, email: e.target.value})} required />
+                <input placeholder={t('dashboard.password')} type="password" className={ui.field} value={newUserForm.password} onChange={(e)=>setNewUserForm({...newUserForm, password: e.target.value})} required />
+                <select className={ui.field} value={newUserForm.role} onChange={(e)=>setNewUserForm({...newUserForm, role: e.target.value})}>
                   <option value="volunteer">{t('dashboard.volunteer')}</option>
                   <option value="coordinator">{t('dashboard.coordinator')}</option>
                   <option value="admin">{t('dashboard.admin')}</option>
                 </select>
                 <div className="flex justify-end gap-2">
-                  <button type="button" className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200" onClick={()=>setCreateUserModalOpen(false)}>{t('common.cancel')}</button>
-                  <button type="submit" className="bg-brand text-black px-4 py-2 rounded-3xl hover:bg-ink hover:text-white transition font-semibold">{t('dashboard.createUser')}</button>
+                  <button type="button" className={ui.btnSecondary} onClick={()=>setCreateUserModalOpen(false)}>{t('common.cancel')}</button>
+                  <button type="submit" className={ui.btnPrimary}>{t('dashboard.createUser')}</button>
                 </div>
               </form>
             </motion.div>

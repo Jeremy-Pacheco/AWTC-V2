@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Contact } from "../../types/api";
+import * as ui from "./ui";
 import { API_URL, ITEMS_PER_PAGE, getTotalPages, paginate, type TabProps } from "./shared";
 import PaginationControls from "./Pagination";
 
@@ -21,10 +22,9 @@ export default function ContactsTab({ token, setStatusMessage, openConfirm, clos
   return (
     <>
                   <div>
-                    <h3 className="font-bold mb-2">{t('dashboard.incidents')}</h3>
                     <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center">
                       <label className="text-sm">{t('dashboard.filter')}:</label>
-                      <select value={contactsFilter} onChange={(e) => setContactsFilter(e.target.value as 'open'|'closed'|'all')} className="text-sm border rounded p-2">
+                      <select value={contactsFilter} onChange={(e) => setContactsFilter(e.target.value as 'open'|'closed'|'all')} className={`${ui.field} sm:w-48`}>
                         <option value="open">{t('dashboard.open')}</option>
                         <option value="closed">{t('dashboard.closed')}</option>
                         <option value="all">{t('dashboard.all')}</option>
@@ -32,11 +32,11 @@ export default function ContactsTab({ token, setStatusMessage, openConfirm, clos
                     </div>
                     <div>
                       {paginate(contacts.filter(c => contactsFilter === 'all' ? true : (contactsFilter === 'open' ? !c.read : c.read)), incidentsPage, ITEMS_PER_PAGE.incidents).map(c => (
-                        <div key={c.id} className="border p-3 mb-2 rounded">
+                        <div key={c.id} className={ui.card}>
                           <div className="flex flex-col md:flex-row justify-between gap-2 md:items-start">
-                            <div><strong className="text-sm md:text-base">{c.name}</strong> — <span className="text-xs md:text-sm text-gray-700">{c.email}</span></div>
+                            <div className="flex flex-wrap items-center gap-2"><strong className="text-base">{c.name}</strong><span className={ui.badge(c.read ? 'closed' : 'open')}>{c.read ? t('dashboard.closed') : t('dashboard.open')}</span><span className="w-full text-xs md:text-sm text-gray-500">{c.email}</span></div>
                             <div className="flex gap-2 flex-wrap md:justify-end">
-                              { !c.read && <button className="border border-muted text-black hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={async ()=>{
+                              { !c.read && <button className={ui.btnSecondary} onClick={async ()=>{
                                 // mark as read/closed
                                 try {
                                   const res = await fetch(`${API_URL}/api/contacts/${c.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ read: true }) });
@@ -45,7 +45,7 @@ export default function ContactsTab({ token, setStatusMessage, openConfirm, clos
                                   setContacts(prev => prev.map(x => x.id === c.id ? updated : x));
                                 } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.networkError') }); }
                               }}>{t('dashboard.close')}</button> }
-                              <button className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => openConfirm(t('dashboard.deleteMessage'), t('dashboard.deleteMessageConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/contacts/${c.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.networkError') }); return; } setContacts(prev => prev.filter(x => x.id !== c.id)); setStatusMessage({ type: 'success', text: t('dashboard.messageDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
+                              <button className={ui.btnDanger} onClick={() => openConfirm(t('dashboard.deleteMessage'), t('dashboard.deleteMessageConfirm'), async () => { closeConfirm(); try { const res = await fetch(`${API_URL}/api/contacts/${c.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }); if (!res.ok) { const err = await res.json(); setStatusMessage({ type: 'error', text: err.message || t('dashboard.networkError') }); return; } setContacts(prev => prev.filter(x => x.id !== c.id)); setStatusMessage({ type: 'success', text: t('dashboard.messageDeleted') }); } catch (err) { console.error(err); setStatusMessage({ type: 'error', text: t('dashboard.errorDeleting') }); } }, true)}>{t('common.delete')}</button>
                             </div>
                           </div>
                           <div className="mt-2 text-sm">{c.message}</div>

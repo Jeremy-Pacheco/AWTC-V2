@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import { imageUrl } from "../../utils/images";
 import { clearAuth } from "../../utils/auth";
+import * as ui from "./ui";
 import { API_URL, modalVariants, type TabProps } from "./shared";
 
 /** Profile: view, edit (name + photo) and delete own account. */
@@ -92,13 +93,13 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
             <h3 className="text-xl font-bold">{user.name}</h3>
             <p>{user.email}</p>
             <button
-              className="mt-3 border border-muted text-black px-4 py-2 rounded-3xl hover:bg-ink hover:text-white transition"
+              className={ui.btnSecondary}
               onClick={() => setShowEditModal(true)}
             >
               {t('dashboard.editProfile')}
             </button>
             <button
-              className="mt-3 bg-danger text-white px-4 py-2 rounded-3xl hover:bg-ink hover:text-white transition"
+              className={ui.btnDanger}
               onClick={() => openConfirm(t('dashboard.deleteProfile'), t('dashboard.deleteProfileConfirm'), async () => { closeConfirm(); await handleDeleteOwnProfile(); }, true)}
             >
               {t('dashboard.deleteProfile')}
@@ -109,7 +110,7 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
       <AnimatePresence>
         {showEditModal && (
           <motion.div
-            className="fixed inset-0 z-50 flex justify-center items-center bg-black/40 backdrop-blur-sm"
+            className={ui.overlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -117,7 +118,7 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
             onClick={() => setShowEditModal(false)}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md"
+              className={`${ui.modal} max-w-md`}
               variants={modalVariants}
               initial="hidden"
               animate="visible"
@@ -125,7 +126,7 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
               transition={{ duration: 0.3, type: "spring", stiffness: 120 }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl md:text-2xl font-bold mb-4">{t('dashboard.editProfile')}</h2>
+              <h2 className={ui.modalTitle}>{t('dashboard.editProfile')}</h2>
               <form
                 onSubmit={handleUpdateProfile}
                 className="flex flex-col gap-3"
@@ -148,12 +149,12 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
                 </div>
 
                 <div>
-                  <label className="block font-semibold mb-1 text-sm">{t('dashboard.name')}:</label>
+                  <label className={ui.label}>{t('dashboard.name')}:</label>
                   <input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full border rounded-lg p-2 focus:ring-2 focus:ring-brand-400 outline-none text-sm"
+                    className={ui.field}
                     required
                   />
                 </div>
@@ -161,14 +162,14 @@ export default function ProfileTab({ token, user, setStatusMessage, openConfirm,
                 <div className="flex gap-2 mt-2 flex-col sm:flex-row w-full sm:w-auto sm:ml-auto">
                   <button
                     type="button"
-                    className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200 text-sm flex-1 sm:flex-none"
+                    className={`${ui.btnSecondary} flex-1 sm:flex-none`}
                     onClick={() => setShowEditModal(false)}
                   >
                     {t('common.cancel')}
                   </button>
                   <button
                     type="submit"
-                    className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold transition-colors text-sm flex-1 sm:flex-none"
+                    className={`${ui.btnPrimary} flex-1 sm:flex-none`}
                   >
                     {t('common.save')}
                   </button>
