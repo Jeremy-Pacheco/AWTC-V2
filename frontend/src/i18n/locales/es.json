@@ -46,7 +46,9 @@
   },
   "home": {
     "hero": {
-      "subtitle": "Únete a iniciativas sociales y ambientales y genera un impacto hoy"
+      "subtitle": "Únete a iniciativas sociales y ambientales y genera un impacto hoy",
+      "eyebrow": "Voluntariado en Gran Canaria",
+      "explore": "Explorar proyectos"
     },
     "newestProjects": "Proyectos Recientes",
     "discoverProjects": "Descubre proyectos de voluntariado y genera un impacto",
@@ -57,8 +59,15 @@
       "readMore": "Leer más"
     },
     "carousel": {
-      "notEnough": "No hay suficientes proyectos disponibles para el carrusel"
-    }
+      "empty": "Todavía no hay proyectos activos.",
+      "viewProject": "Ver proyecto",
+      "previous": "Proyecto anterior",
+      "next": "Proyecto siguiente",
+      "goTo": "Ir a {{name}}",
+      "slide": "{{n}} de {{total}}"
+    },
+    "projectsEyebrow": "Proyectos",
+    "aboutEyebrow": "Quiénes somos"
   },
   "reviews": {
     "title": "Reseñas",
@@ -77,7 +86,8 @@
     "removeImage": "Eliminar imagen",
     "imageWillBeRemoved": "La imagen será eliminada",
     "confirmDelete": "¿Estás seguro?",
-    "errorCreating": "Error al crear la reseña"
+    "errorCreating": "Error al crear la reseña",
+    "eyebrow": "Opiniones"
   },
   "aboutUs": {
     "title": "Sobre Nosotros",
