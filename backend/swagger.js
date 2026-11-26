@@ -17,8 +17,8 @@ const options = {
         description: 'Development Server'
       },
       {
-        url: 'https://awilltochange.me',
-        description: 'Production Server (via Nginx)'
+        url: '/',
+        description: 'This server (e.g. the public demo: https://awtc-api.jeremypacheco.es)'
       }
     ],
     security: [

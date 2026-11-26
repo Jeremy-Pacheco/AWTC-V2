@@ -2,32 +2,20 @@
  * Single source of truth for allowed browser origins (REST API + Socket.IO).
  *
  * - CORS_ORIGINS: comma-separated list of exact origins, e.g.
- *     CORS_ORIGINS=https://awtc.vercel.app,https://www.awilltochange.me
+ *     CORS_ORIGINS=https://awtc.jeremypacheco.es,https://staging.example.com
  *   When set, it REPLACES the default list below.
  * - FRONTEND_URL is always allowed as well.
  *
  * Origins must match exactly (scheme + host + port, no trailing slash).
  */
 
-// Previous hardcoded list, kept as the default so existing setups keep working.
+// Default when CORS_ORIGINS is not set: local development only. Deployed
+// environments must list their origins in CORS_ORIGINS / FRONTEND_URL.
 const DEFAULT_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:8080',
   'https://localhost:5173',
   'https://localhost:8443',
-  'http://209.97.187.131:5173',
-  'http://209.97.187.131:8080',
-  'https://209.97.187.131',
-  'http://awilltochange.me:5173',
-  'http://awilltochange.me:8080',
-  'https://awilltochange.me:5173',
-  'https://awilltochange.me:8443',
-  'http://awilltochange.me',
-  'https://awilltochange.me',
-  'http://www.awilltochange.me',
-  'https://www.awilltochange.me',
-  'https://awtc.com',
-  'https://www.awtc.com',
 ];
 
 const normalize = (origin) => origin.trim().replace(/\/+$/, '');

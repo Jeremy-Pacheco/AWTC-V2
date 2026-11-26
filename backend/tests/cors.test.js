@@ -51,9 +51,9 @@ describe('CORS', () => {
   it('uses X-Forwarded-Proto behind a trusted proxy (https site, http upstream)', async () => {
     const res = await request(buildApp({ trustProxy: true }))
       .get('/asset.js')
-      .set('Host', 'awilltochange.me')
+      .set('Host', 'app.example.com')
       .set('X-Forwarded-Proto', 'https')
-      .set('Origin', 'https://awilltochange.me');
+      .set('Origin', 'https://app.example.com');
     expect(res.status).toBe(200);
   });
 
@@ -65,16 +65,16 @@ describe('CORS', () => {
 
     const lookAlike = await request(app)
       .get('/asset.js')
-      .set('Host', 'awilltochange.me')
-      .set('Origin', 'http://awilltochange.me.evil.example');
+      .set('Host', 'app.example.com')
+      .set('Origin', 'http://app.example.com.evil.example');
     expect(lookAlike.status).toBe(403);
 
     // Without trusting the proxy, a forged X-Forwarded-Proto is ignored
     const forged = await request(app)
       .get('/asset.js')
-      .set('Host', 'awilltochange.me')
+      .set('Host', 'app.example.com')
       .set('X-Forwarded-Proto', 'https')
-      .set('Origin', 'https://awilltochange.me');
+      .set('Origin', 'https://app.example.com');
     expect(forged.status).toBe(403);
   });
 });

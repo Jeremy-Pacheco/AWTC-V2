@@ -5,7 +5,7 @@ The application is designed to be cross-platform, responsive, and accessible, wi
 
 **Status**: Backend is fully functional with CRUD operations for projects, categories, reviews, users, and contacts. Frontend is built in React + TypeScript with responsive UI, internationalization (i18n), and connects with backend APIs.
 
-**Live Demo**: [https://awilltochange.me](https://awilltochange.me)
+**Live Demo**: [https://awtc.jeremypacheco.es](https://awtc.jeremypacheco.es) — public test site with fake data reset every night (one-click login as volunteer, coordinator or admin)
 
 ---
 
@@ -155,9 +155,9 @@ npm run dev    # Development mode with nodemon
 npm start      # Production mode
 ```
 
-Server runs at: **https://awilltochange.me/**
-- API Documentation: https://awilltochange.me/api-docs
-- Admin Dashboard: https://awilltochange.me/admin/ (requires login)
+Server runs at: **http://localhost:8080/**
+- API Documentation: http://localhost:8080/api-docs
+- Admin Dashboard: http://localhost:8080/ (requires login)
 
 ### Frontend Setup
 
@@ -172,7 +172,7 @@ npm install
 npm run dev
 ```
 
-Frontend runs at: **https://awilltochange.me/**
+Frontend runs at: **http://localhost:5173/**
 
 3. Build for production:
 ```bash
@@ -394,10 +394,9 @@ AWTC/
 - All components in `/frontend/src/components/` and `/frontend/src/pages/`
 
 ### CORS Configuration
-- Allowed origins configured in backend/index.js
-- Production: https://awilltochange.me
-- Development: http://localhost:5173, http://localhost:8080
-- Add new URLs if deploying to different servers
+- Allowed origins are configured in `backend/config/cors.js`
+- Deployed environments set `CORS_ORIGINS` / `FRONTEND_URL` (public demo: https://awtc.jeremypacheco.es)
+- Default when unset: http://localhost:5173, http://localhost:8080
 
 ### Backend Scripts
 ```bash
@@ -434,10 +433,10 @@ For detailed system diagrams (E/R Diagram, Class Diagram, Use Case Diagram), see
 
 ## 🚢 Deployment
 
-### Production (Digital Ocean)
-- **Live URL**: [https://awilltochange.me](https://awilltochange.me)
-- **API**: [https://awilltochange.me/api](https://awilltochange.me/api)
-- **API Docs**: [https://awilltochange.me/api-docs](https://awilltochange.me/api-docs)
-- **Admin Dashboard**: [https://awilltochange.me/admin/](https://awilltochange.me/admin/)
-- **Hosted on**: DigitalOcean VPS with Nginx reverse proxy
-- **SSL**: Let's Encrypt certificates (auto-renewal via Certbot)
+### Public demo (Vercel + Render + Aiven + Cloudinary)
+- **Live URL**: [https://awtc.jeremypacheco.es](https://awtc.jeremypacheco.es)
+- **API** (e.g. projects): [https://awtc-api.jeremypacheco.es/api/projects](https://awtc-api.jeremypacheco.es/api/projects)
+- **API Docs**: [https://awtc-api.jeremypacheco.es/api-docs](https://awtc-api.jeremypacheco.es/api-docs)
+- **Admin Dashboard**: [https://awtc-api.jeremypacheco.es](https://awtc-api.jeremypacheco.es) ("Enter as demo admin")
+- **Data**: fake dataset, reset every night at 03:00 UTC by GitHub Actions
+- **Guides**: [docs/demo-runbook.md](docs/demo-runbook.md) (live setup) and [docs/deploy-demo.md](docs/deploy-demo.md) (deploy your own)

@@ -11,8 +11,8 @@ describe('adminDashboardUrl', () => {
   });
 
   it('uses /admin/ when the API shares the origin (Nginx deploy)', () => {
-    expect(adminDashboardUrl('https://awilltochange.me', 'https://awilltochange.me'))
-      .toBe('https://awilltochange.me/admin/');
+    expect(adminDashboardUrl('https://app.example.com', 'https://app.example.com'))
+      .toBe('https://app.example.com/admin/');
   });
 
   it('opens the local backend in development', () => {

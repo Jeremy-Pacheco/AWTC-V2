@@ -59,8 +59,8 @@ const options = {
         description: 'Development Server'
       },
       {
-        url: 'http://209.97.187.131:8080',
-        description: 'Production Server'
+        url: '/',
+        description: 'This server (e.g. the public demo: https://awtc-api.jeremypacheco.es)'
       }
     ],
     components: {
@@ -314,9 +314,9 @@ schema:
 http://localhost:8080/api-docs
 ```
 
-### Production:
+### Public demo:
 ```
-http://209.97.187.131:8080/api-docs
+https://awtc-api.jeremypacheco.es/api-docs
 ```
 
 ### UI Features:
