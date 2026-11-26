@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import type { Project } from '../types/api';
 import AuthModal from "../components/AuthModal";
-import HeroImage from "../components/HeroImage";
 import AlertModal from "../components/AlertModal";
+import ProjectCarousel from "../components/ProjectCarousel";
 import logo4 from "../../../frontend/public/home/aboutUs-image.png";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { useTranslation } from "react-i18next";
 import { handleAuthFetch } from "../utils/auth";
@@ -12,93 +11,13 @@ import { imageUrl } from '../utils/images';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
-// --- CAROUSEL ---
-function Carousel() {
-  const { t } = useTranslation();
-  const [current, setCurrent] = useState<number>(0);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/projects`)
-      .then((res) => res.json())
-      .then((data: Project[]) => {
-        // Take exactly 3 projects with images
-        const projectsWithImages = data.filter((p) => p.filename).slice(0, 3);
-
-        // Only show carousel if we have at least 3 projects
-        if (projectsWithImages.length >= 3) {
-          setProjects(projectsWithImages);
-        } else {
-          setProjects([]);
-        }
-      })
-      .catch((err) =>
-        console.error("Error fetching projects for carousel:", err)
-      );
-  }, []);
-
-  const prev = () => setCurrent((c) => (c === 0 ? projects.length - 1 : c - 1));
-  const next = () => setCurrent((c) => (c === projects.length - 1 ? 0 : c + 1));
-
-  const handleImageClick = (projectId: number) => {
-    navigate(`/volunteering?project=${projectId}`);
-  };
-
-  if (projects.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-400">
-        {t('home.carousel.notEnough')}
-      </div>
-    );
-  }
-
+// --- SECTION HEADING ---
+function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: string; subtitle: string }) {
   return (
-    <div className="flex justify-center items-center my-4 md:my-8 space-x-2 md:space-x-4 px-2">
-      <button
-        onClick={prev}
-        className="text-2xl md:text-3xl px-2 md:px-3 text-gray-600 shrink-0"
-      >
-        &lt;
-      </button>
-      <div className="flex space-x-3 md:space-x-6 items-center justify-center overflow-hidden">
-        <img
-          src={imageUrl(projects[(current - 1 + projects.length) % projects.length].filename)}
-          className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
-          alt={
-            projects[(current - 1 + projects.length) % projects.length].name
-          }
-          onClick={() =>
-            handleImageClick(
-              projects[(current - 1 + projects.length) % projects.length].id
-            )
-          }
-        />
-        <img
-          src={imageUrl(projects[current].filename)}
-          className="w-56 md:w-96 h-40 md:h-72 object-cover rounded shadow-lg shrink-0 cursor-pointer hover:opacity-90 transition-opacity"
-          alt={projects[current].name}
-          onClick={() => handleImageClick(projects[current].id)}
-        />
-        <img
-          src={imageUrl(projects[(current + 1) % projects.length].filename)}
-          className="hidden sm:block w-24 md:w-40 h-32 md:h-52 object-cover rounded opacity-50 cursor-pointer hover:opacity-70 transition-opacity"
-          alt={
-            projects[(current + 1) % projects.length].name
-          }
-          onClick={() =>
-            handleImageClick(
-              projects[(current + 1) % projects.length].id
-            )
-          }
-        />
-      </div>
-      <button
-        onClick={next}
-        className="text-2xl md:text-3xl px-2 md:px-3 text-gray-600 shrink-0"
-      >
-        &gt;
-      </button>
+    <div>
+      <span className="text-xs font-semibold uppercase tracking-widest text-brand-text">{eyebrow}</span>
+      <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">{title}</h2>
+      <p className="mt-2 text-left text-base md:text-lg text-gray-600">{subtitle}</p>
     </div>
   );
 }
@@ -107,20 +26,21 @@ function Carousel() {
 function AboutSection() {
   const { t } = useTranslation();
   return (
-    <section className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 my-8 md:my-12 bg-white px-4 md:px-0">
+    <section className="mt-6 grid items-center gap-8 md:grid-cols-2 md:gap-12 rounded-3xl bg-surface p-5 md:p-10">
       <img
         src={logo4}
         alt="Volunteers"
-        className="w-full md:w-auto md:max-w-sm h-auto rounded"
+        className="w-full h-64 md:h-80 object-cover rounded-2xl shadow-md"
       />
-      <div >
-        <p className="mb-6 md:mb-4 text-gray-700">
+      <div>
+        <p className="mb-6 text-left text-gray-700 leading-relaxed">
           {t('home.aboutSection.description')}
         </p>
-        <NavLink to="/aboutus">
-          <button className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto text-center transition-colors duration-300">
-            {t('home.aboutSection.readMore')}
-          </button>
+        <NavLink
+          to="/aboutus"
+          className="inline-flex w-full md:w-auto justify-center items-center gap-2 rounded-full bg-brand px-6 py-2.5 font-semibold text-on-brand shadow transition-colors hover:bg-brand-hover"
+        >
+          {t('home.aboutSection.readMore')}
         </NavLink>
       </div>
     </section>
@@ -366,34 +286,36 @@ function ReviewsSection({
 
   return (
     <>
-      <section className="my-12 px-4 md:px-0">
-      <div className="flex flex-col gap-4 items-start w-full">
-        <div className="flex justify-between items-baseline mb-6 border-b pb-2 w-full">
-          <h5 className="text-xl font-bold text-gray-800">{t('reviews.title')}</h5>
-          <span className="text-sm text-gray-500">
-            {t('reviews.comments', { count: reviews.length })}
-          </span>
+      <section>
+      <div className="flex flex-col gap-6 items-start w-full">
+        <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-text">{t('reviews.eyebrow')}</span>
+            <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">{t('reviews.title')}</h2>
+            <span className="mt-3 inline-block rounded-full bg-surface px-3 py-1 text-xs font-medium text-gray-600">
+              {t('reviews.comments', { count: reviews.length })}
+            </span>
+          </div>
+          {isLoggedIn && (
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-on-brand shadow transition-colors hover:bg-brand-hover w-full sm:w-auto"
+            >
+              {t('reviews.writeReview')}
+            </button>
+          )}
         </div>
 
-        {isLoggedIn && (
-          <button
-            onClick={() => setShowReviewModal(true)}
-            className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full md:w-auto transition-colors duration-300 mb-4"
-          >
-            {t('reviews.writeReview')}
-          </button>
-        )}
-
-        <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar w-full">
+        <div className="w-full columns-1 md:columns-2 gap-4">
           {reviews.length === 0 ? (
-            <div className="text-center py-10 text-gray-400">
+            <div className="rounded-2xl border border-dashed border-gray-300 py-10 text-center text-gray-500">
               {t('reviews.noReviews')}
             </div>
           ) : (
             reviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                className="mb-4 break-inside-avoid flex flex-col rounded-2xl border border-gray-200 bg-[var(--card-bg)] p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex items-center gap-3">
@@ -454,7 +376,7 @@ function ReviewsSection({
                     <img
                       src={imageUrl(review.image)}
                       alt="Attached"
-                      className="h-32 w-auto object-cover rounded-xl cursor-zoom-in hover:opacity-95"
+                      className="h-40 w-full object-cover rounded-xl cursor-zoom-in hover:opacity-95"
                       onClick={() =>
                         window.open(
                           imageUrl(review.image),
@@ -573,8 +495,8 @@ function ReviewsSection({
                     </div>
                   </div>
                 ) : (
-                  <p className="text-gray-600 leading-relaxed text-sm">
-                    {review.content}
+                  <p className="text-left text-gray-700 leading-relaxed text-base">
+                    “{review.content}”
                   </p>
                 )}
               </div>
@@ -583,17 +505,17 @@ function ReviewsSection({
         </div>
 
         {!isLoggedIn && (
-          <div className="w-full bg-brand-50 p-6 md:p-8 rounded-3xl text-center border border-brand-100">
-            <h3 className="font-bold text-lg mb-2 text-gray-800">
+          <div className="w-full flex flex-col items-center gap-4 rounded-3xl border border-brand-100 bg-brand-50 p-8 md:p-10 text-center">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-800">
               {t('reviews.joinConversation')}
             </h3>
-            <p className="text-xs text-gray-500 mb-6">
+            <p className="text-center text-sm md:text-base text-gray-600">
               {t('reviews.shareExperience')}
             </p>
 
             <button
               onClick={onOpenSignup}
-              className="bg-brand text-black hover:bg-ink hover:text-white px-5 py-2 rounded-3xl font-semibold shadow text-sm md:text-base w-full transition-colors duration-300"
+              className="rounded-full bg-brand px-6 py-2.5 font-semibold text-on-brand shadow transition-colors hover:bg-brand-hover"
             >
               {t('reviews.addReview')}
             </button>
@@ -711,28 +633,50 @@ function Home() {
 
   return (
     <>
-      <HeroImage
-        title={
-          <div className="text-center px-4">
-            <h1 className="Display">{t('common.appName')}</h1>
-            <h4 className="text-base md:text-2xl">
-              {t('home.hero.subtitle')}
-            </h4>
+      <header className="relative isolate overflow-hidden">
+        <img
+          src="/hero-img.jpg"
+          alt=""
+          className="absolute inset-0 -z-10 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/80 via-black/55 to-black/25" />
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-20 md:py-32">
+          <span className="inline-block rounded-full border border-brand-300/50 bg-brand-900/40 px-3 py-1 text-xs font-semibold uppercase tracking-widest !text-brand-200">
+            {t('home.hero.eyebrow')}
+          </span>
+          <h1 className="mt-4 max-w-2xl text-4xl md:text-6xl font-bold leading-[1.05] tracking-tight !text-white">
+            {t('common.appName')}
+          </h1>
+          <p className="mt-4 max-w-xl text-left text-lg md:text-xl !text-white/85">
+            {t('home.hero.subtitle')}
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+            <NavLink
+              to="/volunteering"
+              className="inline-flex justify-center rounded-full bg-brand px-6 py-3 font-semibold text-on-brand shadow-lg transition-colors hover:bg-brand-hover"
+            >
+              {t('home.hero.explore')}
+            </NavLink>
+            <NavLink
+              to="/aboutus"
+              className="inline-flex justify-center rounded-full border border-white/40 bg-black/20 px-6 py-3 font-semibold !text-white backdrop-blur-sm transition-colors hover:bg-black/40"
+            >
+              {t('home.aboutUs')}
+            </NavLink>
           </div>
-        }
-        imgSrc="/hero-img.jpg"
-        heightClass="h-48 md:h-96"
-        titleClass="Display text-white"
-      />
+        </div>
+      </header>
 
-      <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
-        <h2 className="text-3xl font-bold">{t('home.newestProjects')}</h2>
-        <p className="text-lg text-gray-600">{t('home.discoverProjects')}</p>
-        <Carousel />
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16 space-y-16 md:space-y-24">
+        <div>
+          <SectionHeading eyebrow={t('home.projectsEyebrow')} title={t('home.newestProjects')} subtitle={t('home.discoverProjects')} />
+          <ProjectCarousel />
+        </div>
 
-        <h2 className="text-3xl font-bold">{t('home.aboutUs')}</h2>
-        <p className="text-lg text-gray-600">{t('home.aboutUsDescription')}</p>
-        <AboutSection />
+        <div>
+          <SectionHeading eyebrow={t('home.aboutEyebrow')} title={t('home.aboutUs')} subtitle={t('home.aboutUsDescription')} />
+          <AboutSection />
+        </div>
         <ReviewsSection
           onOpenSignup={handleOpenSignup}
           refreshTrigger={refreshKey}

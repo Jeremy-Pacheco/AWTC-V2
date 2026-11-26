@@ -46,7 +46,9 @@
   },
   "home": {
     "hero": {
-      "subtitle": "Join social and environmental initiatives and make an impact today"
+      "subtitle": "Join social and environmental initiatives and make an impact today",
+      "eyebrow": "Volunteering in Gran Canaria",
+      "explore": "Explore projects"
     },
     "newestProjects": "Newest Projects",
     "discoverProjects": "Discover volunteer projects and make an impact",
@@ -57,8 +59,15 @@
       "readMore": "Read more"
     },
     "carousel": {
-      "notEnough": "Not enough projects available for carousel"
-    }
+      "empty": "There are no active projects yet.",
+      "viewProject": "View project",
+      "previous": "Previous project",
+      "next": "Next project",
+      "goTo": "Go to {{name}}",
+      "slide": "{{n}} of {{total}}"
+    },
+    "projectsEyebrow": "Projects",
+    "aboutEyebrow": "Who we are"
   },
   "reviews": {
     "title": "Reviews",
@@ -77,7 +86,8 @@
     "removeImage": "Remove image",
     "imageWillBeRemoved": "Image will be removed",
     "confirmDelete": "Are you sure?",
-    "errorCreating": "Error creating review"
+    "errorCreating": "Error creating review",
+    "eyebrow": "Testimonials"
   },
   "aboutUs": {
     "title": "About Us",

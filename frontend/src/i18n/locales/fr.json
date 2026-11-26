@@ -46,7 +46,9 @@
   },
   "home": {
     "hero": {
-      "subtitle": "Rejoignez des initiatives sociales et environnementales et ayez un impact aujourd'hui"
+      "subtitle": "Rejoignez des initiatives sociales et environnementales et ayez un impact aujourd'hui",
+      "eyebrow": "Bénévolat à Gran Canaria",
+      "explore": "Explorer les projets"
     },
     "newestProjects": "Projets Récents",
     "discoverProjects": "Découvrez des projets de bénévolat et ayez un impact",
@@ -57,8 +59,15 @@
       "readMore": "En savoir plus"
     },
     "carousel": {
-      "notEnough": "Pas assez de projets disponibles pour le carrousel"
-    }
+      "empty": "Il n'y a pas encore de projets actifs.",
+      "viewProject": "Voir le projet",
+      "previous": "Projet précédent",
+      "next": "Projet suivant",
+      "goTo": "Aller à {{name}}",
+      "slide": "{{n}} sur {{total}}"
+    },
+    "projectsEyebrow": "Projets",
+    "aboutEyebrow": "Qui sommes-nous"
   },
   "reviews": {
     "title": "Avis",
@@ -77,7 +86,8 @@
     "removeImage": "Supprimer l'image",
     "imageWillBeRemoved": "L'image sera supprimée",
     "confirmDelete": "Êtes-vous sûr ?",
-    "errorCreating": "Erreur lors de la création de l'avis"
+    "errorCreating": "Erreur lors de la création de l'avis",
+    "eyebrow": "Témoignages"
   },
   "aboutUs": {
     "title": "À Propos",
