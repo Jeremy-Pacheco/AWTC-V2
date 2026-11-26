@@ -29,7 +29,7 @@ No hay LDAP: la demo usa `AUTH_PROVIDER=local` (contraseñas con bcrypt en la ba
 
 ## 1. Aiven for MySQL
 
-1. Crea una cuenta en <https://aiven.io> y un servicio **MySQL** con el plan *Free*.
+1. Crea una cuenta en <https://aiven.io> y un servicio **MySQL** con el plan *Free*. Anota su región (*Overview → Cloud region*): el backend de Render debe ir **en la misma región** (Frankfurt si Aiven está en `fra`), o cada consulta cruzará continentes.
 2. Cuando esté *Running*, copia de la pestaña *Overview*: **Host**, **Port**, **User**, **Password** y **Database** (por defecto `defaultdb`).
 3. Descarga el **CA certificate** (`ca.pem`). Lo usarás como `DB_SSL_CA` para verificar el certificado TLS.
 4. Aiven exige SSL (`DB_SSL=true`) y clave primaria en todas las tablas (`sql_require_primary_key`). Todas las migraciones del proyecto la tienen.
@@ -62,7 +62,7 @@ npx --yes web-push generate-vapid-keys
 El repositorio incluye `render.yaml`.
 
 1. En Render: *New → Blueprint* y elige el repositorio.
-2. Render crea el servicio `awtc-backend` (plan *free*, carpeta `backend/`) y genera `JWT_SECRET` y `SESSION_SECRET` aleatorios.
+2. Render crea el servicio `awtc-backend` en **Frankfurt** (`region` en `render.yaml`; plan *free*, carpeta `backend/`) y genera `JWT_SECRET` y `SESSION_SECRET` aleatorios. Si tu base de datos está en otra región, cambia `region` antes de crear el Blueprint: Render no permite cambiarla después.
 3. Rellena las variables que pide (`sync: false`), según la [tabla de variables](#tabla-de-variables). `REFRESH_COOKIE_SAMESITE` = `none` mientras uses los dominios de Vercel y Render (`lax` con dominio propio, paso 9).
    `FRONTEND_URL` y `CORS_ORIGINS` aún no las conoces: pon temporalmente `https://example.com` y cámbialas en el paso 7.
 

@@ -8,6 +8,10 @@ services:
     name: awtc-backend
     runtime: node
     plan: free
+    # Same region as the Aiven database (DigitalOcean fra): every request runs
+    # several queries, so a backend on another continent adds ~0.3-0.8 s each.
+    # Render cannot change the region of an existing service: create a new one.
+    region: frankfurt
     rootDir: backend
     # Render's free plan has no pre-deploy step, so migrations run in the build
     buildCommand: npx --yes pnpm@12.23.0 install --frozen-lockfile --prod && npx --yes sequelize-cli@6 db:migrate
