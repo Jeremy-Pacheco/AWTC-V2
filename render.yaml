@@ -22,10 +22,11 @@ services:
         value: "1"
       - key: SESSION_COOKIE_SECURE
         value: "true"
-      # Frontend (Vercel) and API (Render) are different sites: the refresh
-      # cookie must be SameSite=None (always Secure)
+      # Asked for on creation so a Blueprint sync never overwrites it:
+      #   none -> web on *.vercel.app and API on *.onrender.com (cross-site)
+      #   lax  -> web and API under the same custom domain (live demo)
       - key: REFRESH_COOKIE_SAMESITE
-        value: none
+        sync: false
       - key: DEMO_MODE
         value: "true"
       - key: AUTH_PROVIDER
