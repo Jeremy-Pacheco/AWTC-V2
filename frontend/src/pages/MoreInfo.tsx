@@ -7,7 +7,7 @@ function MoreInfo() {
 
   return (
     <>
-      <PageHeader eyebrow={t('moreInfo.eyebrow')} title={t('moreInfo.heroTitle')} subtitle={t('moreInfo.exploreSubtitle')} />
+      <PageHeader hero="info" eyebrow={t('moreInfo.eyebrow')} title={t('moreInfo.heroTitle')} subtitle={t('moreInfo.exploreSubtitle')} />
 
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <div className="mb-8">

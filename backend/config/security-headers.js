@@ -45,7 +45,8 @@ function buildCspDirectives({ upgradeInsecureRequests }) {
     scriptSrcAttr: ["'none'"],
     styleSrc: ["'self'", "'unsafe-inline'", 'https://cdnjs.cloudflare.com', 'https://fonts.googleapis.com'],
     fontSrc: ["'self'", 'data:', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com'],
-    imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com'],
+    // Cloudinary: uploads. Unsplash: header photos of the SPA (when Express serves it)
+    imgSrc: ["'self'", 'data:', 'blob:', 'https://res.cloudinary.com', 'https://images.unsplash.com'],
     // 'self' covers fetch() and the same-origin Socket.IO websocket;
     // CSP_CONNECT_SRC adds API/websocket origins when they live elsewhere
     connectSrc: ["'self'", ...extraOrigins(process.env.CSP_CONNECT_SRC)],

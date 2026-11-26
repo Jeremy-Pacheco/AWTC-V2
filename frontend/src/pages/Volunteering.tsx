@@ -298,6 +298,7 @@ const Volunteering: React.FC = () => {
   return (
     <>
       <PageHeader
+        hero="volunteering"
         eyebrow={t('nav.volunteering')}
         title={t('volunteering.headerTitle')}
         subtitle={t('volunteering.subtitle')}

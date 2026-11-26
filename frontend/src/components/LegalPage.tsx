@@ -16,7 +16,7 @@ export default function LegalPage({ title, subtitle, sections }: { title: string
   const { t } = useTranslation();
   return (
     <div className="min-h-[80vh]">
-      <PageHeader eyebrow={t('legal.eyebrow')} title={title} subtitle={subtitle} />
+      <PageHeader hero="legal" eyebrow={t('legal.eyebrow')} title={title} subtitle={subtitle} />
 
       <div className="max-w-6xl mx-auto grid gap-10 px-4 md:px-6 py-12 md:py-16 lg:grid-cols-[220px_minmax(0,1fr)]">
         <nav aria-label={t('legal.onThisPage')} className="hidden lg:block">
