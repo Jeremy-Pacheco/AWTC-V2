@@ -1,171 +1,133 @@
 <%- include('header', { shopName: shopName, currentUser: currentUser, currentSection: (typeof currentSection !== 'undefined' ? currentSection : 'overview') }) %>
 
   <% if (currentSection === 'overview') { %>
-  <div class="section-card">
-    <h2 class="section-title">
-      <i class="fas fa-chart-line" style="color: var(--accent);"></i>
-      Overview
-    </h2>
-    <p style="color: var(--text-2); margin-bottom: 30px; font-size: 15px;">General dashboard statistics</p>
-    
-    <div class="overview-stats">
-      <div class="stat-card">
-        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-          <i class="fas fa-project-diagram"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number"><%= projectsNumber || 0 %></div>
-          <div class="stat-label">Total Projects</div>
-        </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-          <i class="fas fa-tags"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number"><%= categories ? categories.length : 0 %></div>
-          <div class="stat-label">Categories</div>
-        </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-          <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number"><%= users ? users.length : 0 %></div>
-          <div class="stat-label">Total Users</div>
-        </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-          <i class="fas fa-star"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number"><%= reviews ? reviews.length : 0 %></div>
-          <div class="stat-label">Reviews</div>
-        </div>
-      </div>
-      
-      <div class="stat-card">
-        <div class="stat-icon" style="background: var(--accent); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-          <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number"><%= contacts ? contacts.length : 0 %></div>
-          <div class="stat-label">Incidents</div>
-        </div>
-      </div>
+  <%
+    const list = (v) => Array.isArray(v) ? v : [];
+    const allProjects = list(projects), allUsers = list(users), allReviews = list(reviews), allContacts = list(contacts), allCategories = list(categories);
+    const activeProjects = allProjects.filter((p) => p.status === 'active').length;
+    const countRole = (r) => allUsers.filter((u) => u.role === r).length;
+    const openIncidents = allContacts.filter((c) => !c.read);
+    const byDateDesc = (field) => (a, b) => new Date(b[field] || 0) - new Date(a[field] || 0);
+    const latestUsers = [...allUsers].sort(byDateDesc('createdAt')).slice(0, 5);
+    const latestReviews = [...allReviews].sort(byDateDesc('date')).slice(0, 3);
+    const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+    const initial = (u) => ((u && (u.name || u.email)) || '?').charAt(0).toUpperCase();
+    const firstName = currentUser && currentUser.name ? currentUser.name.split(' ')[0] : '';
+  %>
+  <header class="ov-hero">
+    <div>
+      <p class="ov-eyebrow"><%= new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) %></p>
+      <h1 class="ov-title">Welcome back<%= firstName ? ', ' + firstName : '' %></h1>
+      <p class="ov-subtitle">Here is what is happening on A Will To Change.</p>
     </div>
+    <% if (frontendUrl) { %>
+      <a class="ov-btn" href="<%= frontendUrl %>" target="_blank" rel="noopener noreferrer"><i class="fas fa-arrow-up-right-from-square"></i> Open website</a>
+    <% } %>
+  </header>
+
+  <div class="ov-stats">
+    <a class="ov-stat" href="/projects">
+      <span class="ov-stat-icon"><i class="fas fa-diagram-project"></i></span>
+      <span class="ov-stat-number"><%= allProjects.length %></span>
+      <span class="ov-stat-label">Projects</span>
+      <span class="ov-stat-hint"><%= activeProjects %> active</span>
+    </a>
+    <a class="ov-stat" href="/users">
+      <span class="ov-stat-icon"><i class="fas fa-users"></i></span>
+      <span class="ov-stat-number"><%= allUsers.length %></span>
+      <span class="ov-stat-label">Users</span>
+      <span class="ov-stat-hint"><%= countRole('volunteer') %> volunteers · <%= countRole('coordinator') %> coordinators</span>
+    </a>
+    <a class="ov-stat" href="/categories">
+      <span class="ov-stat-icon"><i class="fas fa-tags"></i></span>
+      <span class="ov-stat-number"><%= allCategories.length %></span>
+      <span class="ov-stat-label">Categories</span>
+      <span class="ov-stat-hint">Used to group projects</span>
+    </a>
+    <a class="ov-stat" href="/reviews">
+      <span class="ov-stat-icon"><i class="fas fa-star"></i></span>
+      <span class="ov-stat-number"><%= allReviews.length %></span>
+      <span class="ov-stat-label">Reviews</span>
+      <span class="ov-stat-hint">Shared by volunteers</span>
+    </a>
+    <a class="ov-stat <%= openIncidents.length ? 'ov-stat--alert' : '' %>" href="/contacts">
+      <span class="ov-stat-icon"><i class="fas fa-triangle-exclamation"></i></span>
+      <span class="ov-stat-number"><%= allContacts.length %></span>
+      <span class="ov-stat-label">Incidents</span>
+      <span class="ov-stat-hint"><%= openIncidents.length %> open</span>
+    </a>
   </div>
-  
-  <style>
-    .overview-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    
-    .stat-card {
-      background: white;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(18, 163, 111, 0.2);
-    }
-    
-    .stat-icon {
-      width: 50px;
-      height: 50px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-    
-    .stat-content {
-      flex: 1;
-    }
-    
-    .stat-number {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--ink);
-      line-height: 1;
-      margin-bottom: 5px;
-    }
-    
-    .stat-label {
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    @media (max-width: 1024px) {
-      .overview-stats {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
-      }
-      
-      .stat-card {
-        padding: 15px;
-      }
-      
-      .stat-icon {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-      }
-      
-      .stat-number {
-        font-size: 24px;
-      }
-      
-      .stat-label {
-        font-size: 12px;
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .overview-stats {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 12px;
-      }
-      
-      .stat-card {
-        padding: 12px;
-        flex-direction: column;
-        text-align: center;
-        gap: 10px;
-      }
-      
-      .stat-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-      }
-      
-      .stat-number {
-        font-size: 22px;
-      }
-    }
-  </style>
+
+  <div class="ov-grid">
+    <section class="ov-panel">
+      <div class="ov-panel-head">
+        <h2>Latest users</h2>
+        <a href="/users">View all <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <% if (latestUsers.length === 0) { %>
+        <p class="ov-empty">No users yet.</p>
+      <% } else { %>
+        <ul class="ov-list">
+          <% latestUsers.forEach(function (u) { %>
+            <li class="ov-row">
+              <span class="ov-avatar"><%= initial(u) %></span>
+              <span class="ov-row-main">
+                <strong><%= u.name || u.email %></strong>
+                <small><%= u.email %></small>
+              </span>
+              <span class="user-item-role role-<%= ['admin', 'coordinator', 'volunteer'].includes(u.role) ? u.role : 'volunteer' %>"><%= u.role %></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+    <section class="ov-panel">
+      <div class="ov-panel-head">
+        <h2>Open incidents</h2>
+        <a href="/contacts">View all <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <% if (openIncidents.length === 0) { %>
+        <p class="ov-empty"><i class="fas fa-circle-check"></i> Nothing pending. Good job!</p>
+      <% } else { %>
+        <ul class="ov-list">
+          <% openIncidents.slice(0, 4).forEach(function (c) { %>
+            <li class="ov-row ov-row--top">
+              <span class="ov-dot"></span>
+              <span class="ov-row-main">
+                <strong><%= c.subject || c.name %></strong>
+                <small class="ov-clamp"><%= c.message %></small>
+              </span>
+              <span class="ov-date"><%= fmtDate(c.createdAt) %></span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+    <section class="ov-panel ov-panel--wide">
+      <div class="ov-panel-head">
+        <h2>Latest reviews</h2>
+        <a href="/reviews">View all <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <% if (latestReviews.length === 0) { %>
+        <p class="ov-empty">No reviews yet.</p>
+      <% } else { %>
+        <div class="ov-reviews">
+          <% latestReviews.forEach(function (r) { %>
+            <figure class="ov-review">
+              <blockquote>“<%= r.content %>”</blockquote>
+              <figcaption>
+                <span class="ov-avatar ov-avatar--sm"><%= initial(r.user) %></span>
+                <%= (r.user && (r.user.name || r.user.email)) || 'Anonymous' %>
+                <span class="ov-date"><%= fmtDate(r.date) %></span>
+              </figcaption>
+            </figure>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+  </div>
   <% } %>
 
   <% if (currentSection === 'projects') { %>

@@ -28,6 +28,7 @@
         </button>
       </div>
       <nav class="sidebar-nav">
+        <span class="sidebar-nav-label">Management</span>
         <a href="/" class="sidebar-nav-item <%= (typeof currentSection !== 'undefined' && currentSection==='overview') ? 'active' : '' %>">
           <i class="fas fa-chart-line"></i>
           <span class="sidebar-nav-text">Overview</span>
@@ -56,8 +57,21 @@
     </div>
 
     <!-- Top Bar -->
+    <%
+      const sectionTitles = { overview: 'Overview', projects: 'Projects', categories: 'Categories', users: 'Users', reviews: 'Reviews', contacts: 'Incidents' };
+      const pageTitle = sectionTitles[typeof currentSection !== 'undefined' ? currentSection : 'overview'] || 'Dashboard';
+    %>
     <div class="topbar">
+      <div class="topbar-heading">
+        <span class="topbar-eyebrow">Admin panel</span>
+        <span class="topbar-title"><%= pageTitle %></span>
+      </div>
       <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <div class="topbar-right">
+        <div class="topbar-user">
+          <span class="topbar-user-name"><%= currentUser.name || currentUser.email %></span>
+          <span class="topbar-user-role"><%= currentUser.role %></span>
+        </div>
         <div class="user-menu">
           <div class="user-avatar" id="userAvatar">
             <% if (currentUser.profileImage) { %>
@@ -87,6 +101,7 @@
               </button>
             </form>
           </div>
+        </div>
         </div>
       <% } else { %>
         <a href="/login" style="color:var(--accent-text);text-decoration:none;font-weight:500">
