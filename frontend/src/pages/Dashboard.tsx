@@ -29,6 +29,9 @@ const Dashboard: React.FC = () => {
   const [user, setUser] = useState<DashboardUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("profile");
+  // Tabs stay mounted once opened (hidden when inactive), so switching back
+  // is instant instead of fetching everything again (the API is far away).
+  const [mountedTabs, setMountedTabs] = useState<ReadonlySet<Tab>>(() => new Set<Tab>(["profile"]));
   const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
   const [confirmModal, setConfirmModal] = useState<{ open: boolean; title?: string; message?: string; onConfirm?: (() => void) | null; danger?: boolean }>({ open: false, title: '', message: '', onConfirm: null, danger: false });
   // Shared by several tabs (projects use categories and the coordinators list)
@@ -87,6 +90,25 @@ const Dashboard: React.FC = () => {
     }
   }, [token, user]);
 
+  // Shortly after the user is loaded, mount the rest of the role's tabs in the
+  // background: their requests run in parallel while the profile is shown.
+  useEffect(() => {
+    if (!user) return;
+    const staff = user.role === 'admin' || user.role === 'coordinator';
+    const preload: Tab[] = [
+      "myprojects",
+      ...(staff ? (["projects", "categories", "reviews"] as Tab[]) : []),
+      ...(user.role === 'admin' ? (["users", "contacts"] as Tab[]) : []),
+    ];
+    const id = setTimeout(() => setMountedTabs((prev) => new Set([...prev, ...preload])), 300);
+    return () => clearTimeout(id);
+  }, [user]);
+
+  const showTab = (tab: Tab) => {
+    setActiveTab(tab);
+    setMountedTabs((prev) => (prev.has(tab) ? prev : new Set([...prev, tab])));
+  };
+
   const openConfirm = (title: string, message: string, onConfirm: () => void, danger = false) => {
     setConfirmModal({ open: true, title, message, onConfirm, danger });
   };
@@ -120,6 +142,14 @@ const Dashboard: React.FC = () => {
     categories: t('dashboard.categories'),
     analytics: t('dashboard.analytics'),
   };
+
+  // Mounted tabs are kept in the DOM; only the active one is visible
+  const panel = (tab: Tab, node: React.ReactNode) =>
+    mountedTabs.has(tab) ? (
+      <div key={tab} hidden={activeTab !== tab}>
+        {node}
+      </div>
+    ) : null;
 
   const roleLabel = t(`dashboard.${user.role}`, { defaultValue: user.role });
   const avatar = user.profileImage ? imageUrl(user.profileImage) : null;
@@ -163,7 +193,7 @@ const Dashboard: React.FC = () => {
                     if (tab === "analytics") {
                       window.open(adminDashboardUrl(), '_blank', 'noopener');
                     } else {
-                      setActiveTab(tab as Tab);
+                      showTab(tab as Tab);
                     }
                   }}
                 >
@@ -198,15 +228,13 @@ const Dashboard: React.FC = () => {
           )}
 
           <div className="rounded-2xl border border-gray-200 bg-[var(--card-bg)] p-4 md:p-6 shadow-sm">
-            {activeTab === "profile" && (
-              <ProfileTab {...tabProps} setUser={(u) => setUser(u)} onAccountDeleted={() => navigate('/home')} />
-            )}
-            {activeTab === "myprojects" && <MyProjectsTab {...tabProps} />}
-            {activeTab === "projects" && isStaff && <ProjectsTab {...tabProps} categories={categories} usersData={usersData} />}
-            {activeTab === "categories" && isStaff && <CategoriesTab {...tabProps} categories={categories} setCategories={setCategories} />}
-            {activeTab === "reviews" && isStaff && <ReviewsTab {...tabProps} />}
-            {activeTab === "users" && isAdmin && <UsersTab {...tabProps} usersData={usersData} setUsersData={setUsersData} />}
-            {activeTab === "contacts" && isAdmin && <ContactsTab {...tabProps} />}
+            {panel("profile", <ProfileTab {...tabProps} setUser={(u) => setUser(u)} onAccountDeleted={() => navigate('/home')} />)}
+            {panel("myprojects", <MyProjectsTab {...tabProps} />)}
+            {isStaff && panel("projects", <ProjectsTab {...tabProps} categories={categories} usersData={usersData} />)}
+            {isStaff && panel("categories", <CategoriesTab {...tabProps} categories={categories} setCategories={setCategories} />)}
+            {isStaff && panel("reviews", <ReviewsTab {...tabProps} />)}
+            {isAdmin && panel("users", <UsersTab {...tabProps} usersData={usersData} setUsersData={setUsersData} />)}
+            {isAdmin && panel("contacts", <ContactsTab {...tabProps} />)}
           </div>
         </section>
       </div>
