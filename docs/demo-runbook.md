@@ -30,7 +30,7 @@ Guía de referencia de **cómo está montada la demo real** (`awtc.jeremypacheco
 | Pieza | Servicio | URL / nombre |
 |---|---|---|
 | Web | Vercel, proyecto `awtc-v2` | https://awtc.jeremypacheco.es (`awtc-v2.vercel.app` redirige aquí) |
-| API + panel EJS | Render, servicio `awtc-backend` (plan free) | https://awtc-api.jeremypacheco.es (también `awtc-backend.onrender.com`) |
+| API + panel EJS | Render, servicio `awtc-v2` en **Frankfurt** (plan free) | https://awtc-api.jeremypacheco.es (también `awtc-v2.onrender.com`) |
 | Base de datos | Aiven for MySQL (plan free) | base `defaultdb` |
 | Imágenes | Cloudinary | carpeta `awtc/` |
 | DNS | DonDominio | zona de `jeremypacheco.es` |
@@ -287,8 +287,8 @@ Motivo: con web y API bajo el mismo dominio la cookie de sesión deja de ser de 
 | Paso | Dónde | Qué |
 |---|---|---|
 | 1 | Vercel → *Settings → Domains* | Añadir `awtc.jeremypacheco.es`. Vercel muestra el destino CNAME (`<id>.vercel-dns-017.com`) |
-| 2 | Render → *Settings → Custom Domains* | Añadir `awtc-api.jeremypacheco.es` → CNAME a `awtc-backend.onrender.com` |
-| 3 | DonDominio → *Zona DNS* | `CNAME awtc` → destino de Vercel; `CNAME awtc-api` → `awtc-backend.onrender.com` |
+| 2 | Render → *Settings → Custom Domains* | Añadir `awtc-api.jeremypacheco.es` → CNAME a `<servicio>.onrender.com` (hoy `awtc-v2.onrender.com`) |
+| 3 | DonDominio → *Zona DNS* | `CNAME awtc` → destino de Vercel; `CNAME awtc-api` → `awtc-v2.onrender.com` |
 | 4 | Esperar | Ambos paneles marcan *Verified* y emiten el certificado HTTPS (5-30 min) |
 | 5 | Render → Environment | `FRONTEND_URL` y `CORS_ORIGINS` = `https://awtc.jeremypacheco.es`; `REFRESH_COOKIE_SAMESITE` = `lax` |
 | 6 | Vercel → Environment Variables | `VITE_API_URL` = `https://awtc-api.jeremypacheco.es` → **Redeploy** |
@@ -297,6 +297,18 @@ Motivo: con web y API bajo el mismo dominio la cookie de sesión deja de ser de 
 La cookie: `backend/services/token.service.js:38-53` (`sameSite()`, `cookieOptions()`), cookie `awtc.rt`, `HttpOnly; Secure; Path=/api/auth`, 7 días.
 
 ---
+
+## 9 bis. Mover el backend de región (hecho el 2026-11-26)
+
+El primer servicio (`awtc-backend`) se creó en **Oregón**, pero Aiven está en **Frankfurt** (`fra`): cada consulta cruzaba el Atlántico y cualquier petición tardaba 0,5–1 s. Render **no permite cambiar la región** de un servicio, así que se creó otro y se movió el dominio, sin tocar Vercel:
+
+1. **New → Web Service** (no *Blueprint*, para no chocar con el servicio existente): región **Frankfurt**, `Root Directory` `backend`, mismos *build* / *start* / *health check* que `render.yaml`, plan Free. Nombre actual: `awtc-v2`.
+2. Variables: las fijas de `render.yaml` (pegadas con *Add from .env*), `JWT_SECRET` y `SESSION_SECRET` con **Generate**, y el resto copiado del servicio viejo (`DB_*`, `DB_SSL_CA`, `CLOUDINARY_URL`, `VAPID_*`, `FRONTEND_URL`, `CORS_ORIGINS`, `REFRESH_COOKIE_SAMESITE=lax`). Las `VAPID_*` deben ser **las mismas** (la pública está compilada en Vercel).
+3. Probar `https://<nuevo>.onrender.com/api/demo` y el login demo.
+4. Quitar `awtc-api.jeremypacheco.es` del servicio viejo, añadirlo al nuevo y cambiar el `CNAME awtc-api` en DonDominio. Unos minutos sin servicio mientras se emite el certificado.
+5. Comprobar (sección 10) y **borrar el servicio viejo** y su *Blueprint* en Render.
+
+Resultado medido: `/api/projects` pasó de 0,72–1,0 s a ~0,2 s.
 
 ## 10. Comprobaciones tras cada cambio
 
