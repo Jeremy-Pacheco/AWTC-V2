@@ -6,6 +6,7 @@ import {
   UserIcon,
   EyeIcon,
   EyeSlashIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "react-i18next";
 import AlertModal from "./AlertModal";
@@ -72,7 +73,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Invalid username or password");
+      if (!res.ok) throw new Error(data.message || t("auth.invalidCredentials", "Invalid username or password"));
 
       localStorage.setItem("jwtToken", data.access_token);
       localStorage.setItem("userName", data.user.name);
@@ -101,7 +102,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error creating user");
+      if (!res.ok) throw new Error(data.message || t("auth.signupError", "Error creating user"));
 
       localStorage.setItem("jwtToken", data.access_token);
       localStorage.setItem("userName", data.user.name);
@@ -120,137 +121,148 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, mode, onClose }) => {
     }
   };
 
+  const isLogin = currentMode === "login";
+  const field =
+    "w-full rounded-xl border border-gray-300 bg-[var(--card-bg)] py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/25";
+  const showDemo = isLogin && demoConfig.enabled && demoConfig.accounts && demoConfig.accounts.length > 0;
+
   return (
     <AnimatePresence mode="wait">
       {open && (
         <motion.div
           key="auth-modal"
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.2 }}
           onClick={onClose}
         >
           <motion.div
-            className="relative bg-white rounded-2xl shadow-xl w-[90%] max-w-sm p-6 text-gray-800"
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="auth-modal-title"
+            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-[var(--card-bg)] shadow-2xl"
+            initial={{ scale: 0.95, opacity: 0, y: 16 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            transition={{ duration: 0.3, type: "spring", stiffness: 120 }}
+            exit={{ scale: 0.95, opacity: 0, y: 16 }}
+            transition={{ duration: 0.25, type: "spring", stiffness: 160, damping: 20 }}
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="h-1.5 bg-gradient-to-r from-brand-400 via-brand to-brand-700" />
             <button
-              className="absolute top-3 right-4 text-gray-500 text-2xl hover:text-gray-700 transition"
+              type="button"
+              className="absolute right-4 top-5 grid h-9 w-9 place-items-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
               onClick={onClose}
+              aria-label={t("auth.close", "Close")}
             >
-              ✕
+              <XMarkIcon className="h-5 w-5" />
             </button>
 
-            <h2 className="text-2xl font-semibold mb-4 text-center">
-              {currentMode === "login" ? "Log In" : "Sign Up"}
-            </h2>
+            <div className="p-6 sm:p-8">
+              <h2 id="auth-modal-title" className="text-2xl font-bold tracking-tight">
+                {isLogin ? t("auth.loginTitle", "Welcome back") : t("auth.signupTitle", "Create your account")}
+              </h2>
+              <p className="mt-1 text-left text-sm text-gray-600">
+                {isLogin ? t("auth.loginSubtitle", "Sign in to sign up for projects.") : t("auth.signupSubtitle", "It only takes a minute.")}
+              </p>
 
-            <form
-              className="space-y-4"
-              onSubmit={currentMode === "login" ? handleLogin : handleSignup}
-            >
-              {currentMode === "signup" && (
+              <form className="mt-6 space-y-4" onSubmit={isLogin ? handleLogin : handleSignup}>
+                {!isLogin && (
+                  <div className="relative">
+                    <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder={t("auth.fullName", "Full Name")}
+                      aria-label={t("auth.fullName", "Full Name")}
+                      autoComplete="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className={field}
+                      required
+                    />
+                  </div>
+                )}
+
                 <div className="relative">
-                  <UserIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <input
-                    type="text"
-                    placeholder="Full Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
+                    type="email"
+                    placeholder={t("auth.email", "Email")}
+                    aria-label={t("auth.email", "Email")}
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={field}
                     required
                   />
                 </div>
+
+                <div className="relative">
+                  <LockClosedIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type={showPass ? "text" : "password"}
+                    placeholder={t("auth.password", "Password")}
+                    aria-label={t("auth.password", "Password")}
+                    autoComplete={isLogin ? "current-password" : "new-password"}
+                    value={pass}
+                    onChange={(e) => setPass(e.target.value)}
+                    className={`${field} !pr-11`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(!showPass)}
+                    aria-label={showPass ? t("auth.hidePassword", "Hide password") : t("auth.showPassword", "Show password")}
+                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-full text-gray-400 hover:text-gray-700"
+                  >
+                    {showPass ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-brand py-2.5 font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
+                >
+                  {isLogin ? t("auth.login", "Log In") : t("auth.signup", "Sign Up")}
+                </button>
+              </form>
+
+              {showDemo && (
+                <div className="mt-6">
+                  <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-widest text-gray-400">
+                    <span className="h-px flex-1 bg-gray-200" />
+                    {t("demo.enterAs")}
+                    <span className="h-px flex-1 bg-gray-200" />
+                  </div>
+                  <p className="mt-2 text-center text-xs text-gray-500">{t("demo.enterAsHint")}</p>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {demoConfig.accounts!.map((account) => (
+                      <button
+                        key={account.role}
+                        type="button"
+                        onClick={() => handleDemoLogin(account.role)}
+                        disabled={demoLoading !== null}
+                        className="rounded-xl border border-gray-200 px-2 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-brand hover:bg-brand-50 hover:text-brand-text disabled:cursor-wait disabled:opacity-50"
+                      >
+                        {demoLoading === account.role ? t("demo.signingIn") : t(`demo.roles.${account.role}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
 
-              <div className="relative">
-                <AtSymbolIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
-                  required
-                />
-              </div>
-
-              <div className="relative">
-                <LockClosedIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                <input
-                  type={showPass ? "text" : "password"}
-                  placeholder="Password"
-                  value={pass}
-                  onChange={(e) => setPass(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-brand-400 outline-none"
-                  required
-                />
+              <p className="mt-6 text-center text-sm text-gray-600">
+                {isLogin ? t("auth.noAccount", "Don’t have an account?") : t("auth.haveAccount", "Already have an account?")}{" "}
                 <button
                   type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600"
+                  onClick={() => setCurrentMode(isLogin ? "signup" : "login")}
+                  className="font-semibold text-brand-text hover:underline"
                 >
-                  {showPass ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  {isLogin ? t("auth.signup", "Sign Up") : t("auth.login", "Log In")}
                 </button>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-brand text-black py-2 rounded-3xl hover:bg-ink hover:text-white transition font-semibold"
-              >
-                {currentMode === "login" ? "Log In" : "Sign Up"}
-              </button>
-            </form>
-
-            {currentMode === "login" && demoConfig.enabled && demoConfig.accounts && demoConfig.accounts.length > 0 && (
-              <div className="mt-5 rounded-xl border border-dashed border-brand bg-brand-50 p-3">
-                <p className="text-sm font-semibold text-center">{t("demo.enterAs")}</p>
-                <p className="text-xs text-gray-600 text-center mt-1 mb-3">{t("demo.enterAsHint")}</p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {demoConfig.accounts.map((account) => (
-                    <button
-                      key={account.role}
-                      type="button"
-                      onClick={() => handleDemoLogin(account.role)}
-                      disabled={demoLoading !== null}
-                      className="rounded-3xl border border-ink px-3 py-1.5 text-sm font-medium hover:bg-ink hover:text-white transition disabled:opacity-50 disabled:cursor-wait"
-                    >
-                      {demoLoading === account.role ? t("demo.signingIn") : t(`demo.roles.${account.role}`)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="text-center text-sm mt-4 text-gray-600">
-              {currentMode === "login" ? (
-                <>
-                  Don’t have an account?{" "}
-                  <button
-                    onClick={() => setCurrentMode("signup")}
-                    className="text-brand-text hover:underline"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <button
-                    onClick={() => setCurrentMode("login")}
-                    className="text-brand-text hover:underline"
-                  >
-                    Log In
-                  </button>
-                </>
-              )}
-            </p>
+              </p>
+            </div>
           </motion.div>
         </motion.div>
       )}
