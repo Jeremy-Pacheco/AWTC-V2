@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import HeroImage from "../components/HeroImage";
+import PageHeader from "../components/PageHeader";
 import VolunteerList from "../components/VolunteerList";
 
 function MoreInfo() {
@@ -7,18 +7,12 @@ function MoreInfo() {
 
   return (
     <>
-      <HeroImage
-        title={<h1 className="Display">{t('moreInfo.heroTitle')}</h1>}
-        imgSrc="/hero-img.jpg"
-        heightClass="h-64 md:h-96"
-      />
+      <PageHeader eyebrow={t('moreInfo.eyebrow')} title={t('moreInfo.heroTitle')} subtitle={t('moreInfo.exploreSubtitle')} />
 
-      <main className="max-w-6xl mx-auto px-6 py-12">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold">{t('moreInfo.exploreTitle')}</h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            {t('moreInfo.exploreSubtitle')}
-          </p>
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
+        <div className="mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('moreInfo.exploreTitle')}</h2>
+          <p className="mt-1 text-left text-base text-gray-600">{t('moreInfo.externalNote')}</p>
         </div>
         <VolunteerList />
       </main>

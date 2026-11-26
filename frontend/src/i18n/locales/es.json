@@ -106,7 +106,11 @@
     "messagePlaceholder": "Mensaje",
     "sendMessage": "Enviar mensaje",
     "messageSent": "Tu mensaje ha sido enviado exitosamente. Nuestro equipo te responderá pronto.",
-    "messageFailed": "Error al enviar el mensaje: "
+    "messageFailed": "Error al enviar el mensaje: ",
+    "headerTitle": "Voluntariado claro, verificado y cercano",
+    "whoEyebrow": "Quiénes somos",
+    "missionEyebrow": "Nuestra misión",
+    "contactDescription": "¿Tienes una pregunta, una idea o quieres apuntar a un grupo? Escríbenos y te responderemos lo antes posible."
   },
   "volunteering": {
     "activeProjects": "Proyectos Activos",
@@ -123,12 +127,22 @@
     "cannotEnroll": "No puedes inscribirte en este proyecto",
     "fullCapacity": "El proyecto está a capacidad máxima",
     "errorEnrolling": "Error al inscribirse",
-    "networkError": "Error de red al inscribirse"
+    "networkError": "Error de red al inscribirse",
+    "headerTitle": "Encuentra tu próximo proyecto",
+    "projectCount_one": "{{count}} proyecto",
+    "projectCount_other": "{{count}} proyectos",
+    "noProjects": "No hay proyectos en esta categoría."
   },
   "moreInfo": {
     "heroTitle": "Otras Actividades de Voluntariado",
     "exploreTitle": "Explora Más Oportunidades",
-    "exploreSubtitle": "Descubre oportunidades de voluntariado de plataformas externas"
+    "exploreSubtitle": "Descubre oportunidades de voluntariado de plataformas externas",
+    "eyebrow": "Más oportunidades",
+    "externalNote": "Oportunidades publicadas por otras organizaciones. Se abren en su web.",
+    "loadError": "No se pudieron cargar las oportunidades",
+    "empty": "No hay oportunidades disponibles",
+    "tryLater": "Vuelve a intentarlo más tarde",
+    "viewDetails": "Ver detalles"
   },
   "terms": {
     "heroTitle": "Términos y Condiciones",
@@ -274,5 +288,11 @@
     "uploadFile": "Haz clic para subir archivo del proyecto",
     "categoryName": "Nombre de categoría",
     "categoryDescription": "Descripción de categoría"
+  },
+  "legal": {
+    "eyebrow": "Legal",
+    "onThisPage": "En esta página",
+    "privacySubtitle": "Qué datos tratamos, para qué y cuáles son tus derechos.",
+    "termsSubtitle": "Las condiciones para usar A Will To Change."
   }
 }
