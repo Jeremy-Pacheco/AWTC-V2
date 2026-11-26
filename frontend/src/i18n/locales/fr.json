@@ -106,7 +106,11 @@
     "messagePlaceholder": "Message",
     "sendMessage": "Envoyer le message",
     "messageSent": "Votre message a été envoyé avec succès. Notre équipe vous répondra bientôt.",
-    "messageFailed": "Échec de l'envoi du message : "
+    "messageFailed": "Échec de l'envoi du message : ",
+    "headerTitle": "Un bénévolat clair, vérifié et de proximité",
+    "whoEyebrow": "Qui sommes-nous",
+    "missionEyebrow": "Notre mission",
+    "contactDescription": "Une question, une idée ou un groupe à inscrire ? Écrivez-nous et nous vous répondrons dès que possible."
   },
   "volunteering": {
     "activeProjects": "Projets Actifs",
@@ -123,12 +127,22 @@
     "cannotEnroll": "Vous ne pouvez pas vous inscrire à ce projet",
     "fullCapacity": "Le projet est à pleine capacité",
     "errorEnrolling": "Erreur lors de l'inscription",
-    "networkError": "Erreur réseau lors de l'inscription"
+    "networkError": "Erreur réseau lors de l'inscription",
+    "headerTitle": "Trouvez votre prochain projet",
+    "projectCount_one": "{{count}} projet",
+    "projectCount_other": "{{count}} projets",
+    "noProjects": "Il n'y a aucun projet dans cette catégorie."
   },
   "moreInfo": {
     "heroTitle": "Autres Activités de Bénévolat",
     "exploreTitle": "Explorez Plus d'Opportunités",
-    "exploreSubtitle": "Découvrez des opportunités de bénévolat sur des plateformes externes"
+    "exploreSubtitle": "Découvrez des opportunités de bénévolat sur des plateformes externes",
+    "eyebrow": "Plus d'opportunités",
+    "externalNote": "Opportunités publiées par d'autres organisations. Elles s'ouvrent sur leur site.",
+    "loadError": "Impossible de charger les opportunités",
+    "empty": "Aucune opportunité disponible",
+    "tryLater": "Veuillez réessayer plus tard",
+    "viewDetails": "Voir les détails"
   },
   "terms": {
     "heroTitle": "Conditions Générales",
@@ -274,5 +288,11 @@
     "uploadFile": "Cliquez pour télécharger le fichier du projet",
     "categoryName": "Nom de la catégorie",
     "categoryDescription": "Description de la catégorie"
+  },
+  "legal": {
+    "eyebrow": "Mentions légales",
+    "onThisPage": "Sur cette page",
+    "privacySubtitle": "Quelles données nous traitons, pourquoi et quels sont vos droits.",
+    "termsSubtitle": "Les conditions d'utilisation de A Will To Change."
   }
 }
