@@ -293,10 +293,12 @@ body {
   color: var(--text-primary) !important;
 }
 
-/* Keep the accent background on accent buttons in dark mode (only when not hovering) */
-.dark button[class*="bg-brand"]:not(:hover),
-.dark a[class*="bg-brand"]:not(:hover),
-.dark label[class*="bg-brand"]:not(:hover) {
+/* Dark text on SOLID accent buttons in dark mode (only when not hovering).
+   Tinted ones (bg-brand-50 / bg-brand-100: active nav item, upload areas)
+   keep their own light text, or it would be dark on a dark background. */
+.dark button[class*="bg-brand"]:not([class*="bg-brand-50"]):not([class*="bg-brand-100"]):not(:hover),
+.dark a[class*="bg-brand"]:not([class*="bg-brand-50"]):not([class*="bg-brand-100"]):not(:hover),
+.dark label[class*="bg-brand"]:not([class*="bg-brand-50"]):not([class*="bg-brand-100"]):not(:hover) {
   color: var(--on-accent) !important;
 }
 
