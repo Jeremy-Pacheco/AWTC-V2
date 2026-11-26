@@ -131,5 +131,5 @@ User with full access (inherits from Coordinator) who can:
 ## 🔗 Links
 
 - [Main README](../README.md)
-- [Deployment Documentation](./deploy-sprint-4.md)
+- [Deployment Documentation](./demo-runbook.md)
 - [HTTPS Configuration](./https-configuration.md)

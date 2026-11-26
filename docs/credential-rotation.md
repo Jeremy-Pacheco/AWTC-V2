@@ -17,6 +17,8 @@ versionarlas no basta, hay que **cambiarlas**. Este documento no contiene ningú
 
 `config/secrets.js` ya rechaza al arrancar los valores que estaban escritos en el código.
 
+> **Estado (2026-11-26):** el despliegue antiguo en DigitalOcean (`awilltochange.me`) está **retirado**. La demo actual ([demo-runbook.md](demo-runbook.md)) usa credenciales nuevas: `JWT_SECRET` y `SESSION_SECRET` generados por Render, claves VAPID nuevas, base de datos en Aiven y una clave de Cloudinary ya rotada. Para el servidor retirado basta con **destruir** el Droplet y el clúster MySQL gestionado en el panel de DigitalOcean (eso invalida a la vez sus credenciales filtradas, secciones 1 y 2). Las secciones 3-5 solo aplican a entornos que sigan usando aquellos valores (por ejemplo, tu `.env.development` local).
+
 ## Checklist de rotación
 
 Marca cada paso cuando esté hecho **en todos los entornos** (producción, demo y local).
