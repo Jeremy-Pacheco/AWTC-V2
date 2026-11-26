@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useTranslation } from "react-i18next";
-import HeroImage from "../components/HeroImage";
+import PageHeader from "../components/PageHeader";
 import AuthModal from "../components/AuthModal";
 import AlertModal from "../components/AlertModal";
 import { useSearchParams } from "react-router-dom";
@@ -26,10 +26,10 @@ type Project = {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const Volunteering: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchParams] = useSearchParams();
-  const projectRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
+  const projectRefs = useRef<{ [key: number]: HTMLElement | null }>({});
   const socketRef = useRef<Socket | null>(null);
 
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
@@ -50,7 +50,7 @@ const Volunteering: React.FC = () => {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 6;
 
   // Initialize WebSocket connection
   useEffect(() => {
@@ -139,8 +139,10 @@ const Volunteering: React.FC = () => {
         // Scroll to specific project if ID in URL
         const projectId = searchParams.get("project");
         if (projectId) {
-          // Clear any category filter to ensure the project is visible
+          // Clear any category filter and open the page that holds the project
           setSelectedCategory("");
+          const index = (data as Project[]).findIndex((p) => p.id === Number(projectId));
+          if (index >= 0) setTimeout(() => setCurrentPage(Math.floor(index / ITEMS_PER_PAGE) + 1), 0);
           
           setTimeout(() => {
             const element = projectRefs.current[Number(projectId)];
@@ -280,178 +282,217 @@ const Volunteering: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // Scroll to top of projects section
-    window.scrollTo({ top: 300, behavior: 'smooth' });
+    window.scrollTo({ top: 280, behavior: 'smooth' });
   };
+
+  const formatDate = (value?: string) =>
+    value ? new Date(value).toLocaleDateString(i18n.language, { day: "numeric", month: "short" }) : "";
+
+  const chip = (active: boolean) =>
+    `rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+      active
+        ? "border-transparent bg-ink !text-white"
+        : "border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-100"
+    }`;
 
   return (
     <>
-      {/* Hero */}
-      <HeroImage
-        title={<h1 className="Display">{t('common.appName')}</h1>}
-        imgSrc="/hero-img.jpg"
-        heightClass="h-64 md:h-96"
+      <PageHeader
+        eyebrow={t('nav.volunteering')}
+        title={t('volunteering.headerTitle')}
+        subtitle={t('volunteering.subtitle')}
       />
 
-      <div className="p-4">
-        <div className="flex flex-col md:flex-row justify-between items-center mt-8 mb-6 px-4 md:px-16">
+      <main className="max-w-6xl mx-auto px-4 md:px-6 py-10 md:py-14">
+        <div className="mb-8 flex flex-col gap-4">
           <div>
-            <h2 className="text-3xl font-bold">{t('volunteering.activeProjects')}</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">{t('volunteering.subtitle')}</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">{t('volunteering.activeProjects')}</h2>
+            <p className="mt-1 text-left text-base text-gray-600">
+              {t('volunteering.projectCount', { count: filteredProjects.length })}
+            </p>
           </div>
-          <div className="mt-4 md:mt-0 flex items-center gap-2">
-            <span className="text-gray-700 dark:text-gray-300">{t('volunteering.filterByCategory')}</span>
-            <select
-              className="border border-gray-300 rounded p-2 bg-white text-gray-800 dark:bg-[var(--bg-secondary)] dark:border-gray-600 dark:text-white"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              <option value="">{t('volunteering.allCategories')}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-wrap gap-2" role="group" aria-label={t('volunteering.filterByCategory')}>
+            <button type="button" className={chip(selectedCategory === "")} aria-pressed={selectedCategory === ""} onClick={() => setSelectedCategory("")}>
+              {t('volunteering.allCategories')}
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={chip(selectedCategory === String(cat.id))}
+                aria-pressed={selectedCategory === String(cat.id)}
+                onClick={() => setSelectedCategory(String(cat.id))}
+              >
+                {cat.name}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 px-4 md:px-16 pb-8">
-          {paginatedProjects.map(proj => {
-            const isFull = isProjectFull(proj.id);
-            const count = volunteerCounts[proj.id];
-            
-            return (
-              <div
-                key={proj.id}
-                ref={(el) => {
-                  if (el) projectRefs.current[proj.id] = el;
-                }}
-                className="flex flex-col md:flex-row bg-white dark:bg-[var(--card-bg)] rounded-xl p-4 md:p-6 gap-4 shadow-xl dark:shadow-2xl dark:shadow-black/30 border border-gray-100 dark:border-gray-700 transition-all duration-300 hover:shadow-2xl hover:scale-[1.01]"
-              >
-                {proj.filename && (
-                  <img
-                    src={imageUrl(proj.filename)}
-                    alt={proj.name}
-                    className="w-full md:w-48 h-48 object-cover rounded"
-                  />
-                )}
-                <div className="flex flex-col justify-between w-full">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-2xl font-bold">{proj.name}</h3>
-                      {proj.category && (
-                        <span className="bg-ink text-white px-3 py-1 rounded-full text-xs font-bold">
-                          {proj.category.name}
+        {paginatedProjects.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-300 py-16 text-center text-gray-500">
+            {t('volunteering.noProjects')}
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedProjects.map((proj) => {
+              const isFull = isProjectFull(proj.id);
+              const count = volunteerCounts[proj.id];
+              const enrolled = count ? count.enrolled : 0;
+              const capacity = count ? count.capacity : proj.capacity;
+              const fill = capacity ? Math.min(100, Math.round((enrolled / capacity) * 100)) : 0;
+              const start = formatDate(proj.start_date);
+              const end = formatDate(proj.end_date);
+              const banned = bannedProjectIds.includes(proj.id);
+              const isEnrolled = enrolledProjectIds.includes(proj.id);
+
+              return (
+                <article
+                  key={proj.id}
+                  ref={(el) => {
+                    if (el) projectRefs.current[proj.id] = el;
+                  }}
+                  className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-[var(--card-bg)] shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    {proj.filename ? (
+                      <img
+                        src={imageUrl(proj.filename)}
+                        alt={proj.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-to-br from-brand-600 to-brand-900" />
+                    )}
+                    {proj.category && (
+                      <span className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold !text-white backdrop-blur-sm">
+                        {proj.category.name}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="text-xl font-bold leading-snug">{proj.name}</h3>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                      {proj.location && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true">
+                            <path d="M12 21s-7-6.2-7-11a7 7 0 1114 0c0 4.8-7 11-7 11z" />
+                            <circle cx="12" cy="10" r="2.5" />
+                          </svg>
+                          {proj.location}
+                        </span>
+                      )}
+                      {start && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="16" rx="2" />
+                            <path d="M16 3v4M8 3v4M3 11h18" />
+                          </svg>
+                          {end && end !== start ? `${start} – ${end}` : start}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">📍 {proj.location}</p>
-                    
-                    <p className="mb-4">{proj.description}</p>
-                  </div>
-                  
-                  {/* Button and Capacity section */}
-                  <div className="flex flex-col-reverse sm:flex-row justify-between items-end gap-2 sm:gap-4">
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      {bannedProjectIds.includes(proj.id) ? (
-                        <button
-                          disabled
-                          className="bg-danger text-white px-4 py-2 rounded-3xl font-semibold cursor-not-allowed w-full sm:w-fit text-center"
-                        >
+                    <p className="mt-3 flex-1 text-left text-sm leading-relaxed text-gray-700 line-clamp-3">{proj.description}</p>
+
+                    <div className="mt-5">
+                      <div className="mb-1.5 flex justify-between text-xs font-medium">
+                        <span className="text-gray-500">{t('volunteering.volunteers')}</span>
+                        <span className={isFull ? "text-danger" : "text-brand-text"}>
+                          {enrolled}/{capacity}
+                        </span>
+                      </div>
+                      <div
+                        className="h-1.5 overflow-hidden rounded-full bg-gray-200"
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={capacity}
+                        aria-valuenow={enrolled}
+                        aria-label={t('volunteering.volunteers')}
+                      >
+                        <div className={`h-full rounded-full ${isFull ? "bg-danger" : "bg-brand"}`} style={{ width: `${fill}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="mt-5">
+                      {banned ? (
+                        <button disabled className="w-full rounded-full border border-danger/40 px-4 py-2.5 text-sm font-semibold text-danger cursor-not-allowed">
                           {t('volunteering.notAvailable')}
                         </button>
-                      ) : enrolledProjectIds.includes(proj.id) ? (
-                        <button
-                          disabled
-                          className="bg-gray-400 text-white px-4 py-2 rounded-3xl font-semibold cursor-not-allowed w-full sm:w-fit text-center"
-                        >
-                          {t('volunteering.alreadyEnrolledBtn')}
+                      ) : isEnrolled ? (
+                        <button disabled className="w-full rounded-full bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-600 cursor-not-allowed">
+                          ✓ {t('volunteering.alreadyEnrolledBtn')}
                         </button>
                       ) : isFull ? (
-                        <button
-                          disabled
-                          className="bg-red-600 text-white px-4 py-2 rounded-3xl font-semibold cursor-not-allowed w-full sm:w-fit text-center"
-                        >
+                        <button disabled className="w-full rounded-full bg-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-500 cursor-not-allowed">
                           {t('volunteering.full')}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleEnroll(proj.id)}
-                          className="bg-brand text-black hover:bg-ink hover:text-white px-4 py-2 rounded-3xl font-semibold transition-colors w-full sm:w-fit text-center"
+                          className="w-full rounded-full bg-brand px-4 py-2.5 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover"
                         >
                           {t('volunteering.enroll')}
                         </button>
                       )}
                     </div>
-
-                    {/* Display volunteer capacity */}
-                    <div className="text-sm font-semibold whitespace-nowrap self-end">
-                      <span className={isFull ? 'text-red-600 font-bold' : 'text-brand-text font-bold'}>
-                        {t('volunteering.volunteers')}: {count ? `${count.enrolled}/${count.capacity}` : `0/${proj.capacity}`}
-                      </span>
-                      {isFull}
-                    </div>
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-1 mb-8 flex-wrap px-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-1.5">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+              className="rounded-full border border-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t('dashboard.previous')}
             </button>
-            
-            {getPageNumbers().map((page, index) => (
+            {getPageNumbers().map((page, index) =>
               typeof page === 'number' ? (
                 <button
                   key={index}
                   onClick={() => handlePageChange(page)}
-                  className={`px-3 py-2 rounded border text-sm min-w-[40px] ${
-                    currentPage === page
-                      ? 'bg-brand text-black border-brand font-semibold'
-                      : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  aria-current={currentPage === page ? 'page' : undefined}
+                  className={`grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-medium transition-colors ${
+                    currentPage === page ? 'bg-brand text-on-brand font-semibold' : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   {page}
                 </button>
               ) : (
-                <span key={index} className="px-2 py-2 text-gray-500">
-                  {page}
-                </span>
+                <span key={index} className="px-2 py-1 text-gray-500">{page}</span>
               )
-            ))}
-            
+            )}
             <button
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+              className="rounded-full border border-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {t('dashboard.next')}
             </button>
           </div>
         )}
+      </main>
 
-        {/* Auth Modal */}
-        <AuthModal 
-          open={authOpen} 
-          onClose={() => {
-            setAuthOpen(false);
-            // Refresh enrolled projects
-            fetchEnrolledProjects();
-          }} 
-          mode={authMode} 
-        />
+      {/* Auth Modal */}
+      <AuthModal
+        open={authOpen}
+        onClose={() => {
+          setAuthOpen(false);
+          // Refresh enrolled projects
+          fetchEnrolledProjects();
+        }}
+        mode={authMode}
+      />
 
-        <AlertModal open={alertOpen} message={alertMessage} onAccept={() => setAlertOpen(false)} />
-      </div>
+      <AlertModal open={alertOpen} message={alertMessage} onAccept={() => setAlertOpen(false)} />
     </>
   );
 };
