@@ -37,11 +37,14 @@ describe('Dashboard', () => {
   it('shows every tab of an admin with its data', async () => {
     render(<MemoryRouter><Dashboard /></MemoryRouter>);
 
-    // Profile (default tab)
-    expect(await screen.findByText('Ada Admin')).toBeTruthy();
+    // Profile (default tab): name in the sidebar and in the profile card
+    expect((await screen.findAllByText('Ada Admin')).length).toBe(2);
+    // Role badge in the sidebar
+    expect(screen.getAllByText('dashboard.admin').length).toBeGreaterThan(0);
 
     const open = async (tab: string, text: string) => {
       fireEvent.click(screen.getByRole('button', { name: tab }));
+      expect(screen.getByRole('heading', { level: 1, name: tab })).toBeTruthy();
       expect(await screen.findByText(text)).toBeTruthy();
     };
     await open('dashboard.myProjects', 'My Beach Day');
@@ -57,7 +60,7 @@ describe('Dashboard', () => {
   it('hides staff tabs from volunteers', async () => {
     API['/api/users/dashboard'] = { user: { id: 4, name: 'Vera', role: 'volunteer' } };
     render(<MemoryRouter><Dashboard /></MemoryRouter>);
-    expect(await screen.findByText('Vera')).toBeTruthy();
+    expect((await screen.findAllByText('Vera')).length).toBeGreaterThan(0);
     expect(screen.queryByRole('button', { name: 'dashboard.projects' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'dashboard.users' })).toBeNull();
     API['/api/users/dashboard'] = { user: admin };

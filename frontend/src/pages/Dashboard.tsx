@@ -12,6 +12,9 @@ import ReviewsTab from './dashboard/ReviewsTab';
 import UsersTab from './dashboard/UsersTab';
 import ContactsTab from './dashboard/ContactsTab';
 import CategoriesTab from './dashboard/CategoriesTab';
+import TabIcon from './dashboard/TabIcon';
+import * as ui from './dashboard/ui';
+import { imageUrl } from '../utils/images';
 
 type Tab = "profile" | "myprojects" | "projects" | "users" | "contacts" | "categories" | "reviews";
 
@@ -89,7 +92,13 @@ const Dashboard: React.FC = () => {
   };
   const closeConfirm = () => setConfirmModal({ open: false, title: '', message: '', onConfirm: null, danger: false });
 
-  if (!user || !token) return <div className="p-6">{t('dashboard.loadingUser')}</div>;
+  if (!user || !token) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
+        <div className="h-24 w-full max-w-xs animate-pulse rounded-2xl bg-gray-100" aria-label={t('dashboard.loadingUser')} />
+      </div>
+    );
+  }
 
   const isStaff = user.role === 'admin' || user.role === 'coordinator';
   const isAdmin = user.role === 'admin';
@@ -112,47 +121,94 @@ const Dashboard: React.FC = () => {
     analytics: t('dashboard.analytics'),
   };
 
+  const roleLabel = t(`dashboard.${user.role}`, { defaultValue: user.role });
+  const avatar = user.profileImage ? imageUrl(user.profileImage) : null;
+
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">{t('dashboard.title')}</h2>
-      {statusMessage && (
-        <div className={`mb-4 p-3 rounded ${statusMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-          {statusMessage.text}
-        </div>
-      )}
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
+        {/* Sidebar: who is signed in + navigation */}
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+          <div className="flex items-center gap-3 rounded-2xl border border-gray-200 bg-[var(--card-bg)] p-4">
+            {avatar ? (
+              <img src={avatar} alt="" className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-brand/40" />
+            ) : (
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-brand text-lg font-bold text-on-brand">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="truncate font-semibold">{user.name}</div>
+              <span className={`mt-1 ${ui.badge(user.role)}`}>{roleLabel}</span>
+            </div>
+          </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 md:gap-4 mb-6 justify-center">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            className={`px-3 md:px-4 py-2 rounded-3xl font-semibold transition text-sm md:text-base ${
-              activeTab === tab ? "bg-brand text-black" : "bg-gray-200 hover:bg-ink hover:text-white"
-            }`}
-            onClick={() => {
-              if (tab === "analytics") {
-                window.open(adminDashboardUrl(), '_blank', 'noopener');
-              } else {
-                setActiveTab(tab as Tab);
-              }
-            }}
+          <nav
+            aria-label={t('dashboard.title')}
+            className="mt-4 -mx-4 flex gap-1 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0"
           >
-            {tabLabel[tab]}
-          </button>
-        ))}
-      </div>
+            {tabs.map((tab) => {
+              const active = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  aria-current={active ? 'page' : undefined}
+                  className={`flex shrink-0 items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-brand-50 font-semibold text-brand-text'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  }`}
+                  onClick={() => {
+                    if (tab === "analytics") {
+                      window.open(adminDashboardUrl(), '_blank', 'noopener');
+                    } else {
+                      setActiveTab(tab as Tab);
+                    }
+                  }}
+                >
+                  <TabIcon tab={tab} />
+                  <span className="whitespace-nowrap">{tabLabel[tab]}</span>
+                  {tab === 'analytics' && <TabIcon tab="external" className="ml-auto h-3.5 w-3.5 opacity-60" />}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-      {/* Tab content */}
-      <div className="bg-gray-100 p-4 md:p-6 rounded-lg shadow-md">
-        {activeTab === "profile" && (
-          <ProfileTab {...tabProps} setUser={(u) => setUser(u)} onAccountDeleted={() => navigate('/home')} />
-        )}
-        {activeTab === "myprojects" && <MyProjectsTab {...tabProps} />}
-        {activeTab === "projects" && isStaff && <ProjectsTab {...tabProps} categories={categories} usersData={usersData} />}
-        {activeTab === "categories" && isStaff && <CategoriesTab {...tabProps} categories={categories} setCategories={setCategories} />}
-        {activeTab === "reviews" && isStaff && <ReviewsTab {...tabProps} />}
-        {activeTab === "users" && isAdmin && <UsersTab {...tabProps} usersData={usersData} setUsersData={setUsersData} />}
-        {activeTab === "contacts" && isAdmin && <ContactsTab {...tabProps} />}
+        {/* Active tab */}
+        <section className="min-w-0">
+          <header className="mb-5">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-text">{t('dashboard.title')}</span>
+            <h1 className="mt-1 text-2xl md:text-3xl font-bold tracking-tight">{tabLabel[activeTab]}</h1>
+          </header>
+
+          {statusMessage && (
+            <div
+              role="status"
+              className={`mb-4 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
+                statusMessage.type === 'success'
+                  ? 'border-brand-200 bg-brand-50 text-brand-700'
+                  : 'border-red-200 bg-red-50 text-red-700'
+              }`}
+            >
+              <span aria-hidden="true">{statusMessage.type === 'success' ? '✓' : '!'}</span>
+              {statusMessage.text}
+            </div>
+          )}
+
+          <div className="rounded-2xl border border-gray-200 bg-[var(--card-bg)] p-4 md:p-6 shadow-sm">
+            {activeTab === "profile" && (
+              <ProfileTab {...tabProps} setUser={(u) => setUser(u)} onAccountDeleted={() => navigate('/home')} />
+            )}
+            {activeTab === "myprojects" && <MyProjectsTab {...tabProps} />}
+            {activeTab === "projects" && isStaff && <ProjectsTab {...tabProps} categories={categories} usersData={usersData} />}
+            {activeTab === "categories" && isStaff && <CategoriesTab {...tabProps} categories={categories} setCategories={setCategories} />}
+            {activeTab === "reviews" && isStaff && <ReviewsTab {...tabProps} />}
+            {activeTab === "users" && isAdmin && <UsersTab {...tabProps} usersData={usersData} setUsersData={setUsersData} />}
+            {activeTab === "contacts" && isAdmin && <ContactsTab {...tabProps} />}
+          </div>
+        </section>
       </div>
 
       <ConfirmModal

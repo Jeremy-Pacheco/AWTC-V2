@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Project } from "../../types/api";
+import * as ui from "./ui";
 import { API_URL, ITEMS_PER_PAGE, getTotalPages, paginate, type TabProps } from "./shared";
 import PaginationControls from "./Pagination";
 
@@ -32,16 +33,15 @@ export default function MyProjectsTab({ token, setStatusMessage, openConfirm, cl
   return (
     <>
           <div>
-            <h3 className="font-bold mb-2">{t('dashboard.myProjects')}</h3>
             <div>
               {paginate(myProjects, myProjectsPage, ITEMS_PER_PAGE.myProjects).map(p => (
-                <div key={p.id} className="border p-3 mb-2 rounded flex flex-col md:flex-row justify-between md:items-start gap-3">
+                <div key={p.id} className={`${ui.card} flex flex-col md:flex-row justify-between md:items-start gap-3`}>
                   <div className="flex-1">
-                    <strong className="text-sm md:text-base">{p.name}</strong> {p.status && <span className="text-gray-500 text-sm">({p.status})</span>}<br />
-                    <div className="text-sm">{p.description}</div>
+                    <div className="flex flex-wrap items-center gap-2"><strong className="text-base">{p.name}</strong>{p.status && <span className={ui.badge(p.status)}>{t(`dashboard.${p.status}`, { defaultValue: p.status })}</span>}</div>
+                    <div className="mt-1 text-sm text-gray-600">{p.description}</div>
                   </div>
                   <div className="flex gap-2 flex-wrap md:flex-nowrap">
-                    <button className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" onClick={() => openConfirm(t('dashboard.unregister'), t('dashboard.unregisterConfirm'), async () => { closeConfirm(); await unregisterFromProject(p.id); }, true)}>{t('dashboard.unregister')}</button>
+                    <button className={ui.btnDanger} onClick={() => openConfirm(t('dashboard.unregister'), t('dashboard.unregisterConfirm'), async () => { closeConfirm(); await unregisterFromProject(p.id); }, true)}>{t('dashboard.unregister')}</button>
                   </div>
                 </div>
               ))}

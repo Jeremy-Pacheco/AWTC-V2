@@ -53,11 +53,11 @@ const PaginationControls: React.FC<{
     const pageNumbers = getPageNumbersImpl(currentPage, totalPages);
 
     return (
-      <div className="flex justify-center items-center gap-1 mt-4 flex-wrap">
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5">
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 text-sm"
+          className="rounded-full border border-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t('dashboard.previous')}
         </button>
@@ -67,10 +67,11 @@ const PaginationControls: React.FC<{
             <button
               key={index}
               onClick={() => onPageChange(page)}
-              className={`px-3 py-1 rounded border text-sm min-w-[36px] ${
+              aria-current={currentPage === page ? 'page' : undefined}
+              className={`grid h-9 min-w-9 place-items-center rounded-full px-2 text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-brand text-black border-brand font-semibold'
-                  : 'border-gray-300 hover:bg-gray-100'
+                  ? 'bg-brand text-on-brand font-semibold'
+                  : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
               {page}
@@ -85,7 +86,7 @@ const PaginationControls: React.FC<{
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 text-sm"
+          className="rounded-full border border-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t('dashboard.next')}
         </button>

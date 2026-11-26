@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { imageUrl } from "../../utils/images";
 import type { Review } from "../../types/api";
+import * as ui from "./ui";
 import { API_URL, ITEMS_PER_PAGE, getTotalPages, paginate, type TabProps } from "./shared";
 import PaginationControls from "./Pagination";
 
@@ -18,13 +19,12 @@ export default function ReviewsTab({ token, user, setStatusMessage, openConfirm,
   return (
     <>
           <div>
-            <h3 className="font-bold mb-2">{t('dashboard.reviews')}</h3>
             <div>
               {reviews.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">{t('dashboard.noReviews')}</p>
+                <p className={ui.empty}>{t('dashboard.noReviews')}</p>
               ) : (
                 paginate(reviews, reviewsPage, ITEMS_PER_PAGE.reviews).map(r => (
-                  <div key={r.id} className="border p-4 mb-3 rounded bg-white shadow-sm">
+                  <div key={r.id} className={ui.card}>
                     <div className="flex flex-col md:flex-row justify-between md:items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
@@ -43,7 +43,7 @@ export default function ReviewsTab({ token, user, setStatusMessage, openConfirm,
                       {(user.role === 'admin' || (r.user?.id != null && r.user.id === user.id)) && (
                         <div className="flex gap-2 flex-wrap md:flex-nowrap">
                           <button 
-                            className="bg-danger text-white hover:bg-ink hover:text-white transition px-3 py-1 rounded-3xl text-sm" 
+                            className={ui.btnDanger} 
                             onClick={() => openConfirm(t('dashboard.deleteReview'), t('dashboard.deleteReviewConfirm'), async () => {
                               closeConfirm();
                               try {
