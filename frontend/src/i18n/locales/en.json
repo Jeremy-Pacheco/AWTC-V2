@@ -294,5 +294,23 @@
     "onThisPage": "On this page",
     "privacySubtitle": "What data we process, why, and your rights.",
     "termsSubtitle": "The conditions for using A Will To Change."
+  },
+  "auth": {
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to sign up for projects.",
+    "signupTitle": "Create your account",
+    "signupSubtitle": "It only takes a minute.",
+    "fullName": "Full Name",
+    "email": "Email",
+    "password": "Password",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "noAccount": "Don’t have an account?",
+    "haveAccount": "Already have an account?",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "close": "Close",
+    "invalidCredentials": "Invalid username or password",
+    "signupError": "Error creating user"
   }
 }

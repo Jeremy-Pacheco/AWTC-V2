@@ -294,5 +294,23 @@
     "onThisPage": "Sur cette page",
     "privacySubtitle": "Quelles données nous traitons, pourquoi et quels sont vos droits.",
     "termsSubtitle": "Les conditions d'utilisation de A Will To Change."
+  },
+  "auth": {
+    "loginTitle": "Bon retour parmi nous",
+    "loginSubtitle": "Connectez-vous pour vous inscrire aux projets.",
+    "signupTitle": "Créez votre compte",
+    "signupSubtitle": "Cela ne prend qu’une minute.",
+    "fullName": "Nom complet",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "login": "Se connecter",
+    "signup": "S’inscrire",
+    "noAccount": "Pas encore de compte ?",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "close": "Fermer",
+    "invalidCredentials": "E-mail ou mot de passe incorrect",
+    "signupError": "Impossible de créer le compte"
   }
 }
