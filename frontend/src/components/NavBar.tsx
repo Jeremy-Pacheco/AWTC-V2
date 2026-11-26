@@ -58,81 +58,56 @@ function NavBar() {
     navigate("/");
   };
 
+  const links = [
+    { to: "/home", label: t('nav.home') },
+    { to: "/volunteering", label: t('nav.volunteering') },
+    { to: "/moreinfo", label: t('nav.info') },
+    { to: "/aboutus", label: t('nav.aboutUs') },
+  ];
+  const linkClass = ({ isActive }: { isActive: boolean }) =>
+    `rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
+      isActive ? "bg-gray-100 text-gray-900 font-semibold" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+    }`;
+  const btnGhost = "rounded-full px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100";
+  const btnOutline = "rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-100";
+  const btnPrimary = "rounded-full bg-brand px-4 py-2 text-sm font-semibold text-on-brand shadow-sm transition-colors hover:bg-brand-hover";
+
   return (
-    <nav className="bg-white shadow-md relative z-30 dark:bg-[var(--nav-bg)]">
-      <div className="mx-auto px-4 flex justify-between items-center h-16">
-        <NavLink to="/home" className="flex items-center">
-          <img src={isDarkMode ? LogoWhite : Logo} alt="Logo AWTC" className="h-10 w-10 mr-2" />
+    <nav className="sticky top-0 z-30 border-b border-gray-200 bg-white dark:bg-[var(--nav-bg)]">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 md:px-6">
+        <NavLink to="/home" className="flex shrink-0 items-center gap-2.5">
+          <img src={isDarkMode ? LogoWhite : Logo} alt="Logo AWTC" className="h-9 w-9" />
+          <span className="hidden text-base font-bold tracking-tight text-gray-900 lg:inline">A Will To Change</span>
         </NavLink>
 
         {/* desktop/tablet */}
-        <div className="hidden md:flex items-center space-x-4">
-          <NavLink
-  to="/home"
-  className={({ isActive }) =>
-    `text-gray-800 transition-all duration-200 ${isActive ? "font-bold" : ""}`
-  }
->
-  {t('nav.home')}
-</NavLink>
+        <div className="hidden md:flex items-center gap-1">
+          {links.map((l) => (
+            <NavLink key={l.to} to={l.to} className={linkClass}>
+              {l.label}
+            </NavLink>
+          ))}
+        </div>
 
-<NavLink
-  to="/volunteering"
-  className={({ isActive }) =>
-    `text-gray-800 transition-all duration-200 ${isActive ? "font-bold" : ""}`
-  }
->
-  {t('nav.volunteering')}
-</NavLink>
-
-<NavLink
-  to="/moreinfo"
-  className={({ isActive }) =>
-    `text-gray-800 transition-all duration-200 ${isActive ? "font-bold" : ""}`
-  }
->
-  {t('nav.info')}
-</NavLink>
-
-<NavLink
-  to="/aboutus"
-  className={({ isActive }) =>
-    `text-gray-800 transition-all duration-200 ${isActive ? "font-bold" : ""}`
-  }
->
-  {t('nav.aboutUs')}
-</NavLink>
-
+        <div className="hidden md:flex items-center gap-2">
           <DarkModeToggle />
           <LanguageSelector />
-
+          <span className="mx-1 h-6 w-px bg-gray-200" aria-hidden="true" />
           {isLoggedIn ? (
             <>
-              <button
-                onClick={() => navigate("/dashboard")}
-                className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => navigate("/dashboard")} className={btnOutline}>
                 {t('common.profile')}
               </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 rounded-3xl bg-danger text-white hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={handleLogout} className={btnGhost}>
                 {t('common.logout')}
               </button>
             </>
           ) : (
             <>
-              <button
-                onClick={() => openAuth("login")}
-                className="px-4 py-2 rounded-3xl border border-muted hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => openAuth("login")} className={btnGhost}>
                 {t('common.login')}
               </button>
-              <button
-                onClick={() => openAuth("signup")}
-                className="px-4 py-2 rounded-3xl bg-brand text-black hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => openAuth("signup")} className={btnPrimary}>
                 {t('common.signup')}
               </button>
             </>
@@ -140,108 +115,80 @@ function NavBar() {
         </div>
 
         {/* phone */}
-        <div className="flex items-center space-x-2 md:hidden">
-          <img
-            src={isDarkMode ? UserWhite : User}
-            alt="User Icon"
-            className="h-8 w-8 cursor-pointer"
+        <div className="flex items-center gap-1 md:hidden">
+          <button
+            type="button"
+            aria-label={isLoggedIn ? t('common.profile') : t('common.login')}
             onClick={() => (isLoggedIn ? navigate("/dashboard") : openAuth("login"))}
-          />
-          <Hamburger toggled={menuOpen} toggle={setMenuOpen} size={26} color={isDarkMode ? "#ffffff" : "#222"} />
+            className="grid h-10 w-10 place-items-center rounded-full hover:bg-gray-100"
+          >
+            <img src={isDarkMode ? UserWhite : User} alt="User Icon" className="h-6 w-6" />
+          </button>
+          <Hamburger toggled={menuOpen} toggle={setMenuOpen} size={22} color={isDarkMode ? "#ffffff" : "#16201b"} label="Menu" />
         </div>
       </div>
 
-      {/* Drawer phone */}
-      {/* Overlay */}
+      {/* Phone drawer */}
       {menuOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setMenuOpen(false)}
-        ></div>
+        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setMenuOpen(false)} aria-hidden="true" />
       )}
 
       <div
-        className={`fixed inset-0 bg-white dark:bg-[var(--bg-primary)] z-50
-        transform transition-transform duration-300 ease-in-out
-        ${menuOpen ? "translate-x-0" : "translate-x-full"}
-        flex flex-col p-6 pt-20 space-y-6 overflow-y-auto`}
+        className={`fixed inset-y-0 right-0 z-50 flex w-80 max-w-[85vw] flex-col bg-[var(--card-bg)] p-6 shadow-2xl
+        transform transition-transform duration-300 ease-in-out md:hidden
+        ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <button
-          className="absolute top-5 right-5 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
-          onClick={() => setMenuOpen(false)}
-          aria-label="Close menu"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        <div className="flex flex-col space-y-4">
-          <NavLink 
-            to="/home" 
+        <div className="flex items-center justify-between">
+          <img src={isDarkMode ? LogoWhite : Logo} alt="" className="h-9 w-9" />
+          <button
+            className="grid h-10 w-10 place-items-center rounded-full text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
             onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
+            aria-label="Close menu"
           >
-            {t('nav.home')}
-          </NavLink>
-          <NavLink 
-            to="/volunteering" 
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
-          >
-            {t('nav.volunteering')}
-          </NavLink>
-          <NavLink 
-            to="/moreinfo" 
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
-          >
-            {t('nav.info')}
-          </NavLink>
-          <NavLink 
-            to="/aboutus" 
-            onClick={() => setMenuOpen(false)}
-            className={({ isActive }) => `text-lg font-medium transition-colors ${isActive ? "text-brand-text" : "text-gray-800 dark:text-gray-200 hover:text-brand-text"}`}
-          >
-            {t('nav.aboutUs')}
-          </NavLink>
-          
-          <div className="flex justify-start mt-2 gap-2">
-            <DarkModeToggle />
-            <LanguageSelector />
-          </div>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        <div className="h-px bg-gray-200 dark:bg-gray-700 w-full my-4"></div>
+        <div className="mt-8 flex flex-col gap-1">
+          {links.map((l) => (
+            <NavLink
+              key={l.to}
+              to={l.to}
+              onClick={() => setMenuOpen(false)}
+              className={({ isActive }) =>
+                `rounded-xl px-4 py-3 text-base font-medium transition-colors ${
+                  isActive ? "bg-gray-100 font-semibold text-gray-900" : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
+            >
+              {l.label}
+            </NavLink>
+          ))}
+        </div>
 
-        <div className="flex flex-col space-y-3">
+        <div className="mt-6 flex items-center gap-2 px-1">
+          <DarkModeToggle />
+          <LanguageSelector />
+        </div>
+
+        <div className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-6">
           {isLoggedIn ? (
             <>
-              <button 
-                onClick={() => {navigate("/dashboard"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl border border-muted dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => { navigate("/dashboard"); setMenuOpen(false); }} className={`${btnOutline} w-full py-2.5`}>
                 {t('common.profile')}
               </button>
-              <button 
-                onClick={() => {handleLogout(); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl bg-danger text-white text-center hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => { handleLogout(); setMenuOpen(false); }} className={`${btnGhost} w-full py-2.5`}>
                 {t('common.logout')}
               </button>
             </>
           ) : (
             <>
-              <button 
-                onClick={() => {openAuth("login"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl border border-muted dark:border-gray-500 text-center text-gray-800 dark:text-gray-200 hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => { openAuth("login"); setMenuOpen(false); }} className={`${btnOutline} w-full py-2.5`}>
                 {t('common.login')}
               </button>
-              <button 
-                onClick={() => {openAuth("signup"); setMenuOpen(false)}} 
-                className="w-full px-4 py-2 rounded-3xl bg-brand text-black text-center hover:bg-ink hover:text-white transition-colors duration-200"
-              >
+              <button onClick={() => { openAuth("signup"); setMenuOpen(false); }} className={`${btnPrimary} w-full py-2.5`}>
                 {t('common.signup')}
               </button>
             </>
