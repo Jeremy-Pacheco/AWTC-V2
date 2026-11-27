@@ -86,6 +86,55 @@ Open **Log in** and choose **one of the three demo accounts**. No password is ne
 
 ---
 
+## 🛡️ Security audit: what we found and fixed
+
+Before publishing the demo, the whole project, frontend and backend, went through a **full security and code audit**. The original version worked well as an academic project, but it was **not safe to put online**: several flaws let someone take over an admin account, or read and change data without logging in.
+
+All the findings below are **fixed in V2**. Each fix was made in its own pull request and is covered by tests where possible.
+
+| Severity | What we found | How V2 fixes it |
+| --- | --- | --- |
+| 🔴 Critical | The **JWT signing secret** had a default value written in the code, so anyone could create a valid admin token. | Secrets come only from environment variables. The server refuses to start if one is missing or is one of the values that leaked. |
+| 🔴 Critical | **Debug endpoints** that anyone could call returned whole database tables, including users, private messages and contacts. | Removed. |
+| 🔴 Critical | The **real-time chat** trusted the user ID sent by the browser, so anyone could impersonate an admin and read their messages. | The socket identifies the user from their verified token. |
+| 🔴 Critical | **Editing and deleting projects** required no login at all. | Authentication, role checks and project ownership on every write endpoint. |
+| 🔴 Critical | **Stored XSS** in the admin panel, which could be triggered from the public contact form. | Output escaping, plus a strict Content Security Policy with nonces. |
+| 🔴 Critical | **Unrestricted file uploads**: HTML or SVG files were served from the app's own domain and could steal sessions. | Only images are accepted, checked by type and size, and stored on Cloudinary. |
+| 🔴 Critical | **Secrets committed to git**: `.env` files and the production database credentials. | Removed from the repository, git-ignored, replaced by `.env.example`, and documented in a [rotation guide](docs/credential-rotation.md). |
+| 🟠 High | Any logged-in user, even a volunteer, could open the **admin dashboard**. | Admin-only access to the dashboard. |
+| 🟠 High | **No protection against brute force** on login. | Rate limiting on login, sign-up, token refresh and the contact form. |
+| 🟠 High | **62 known vulnerabilities in dependencies** (4 critical): 27 in the backend and 35 in the frontend. | Dependencies updated and vulnerable sub-dependencies patched. `pnpm audit` now reports none. |
+| 🟠 High | **Session cookies without CSRF protection**, and sessions that were not regenerated on login. | CSRF tokens, a new session ID on login, and sessions stored in the database. |
+| 🟡 Medium | Tokens valid for 24 hours that **logging out did not revoke**. | 15-minute access tokens and refresh tokens that change on every use and are revoked on logout. |
+| 🟡 Medium | **No validation on the server**, mass assignment, LDAP injection and TLS certificates not verified. | Zod schemas, field allowlists, escaped LDAP DNs, and verified TLS for the database and external APIs. |
+
+On the code side, the audit also took **TypeScript from 24 errors and ESLint from 57 problems to zero**. It split the 1,000-line files into modules and added **integration tests on a real MySQL database** that check every role's permissions.
+
+---
+
+## 🔄 Infrastructure changes
+
+### Database: DigitalOcean ➜ Aiven
+
+The original app ran on a **self-managed DigitalOcean server** with a managed MySQL database. V2 moved to a **new MySQL database on Aiven's free plan** for three reasons:
+
+- **Security:** the old database credentials had been committed to the repository. Starting fresh with new credentials, which never touched git, was safer than reusing it.
+- **Cost:** the public demo had to run for free. Aiven gives a free MySQL database with TLS, Render runs the API, Vercel serves the frontend and Cloudinary stores the images.
+- **Performance:** the database and the backend run in the same region (Frankfurt). Placing them together cut API response times from about 0.7–1 s to about 0.2 s.
+
+The old server has since been retired.
+
+### Package manager: npm ➜ pnpm
+
+Both the frontend and the backend moved from **npm to pnpm** because:
+
+- **Patching vulnerable sub-dependencies:** pnpm `overrides` let us force safe versions of indirect packages (such as `uuid`, `glob` and `minimatch`) without waiting for the libraries that use them to update.
+- **Supply-chain protection:** pnpm does not run dependencies' install scripts unless they are explicitly allowed, so a compromised package cannot run code just by being installed.
+- **Strict dependencies:** the code can only import packages that are declared in `package.json`. This avoids "phantom dependencies" that work locally and break later.
+- **Speed and disk space:** a shared store and hard links make installs, CI runs and deployments faster.
+
+---
+
 ## ⚡ Tech stack
 
 | Layer | Technologies |
