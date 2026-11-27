@@ -77,7 +77,7 @@ function DarkModeToggle() {
             ],
           },
           {
-            duration: 1100,
+            duration: 1500,
             fill: "both",
             easing: "cubic-bezier(0.7, 0, 0.3, 1)",
             pseudoElement: "::view-transition-new(root)",
