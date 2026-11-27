@@ -14,6 +14,8 @@
   },
   "common": {
     "appName": "Volonté Qui Transforme",
+    "themeDark": "Activer le mode sombre",
+    "themeLight": "Activer le mode clair",
     "login": "Se Connecter",
     "logout": "Se Déconnecter",
     "signup": "S'inscrire",
