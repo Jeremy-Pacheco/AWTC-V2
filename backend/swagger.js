@@ -1,3 +1,4 @@
+const path = require('path');
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
@@ -6,19 +7,29 @@ const options = {
     info: {
       title: 'AWTC API',
       version: '1.0.0',
-      description: 'API Documentation for A Will To Change',
+      description: [
+        'API Documentation for A Will To Change.',
+        '',
+        '**How to authorize:** get an `access_token` and paste it in **Authorize** (bearerAuth).',
+        '- Public demo: `POST /api/demo/login` with `{ "role": "volunteer" | "coordinator" | "admin" }`.',
+        '- Any environment: `POST /api/users/login` with your email and password.',
+        '',
+        'Access tokens last 15 minutes; log in again (or use `/api/auth/refresh` from the app) when it expires.',
+      ].join('\n'),
       contact: {
         name: 'AWTC Support'
       }
     },
+    // The current server comes first so "Try it out" works on the deployed
+    // docs (e.g. https://awtc-api.jeremypacheco.es/api-docs) without changes.
     servers: [
       {
-        url: 'http://localhost:8080',
-        description: 'Development Server'
+        url: '/',
+        description: 'This server'
       },
       {
-        url: '/',
-        description: 'This server (e.g. the public demo: https://awtc-api.jeremypacheco.es)'
+        url: 'http://localhost:8080',
+        description: 'Local development server'
       }
     ],
     security: [
@@ -43,10 +54,10 @@ const options = {
           type: 'object',
           properties: {
             id: { type: 'integer', example: 1 },
-            email: { type: 'string', example: 'user@example.com' },
-            firstName: { type: 'string', example: 'John' },
-            lastName: { type: 'string', example: 'Doe' },
-            role: { type: 'string', enum: ['user', 'admin'], example: 'user' },
+            name: { type: 'string', example: 'Jane Doe' },
+            email: { type: 'string', format: 'email', example: 'user@example.com' },
+            role: { type: 'string', enum: ['volunteer', 'coordinator', 'admin'], example: 'volunteer' },
+            profileImage: { type: 'string', nullable: true, example: 'profile.png' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -57,8 +68,14 @@ const options = {
             id: { type: 'integer', example: 1 },
             name: { type: 'string', example: 'Project Name' },
             description: { type: 'string' },
+            start_date: { type: 'string', format: 'date-time' },
+            end_date: { type: 'string', format: 'date-time' },
+            location: { type: 'string', example: 'Las Palmas de Gran Canaria' },
+            capacity: { type: 'integer', example: 20 },
+            filename: { type: 'string', nullable: true, description: 'Project image' },
             categoryId: { type: 'integer', example: 1 },
-            status: { type: 'string', enum: ['active', 'inactive', 'completed'] },
+            ownerId: { type: 'integer', nullable: true, description: 'Coordinator who manages the project' },
+            status: { type: 'string', enum: ['active', 'cancelled', 'finished'] },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' }
           }
@@ -99,25 +116,18 @@ const options = {
             id: { type: 'integer', example: 1 },
             name: { type: 'string' },
             email: { type: 'string', format: 'email' },
+            subject: { type: 'string' },
             message: { type: 'string' },
-            status: { type: 'string', enum: ['new', 'read', 'resolved'] },
+            read: { type: 'boolean', example: false },
             createdAt: { type: 'string', format: 'date-time' }
           }
         }
       }
     }
   },
-  apis: [
-    './routes/project.routes.js',
-    './routes/reviews.routes.js',
-    './routes/category.routes.js',
-    './routes/user.routes.js',
-    './routes/contact.routes.js',
-    './routes/session.routes.js',
-    './routes/message.routes.js',
-    './routes/subscription.routes.js',
-    './routes/external.routes.js'
-  ]
+  // Every route file, resolved from this file so it works from any cwd
+  // (glob patterns need forward slashes, also on Windows)
+  apis: [path.join(__dirname, 'routes', '*.js').split(path.sep).join('/')]
 };
 
 const swaggerSpecs = swaggerJsdoc(options);

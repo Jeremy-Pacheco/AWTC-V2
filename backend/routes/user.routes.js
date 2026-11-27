@@ -80,15 +80,78 @@ router.get(
   userCtrl.getOwnProfile
 );
 
-// Delete own account
+/**
+ * @swagger
+ * /api/users/dashboard:
+ *   delete:
+ *     summary: Delete your own account
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: Account deleted
+ *       401:
+ *         description: Not authenticated
+ *       403:
+ *         description: Demo accounts cannot be deleted
+ */
 router.delete('/dashboard', authMiddleware, requireAuth, protectDemoSelf, userCtrl.deleteOwnProfile);
 
-// Get projects for current user (dashboard)
+/**
+ * @swagger
+ * /api/users/dashboard/projects:
+ *   get:
+ *     summary: Projects the current user is enrolled in
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: List of enrollments with their project
+ *       401:
+ *         description: Not authenticated
+ * /api/users/dashboard/bans:
+ *   get:
+ *     summary: Projects the current user is banned from
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: List of bans
+ *       401:
+ *         description: Not authenticated
+ */
 router.get('/dashboard/projects', authMiddleware, requireAuth, userCtrl.getOwnProjects);
 // Get bans for current user
 router.get('/dashboard/bans', authMiddleware, requireAuth, userCtrl.getOwnBans);
 
-// Admin or coordinator can list another user's projects
+/**
+ * @swagger
+ * /api/users/{id}/projects:
+ *   get:
+ *     summary: Projects a user is enrolled in (admin or coordinator)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: List of enrollments
+ *       403:
+ *         description: Admin or coordinator role required
+ * /api/users/{id}/bans:
+ *   get:
+ *     summary: Projects a user is banned from (admin or coordinator)
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: List of bans
+ *       403:
+ *         description: Admin or coordinator role required
+ */
 router.get('/:id/projects', authMiddleware, isAdminOrCoordinator, validate({ params: schemas.idParams }), userCtrl.getUserProjects);
 // Get bans for specific user (admin or coordinator)
 router.get('/:id/bans', authMiddleware, isAdminOrCoordinator, validate({ params: schemas.idParams }), userCtrl.getUserBans);

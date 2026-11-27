@@ -42,6 +42,28 @@ router.get('/login', sessionController.showLogin);
 router.post('/login', verifyCsrfToken, dashboardLoginLimiter, sessionController.login);
 
 // One-click access to the admin dashboard as the demo admin (DEMO_MODE only)
+/**
+ * @swagger
+ * /demo-login:
+ *   post:
+ *     summary: Enter the EJS admin dashboard as the demo admin (only when DEMO_MODE=true)
+ *     tags: [Session]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             required: [_csrf]
+ *             properties:
+ *               _csrf: { type: string, description: CSRF token from the login form }
+ *     responses:
+ *       302:
+ *         description: Redirects to the dashboard
+ *       403:
+ *         description: Invalid CSRF token
+ */
 router.post('/demo-login', verifyCsrfToken, dashboardLoginLimiter, demoCtrl.sessionLogin);
 
 /**
