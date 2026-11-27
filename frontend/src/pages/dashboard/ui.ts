@@ -1,8 +1,8 @@
 /**
  * Shared class names for the dashboard, so every tab uses the same buttons,
- * fields, cards and badges. `bg-[var(--card-bg)]` instead of `bg-white`
- * keeps cards distinct from the page in dark mode (index.css repaints any
- * `bg-white` with the page background).
+ * fields, cards and badges. Cards use `bg-[var(--card-bg)]` so they follow
+ * the theme tokens directly (index.css also repaints `bg-white` with the
+ * card color in dark mode).
  */
 const btn =
   "inline-flex items-center justify-center gap-1.5 rounded-full text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50";
