@@ -77,26 +77,28 @@
 }
 
 .dark {
-  --bg-primary: #0a1410;
-  --bg-secondary: #111d18;
-  --bg-tertiary: #1a2822;
-  --text-primary: #eaf3ee;
-  --text-secondary: #c5d3cb;
-  --text-muted: #93a89c;
-  --border-color: #26352e;
-  --shadow-color: rgba(0, 0, 0, 0.5);
-  --card-bg: #111d18;
-  --nav-bg: #0d1713;
-  --footer-bg: #060d0a;
+  /* Soft dark: lifted green-tinted greys instead of near-black, with clear
+     steps between page, surfaces and cards so layers stay distinguishable. */
+  --bg-primary: #18221e;
+  --bg-secondary: #202c27;
+  --bg-tertiary: #2b3a33;
+  --text-primary: #eef5f1;
+  --text-secondary: #ccd9d1;
+  --text-muted: #a3b5ab;
+  --border-color: #36463e;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --card-bg: #23302a;
+  --nav-bg: #1d2823;
+  --footer-bg: #131c18;
   --accent-color: #2fcb8e;
   --accent-hover: #4fd7a2;
   --accent-text: #4fd7a2;
   --on-accent: #04140d;
-  --ink: #20352b;
-  --danger-color: #ef4444;
-  --scrollbar-track: #111d18;
-  --scrollbar-thumb: #2e4037;
-  --scrollbar-thumb-hover: #4a5e54;
+  --ink: #2d443a;
+  --danger-color: #f06262;
+  --scrollbar-track: #202c27;
+  --scrollbar-thumb: #3e5047;
+  --scrollbar-thumb-hover: #5a6f64;
 }
 
 /**--------- BASE DARK MODE STYLES --------- */
@@ -276,7 +278,7 @@ body {
 
 /**--------- DARK MODE UTILITY CLASSES --------- */
 .dark .bg-white {
-  background-color: var(--bg-primary) !important;
+  background-color: var(--card-bg) !important;
 }
 
 .dark .bg-gray-50,
@@ -364,7 +366,7 @@ body {
 /** Cards and containers in dark mode */
 /** Fix for specific white backgrounds */
 .dark [class*="bg-white"] {
-  background-color: var(--bg-primary) !important;
+  background-color: var(--card-bg) !important;
 }
 
 /** Soft accent backgrounds in prompts/alerts */
