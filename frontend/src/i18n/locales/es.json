@@ -14,6 +14,8 @@
   },
   "common": {
     "appName": "Voluntad Que Transforma",
+    "themeDark": "Activar modo oscuro",
+    "themeLight": "Activar modo claro",
     "login": "Iniciar Sesión",
     "logout": "Cerrar Sesión",
     "signup": "Registrarse",
