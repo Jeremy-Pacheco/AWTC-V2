@@ -51,6 +51,10 @@ describe('ProjectCarousel', () => {
     try {
       render(<MemoryRouter><ProjectCarousel /></MemoryRouter>);
       await screen.findByText('First');
+      // The effect that starts the autoplay timer runs on React's scheduler (real
+      // setImmediate), so the text can show up before it has run: wait for the
+      // timer to be pending before moving the clock, or the first advance is lost
+      await vi.waitFor(() => expect(vi.getTimerCount()).toBeGreaterThan(0));
       const slides = screen.getAllByRole('article', { hidden: true });
       act(() => { vi.advanceTimersByTime(AUTOPLAY_MS); });
       expect(slides[1].getAttribute('aria-hidden')).toBe('false');
